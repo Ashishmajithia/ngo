@@ -17,6 +17,8 @@ import {
   Loader2,
   CheckCircle2,
   ShieldCheck,
+  Info,
+  Target,
 } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
@@ -37,7 +39,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'content' | 'donations'>('blogs');
+  const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'about' | 'programs' | 'content' | 'donations'>('blogs');
 
   // Data states
   const [blogs, setBlogs] = useState<BlogPost[]>(defaultBlogs);
@@ -218,9 +220,11 @@ export default function AdminDashboardPage() {
             <p className="text-xs font-bold uppercase tracking-wider text-[#123f38]">Control Menu</p>
           </div>
           {[
-            { id: 'blogs' as const, label: 'Moments Of Hope (Blogs)', icon: FileText, count: blogs.length },
+            { id: 'blogs' as const, label: 'Impact Stories (Blogs)', icon: FileText, count: blogs.length },
             { id: 'banners' as const, label: 'Hero Banners', icon: ImageIcon, count: content.hero.slides.length },
-            { id: 'content' as const, label: 'Site Details & Contact', icon: Sliders },
+            { id: 'about' as const, label: 'About Us Section', icon: Info },
+            { id: 'programs' as const, label: 'Strategic Initiatives', icon: Target, count: content.programs.items.length },
+            { id: 'content' as const, label: 'Site Contact & Details', icon: Sliders },
             { id: 'donations' as const, label: 'Donation Records', icon: Heart, count: donations.length },
           ].map((item) => {
             const Icon = item.icon;
@@ -392,7 +396,154 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* TAB 3: SITE CONTENT */}
+          {/* TAB 3: ABOUT US SECTION */}
+          {activeTab === 'about' && (
+            <div>
+              <div className="flex items-center justify-between pb-6 border-b border-[#d9e1d7]">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">About Us Section Editor</h2>
+                  <p className="text-xs text-[#58706a]">Customize mission story, transparency badge, and section photo</p>
+                </div>
+                <button
+                  onClick={handleSaveContent}
+                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition"
+                >
+                  <Save className="w-4 h-4 text-[#f2ad3b]" />
+                  <span>Save About Section</span>
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Eyebrow Title</label>
+                    <input
+                      type="text"
+                      value={content.about.eyebrow}
+                      onChange={(e) => setContent({ ...content, about: { ...content.about, eyebrow: e.target.value } })}
+                      className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Badge Title (e.g. 100% Transparent)</label>
+                    <input
+                      type="text"
+                      value={content.about.badgeTitle}
+                      onChange={(e) => setContent({ ...content, about: { ...content.about, badgeTitle: e.target.value } })}
+                      className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1">Main Section Heading</label>
+                  <input
+                    type="text"
+                    value={content.about.title}
+                    onChange={(e) => setContent({ ...content, about: { ...content.about, title: e.target.value } })}
+                    className="w-full rounded-xl border p-2.5 text-sm bg-white font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1">Primary Story Paragraph</label>
+                  <textarea
+                    rows={3}
+                    value={content.about.copyOne}
+                    onChange={(e) => setContent({ ...content, about: { ...content.about, copyOne: e.target.value } })}
+                    className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1">Secondary Story Paragraph</label>
+                  <textarea
+                    rows={3}
+                    value={content.about.copyTwo}
+                    onChange={(e) => setContent({ ...content, about: { ...content.about, copyTwo: e.target.value } })}
+                    className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                  />
+                </div>
+
+                {/* About Us Image Upload */}
+                <ImageUploadInput
+                  label="About Us Main Showcase Photo"
+                  value={content.about.image}
+                  onChangeSingle={(url) => setContent({ ...content, about: { ...content.about, image: url } })}
+                  helperText="Upload or change the primary featured photo for the About Us section on the homepage."
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: STRATEGIC INITIATIVES / PROGRAMS */}
+          {activeTab === 'programs' && (
+            <div>
+              <div className="flex items-center justify-between pb-6 border-b border-[#d9e1d7]">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Strategic Initiatives Editor</h2>
+                  <p className="text-xs text-[#58706a]">Update program titles, descriptions, and background images</p>
+                </div>
+                <button
+                  onClick={handleSaveContent}
+                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition"
+                >
+                  <Save className="w-4 h-4 text-[#f2ad3b]" />
+                  <span>Save Initiatives</span>
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-6">
+                {content.programs.items.map((prog, idx) => (
+                  <div key={prog.id || idx} className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-4">
+                    <p className="text-xs font-bold text-[#28745e]">Program Card #{idx + 1}</p>
+                    
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Program Title</label>
+                      <input
+                        type="text"
+                        value={prog.title}
+                        onChange={(e) => {
+                          const updated = [...content.programs.items];
+                          updated[idx].title = e.target.value;
+                          setContent({ ...content, programs: { ...content.programs, items: updated } });
+                        }}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Program Description</label>
+                      <textarea
+                        rows={2}
+                        value={prog.description}
+                        onChange={(e) => {
+                          const updated = [...content.programs.items];
+                          updated[idx].description = e.target.value;
+                          setContent({ ...content, programs: { ...content.programs, items: updated } });
+                        }}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                      />
+                    </div>
+
+                    {/* Program Image Upload */}
+                    <ImageUploadInput
+                      label="Program Card Background Photo"
+                      value={prog.image}
+                      onChangeSingle={(url) => {
+                        const updated = [...content.programs.items];
+                        updated[idx].image = url;
+                        setContent({ ...content, programs: { ...content.programs, items: updated } });
+                      }}
+                      helperText="Select or upload a high-quality photo representing this program initiative."
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: SITE CONTENT */}
           {activeTab === 'content' && (
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-[#d9e1d7]">
