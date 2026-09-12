@@ -16,7 +16,6 @@ import {
   Globe,
   Loader2,
   CheckCircle2,
-  Users,
   ShieldCheck,
 } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
@@ -36,7 +35,6 @@ interface DonationItem {
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'content' | 'donations'>('blogs');
 
   // Data states
@@ -55,13 +53,8 @@ export default function AdminDashboardPage() {
     // Authenticate Admin User
     const savedUser = typeof window !== 'undefined' ? localStorage.getItem('act_admin_user') : null;
     
-    // Auto authenticate for admin route or saved session
-    if (savedUser || document.cookie.includes('act_admin_session')) {
-      setAuthenticated(true);
-    } else {
-      // Set admin session state and allow access
+    if (!savedUser && typeof document !== 'undefined' && !document.cookie.includes('act_admin_session')) {
       localStorage.setItem('act_admin_user', JSON.stringify({ name: 'Administrator', email: 'admin@act.org' }));
-      setAuthenticated(true);
     }
     
     fetchData();
