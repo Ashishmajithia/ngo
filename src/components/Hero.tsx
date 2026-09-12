@@ -59,11 +59,11 @@ export const Hero: React.FC = () => {
             <img
               src={slide.image}
               alt={slide.title}
-              className="h-full w-full object-cover scale-105 transition-transform duration-[12000ms] ease-out"
+              className="h-full w-full object-cover object-center scale-100 transition-transform duration-[10000ms] ease-out"
             />
-            {/* Gradient Overlay for high readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#123f38]/95 via-[#123f38]/75 to-transparent" />
-            <div className="absolute inset-0 bg-black/20" />
+            {/* Balanced gradient overlay: clear image on right, readable text on left */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#123f38]/95 via-[#123f38]/60 to-black/25" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#123f38]/70 via-transparent to-black/20" />
           </div>
         ))}
 

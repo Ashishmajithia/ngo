@@ -345,10 +345,31 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
 
+              <div className="mt-4 p-4 rounded-2xl bg-[#e8f0e8] border border-[#28745e]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+                <div>
+                  <p className="text-xs font-bold text-[#123f38] flex items-center gap-1.5">
+                    <span className="text-[#f2ad3b] text-base">📐</span>
+                    <span>Recommended Banner Image Size & Proportions</span>
+                  </p>
+                  <p className="text-[11px] text-[#58706a] mt-0.5">
+                    Best Resolution: <strong className="text-[#123f38]">Width: 1920 px × Height: 850 px</strong> (Landscape 16:9 ratio). Subject looks best centered or on the right side.
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] font-bold bg-[#123f38] text-[#f2ad3b] px-3.5 py-1.5 rounded-full shrink-0 shadow-sm">
+                  <span>1920 × 850 PX (16:9)</span>
+                </div>
+              </div>
+
               <div className="mt-6 space-y-6">
                 {content.hero.slides.map((slide, idx) => (
                   <div key={slide.id || idx} className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-3">
-                    <p className="text-xs font-bold text-[#28745e]">Hero Banner Slide #{idx + 1}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-[#28745e]">Hero Banner Slide #{idx + 1}</p>
+                      <span className="text-[10px] font-mono bg-white border border-[#dce7dc] px-2 py-0.5 rounded text-[#58706a]">
+                        Size: 1920 × 850 px
+                      </span>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-bold mb-1">Heading Title</label>
@@ -380,14 +401,14 @@ export default function AdminDashboardPage() {
 
                     <div>
                       <ImageUploadInput
-                        label="Hero Slide Background Image"
+                        label="Hero Slide Background Image (Recommended: 1920 × 850 px)"
                         value={slide.image}
                         onChangeSingle={(url) => {
                           const updated = [...content.hero.slides];
                           updated[idx].image = url;
                           setContent({ ...content, hero: { ...content.hero, slides: updated } });
                         }}
-                        helperText="Select or upload a high-resolution banner photo for homepage background slider"
+                        helperText="Exact Recommended Dimensions: 1920px width × 850px height (PNG, JPG, WEBP)."
                       />
                     </div>
                   </div>

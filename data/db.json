@@ -93,7 +93,7 @@
           "id": "prog-1",
           "title": "Education & Child Development",
           "description": "Building modern learning centers, providing scholarships, digital tablets, and after-school tutoring for underprivileged children.",
-          "image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=800&auto=format&fit=crop",
+          "image": "/uploads/upload_1789213152254_913na_12_testimonial_img_two_png.png",
           "icon": "GraduationCap",
           "badgeBg": "bg-[#f8e6bd]",
           "badgeTextColor": "text-[#8b590b]"
@@ -254,5 +254,5 @@
       "published": true
     }
   ],
-  "updatedAt": "2026-09-12T11:34:40.021Z"
+  "updatedAt": "2026-09-12T11:39:19.910Z"
 }
