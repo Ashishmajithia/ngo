@@ -21,21 +21,41 @@ export async function POST(request: Request) {
     }
 
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    let canWriteToDisk = true;
+    try {
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+    } catch {
+      canWriteToDisk = false;
     }
 
     const uploadedUrls: string[] = [];
 
     for (const f of filesToUpload) {
       const buffer = Buffer.from(await f.arrayBuffer());
-      const ext = path.extname(f.name) || '.jpg';
+      const ext = path.extname(f.name).toLowerCase() || '.jpg';
       const cleanName = f.name.replace(/[^a-zA-Z0-9]/g, '_');
       const fileName = `upload_${Date.now()}_${Math.random().toString(36).substring(2, 7)}_${cleanName}${ext}`;
       const filePath = path.join(uploadsDir, fileName);
 
-      fs.writeFileSync(filePath, buffer);
-      uploadedUrls.push(`/uploads/${fileName}`);
+      let savedUrl = '';
+      if (canWriteToDisk) {
+        try {
+          fs.writeFileSync(filePath, buffer);
+          savedUrl = `/uploads/${fileName}`;
+        } catch {
+          canWriteToDisk = false;
+        }
+      }
+
+      if (!savedUrl) {
+        const base64 = buffer.toString('base64');
+        const mime = ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
+        savedUrl = `data:${mime};base64,${base64}`;
+      }
+
+      uploadedUrls.push(savedUrl);
     }
 
     return NextResponse.json({
