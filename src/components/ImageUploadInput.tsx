@@ -89,32 +89,25 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
       );
       const validDataUrls = compressedDataUrls.filter(Boolean);
 
-      // 2. Also attempt server-side upload to /api/upload
-      let finalUrls = validDataUrls;
+      // 2. Use compressed data URLs directly for 100% instant display & durability
+      if (validDataUrls.length === 0) {
+        setErrorMsg('Please choose a valid image file');
+        return;
+      }
+
+      if (multiple && onChangeMultiple) {
+        onChangeMultiple([...values, ...validDataUrls]);
+      } else if (!multiple && onChangeSingle && validDataUrls[0]) {
+        onChangeSingle(validDataUrls[0]);
+      }
+
+      // Optional background sync to public uploads folder
       try {
         const formData = new FormData();
         fileArray.forEach((file) => formData.append('files', file));
-
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.urls && data.urls.length > 0) {
-            finalUrls = data.urls;
-          }
-        }
+        fetch('/api/upload', { method: 'POST', body: formData }).catch(() => {});
       } catch {
-        console.info('Using client compressed image fallback');
-      }
-
-      // 3. Update state
-      if (multiple && onChangeMultiple) {
-        onChangeMultiple([...values, ...finalUrls]);
-      } else if (!multiple && onChangeSingle && finalUrls[0]) {
-        onChangeSingle(finalUrls[0]);
+        // background sync non-blocking
       }
     } catch {
       setErrorMsg('Failed to process image file');
