@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
-import { HeartHandshake, Phone, Mail, MapPin, Heart } from 'lucide-react';
+import Link from 'next/link';
+import { HeartHandshake, Phone, Mail, MapPin, Heart, Lock } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 
 export const Footer: React.FC = () => {
-  const { content, setIsAdminOpen } = useContent();
+  const { content } = useContent();
   const { brand } = content;
 
   return (
@@ -57,26 +58,26 @@ export const Footer: React.FC = () => {
               <li><a href="#about" className="hover:text-[#28745e]">About Our Mission</a></li>
               <li><a href="#programs" className="hover:text-[#28745e]">Grassroots Programs</a></li>
               <li><a href="#approach" className="hover:text-[#28745e]">Core Principles</a></li>
-              <li><a href="#gallery" className="hover:text-[#28745e]">Photo Gallery</a></li>
+              <li><a href="#gallery" className="hover:text-[#28745e]">Impact Stories & Blogs</a></li>
               <li><a href="#impact" className="hover:text-[#28745e]">Impact Reports</a></li>
             </ul>
           </div>
 
-          {/* Admin Customizer Link */}
+          {/* Admin Control Link */}
           <div>
             <h4 className="font-bold text-sm text-[#123f38] uppercase tracking-wider mb-3">
-              Dynamic Controls
+              Admin & Controls
             </h4>
             <p className="text-xs text-[#58706a] mb-3">
-              Edit all text, hero slides, images, stats, and contact info live.
+              Secure login portal for managing blogs, hero banners, and viewing donation records.
             </p>
-            <button
-              onClick={() => setIsAdminOpen(true)}
-              className="focusable inline-flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#123f38] hover:bg-[#123f38] hover:text-white transition"
+            <Link
+              href="/admin/login"
+              className="focusable inline-flex items-center gap-2 rounded-full bg-[#123f38] px-4 py-2 text-xs font-bold text-white hover:bg-[#28745e] transition"
             >
-              <Heart className="w-3.5 h-3.5 text-[#f2ad3b]" />
-              <span>Open Content Customizer</span>
-            </button>
+              <Lock className="w-3.5 h-3.5 text-[#f2ad3b]" />
+              <span>Admin Login Portal</span>
+            </Link>
           </div>
         </div>
 
