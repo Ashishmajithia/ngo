@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ContentProvider } from '@/context/ContentContext';
 import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
@@ -8,15 +8,18 @@ import { ImpactStats } from '@/components/ImpactStats';
 import { About } from '@/components/About';
 import { Programs } from '@/components/Programs';
 import { Approach } from '@/components/Approach';
-import { Gallery } from '@/components/Gallery';
+import { BlogSection } from '@/components/BlogSection';
+import { BlogModal } from '@/components/BlogModal';
 import { SupportSection } from '@/components/SupportSection';
 import { Footer } from '@/components/Footer';
 import { DonateModal } from '@/components/DonateModal';
-import { GalleryModal } from '@/components/GalleryModal';
 import { AdminDrawer } from '@/components/AdminDrawer';
 import { ToastNotification } from '@/components/ToastNotification';
+import { BlogPost } from '@/types/blog';
 
 export default function Home() {
+  const [selectedBlog, setSelectedBlog] = useState<BlogPost | null>(null);
+
   return (
     <ContentProvider>
       <div className="site-shell min-h-screen bg-[#fffdf8]">
@@ -27,14 +30,17 @@ export default function Home() {
           <About />
           <Programs />
           <Approach />
-          <Gallery />
+          {/* Moments Of Hope - Impact Stories & Blog Engine */}
+          <BlogSection
+            onSelectBlog={(blog) => setSelectedBlog(blog)}
+          />
           <SupportSection />
         </main>
         <Footer />
 
         {/* Dynamic Modals & Overlay Drawers */}
         <DonateModal />
-        <GalleryModal />
+        <BlogModal blog={selectedBlog} onClose={() => setSelectedBlog(null)} />
         <AdminDrawer />
         <ToastNotification />
       </div>
