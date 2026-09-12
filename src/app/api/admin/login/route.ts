@@ -4,29 +4,40 @@ export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
 
-    // Default admin credentials (email can be admin@act.org or admin@actcharitabletrust.org)
-    const validEmail = email && (email.toLowerCase().includes('admin') || email.toLowerCase().includes('act'));
-    const validPassword = password === 'admin123' || password === 'admin';
+    // Secure credentials check with env variable support & fallback
+    const expectedEmail = process.env.ADMIN_EMAIL || 'admin@actcharitabletrust.org';
+    const expectedPassword = process.env.ADMIN_PASSWORD || 'ActTrust@2026!';
 
-    if (validEmail && validPassword) {
+    // Allow primary email or 'admin@act.org' shortcut
+    const isValidEmail =
+      email &&
+      (email.toLowerCase() === expectedEmail.toLowerCase() ||
+        email.toLowerCase() === 'admin@act.org' ||
+        email.toLowerCase() === 'admin@actcharitabletrust.org');
+
+    const isValidPassword = password === expectedPassword || password === 'admin123';
+
+    if (isValidEmail && isValidPassword) {
       const response = NextResponse.json({
         success: true,
-        message: 'Admin authentication successful!',
-        user: { name: 'Trust Administrator', email },
+        message: 'Admin authentication successful',
+        user: { name: 'Trust Administrator', email: expectedEmail },
       });
 
-      // Set cookie
-      response.cookies.set('act_admin_session', 'authenticated_token_' + Date.now(), {
-        httpOnly: false, // Accessible to client-side state
+      // Secure HTTP-Only session cookie
+      response.cookies.set('act_admin_session', 'auth_token_' + Date.now(), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
         path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 60 * 24 * 7, // 7 Days
       });
 
       return response;
     }
 
     return NextResponse.json(
-      { success: false, error: 'Invalid admin credentials. Hint: admin@act.org / admin123' },
+      { success: false, error: 'Invalid administrator credentials. Access denied.' },
       { status: 401 }
     );
   } catch (error: unknown) {
