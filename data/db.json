@@ -1,11 +1,11 @@
 {
   "content": {
     "brand": {
-      "name": "ACT Charitable Trust",
-      "tagline": "Together We Rise",
-      "email": "hello@actcharitabletrust.org",
-      "phone": "+91 98765 43210",
-      "location": "New Delhi & Rural Empowerment Centers, India",
+      "name": "ACT Charitable Trust 1",
+      "tagline": "Together We Rise 1",
+      "email": "sohan@gmail.com",
+      "phone": "8837863740",
+      "location": "mohali",
       "primaryCtaText": "Donate & Support"
     },
     "hero": {
@@ -13,7 +13,7 @@
       "slides": [
         {
           "id": "slide-1",
-          "image": "/uploads/upload_1789212878399_yqie7_12_testimonial_img_two_png.png",
+          "image": "/uploads/upload_1789213439692_r6kg5_2_Gemini_Generated_Image_989orc989orc989o_png.png",
           "eyebrow": "Empower Communities • Transform Lives",
           "title": "Building Hope & Resilient Futures Together",
           "copy": "ACT Charitable Trust works closely at the grassroots level to unlock opportunities for underprivileged children, women, and families across underserved communities."
@@ -80,7 +80,7 @@
       "copyOne": "ACT Charitable Trust was established with a singular vision: to bridge the socio-economic divide through targeted grassroots action. We believe that true development occurs when communities are empowered from within.",
       "copyTwo": "From rural education initiatives and mobile health clinics to women-led micro-enterprises, every project we undertake is driven by empathy, transparency, and sustainable impact.",
       "ctaText": "View Our Photo Gallery",
-      "image": "https://images.unsplash.com/photo-1532629345422-7515f3d16bb0?q=80&w=1200&auto=format&fit=crop",
+      "image": "/uploads/upload_1789213185840_3xjwb_2_Gemini_Generated_Image_989orc989orc989o_png.png",
       "badgeTitle": "100% Transparent",
       "badgeCopy": "Over 94% of direct funds go directly to grassroots programs."
     },
@@ -215,19 +215,33 @@
       "ctaText": "Send Us An Email / Donate Now"
     }
   },
-  "donations": [],
+  "donations": [
+    {
+      "id": "don_1789213489403",
+      "amount": "1000",
+      "frequency": "once",
+      "name": "ashish",
+      "email": "ashish@gmail.com",
+      "phone": "8837863740",
+      "createdAt": "2026-09-12T11:44:49.403Z"
+    }
+  ],
   "blogs": [
     {
       "id": "blog-1",
       "title": "Transforming Rural Classrooms with Digital Learning Tablets",
-      "slug": "transforming-rural-classrooms-digital-learning",
+      "slug": "transforming-rural-classrooms-with-digital-learning-tablets",
       "excerpt": "Over 500 children in remote villages received smart learning devices to master mathematics, science, and languages.",
       "content": "Education is the most powerful weapon to break generational poverty. Across our 15 rural learning centers, children previously lacked access to up-to-date textbooks and interactive learning tools.\n\nThanks to our dedicated supporters, ACT Charitable Trust launched the Digital Shiksha initiative, introducing interactive tablets loaded with regional and English curriculum content. Teachers report a 40% increase in student attendance and significant improvements in reading comprehension!",
       "coverImage": "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1200&auto=format&fit=crop",
       "author": "Priya Sharma (Education Lead)",
       "date": "September 10, 2026",
       "category": "Education",
-      "published": true
+      "published": true,
+      "images": [
+        "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1200&auto=format&fit=crop",
+        "/uploads/upload_1789213417100_167mj_2_Gemini_Generated_Image_989orc989orc989o_png.png"
+      ]
     },
     {
       "id": "blog-2",
@@ -254,5 +268,5 @@
       "published": true
     }
   ],
-  "updatedAt": "2026-09-12T11:39:19.910Z"
+  "updatedAt": "2026-09-12T11:44:01.747Z"
 }

@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Info,
   Target,
+  BarChart3,
 } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
@@ -39,7 +40,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'about' | 'programs' | 'content' | 'donations'>('blogs');
+  const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'content' | 'donations'>('blogs');
 
   // Data states
   const [blogs, setBlogs] = useState<BlogPost[]>(defaultBlogs);
@@ -222,6 +223,7 @@ export default function AdminDashboardPage() {
           {[
             { id: 'blogs' as const, label: 'Impact Stories (Blogs)', icon: FileText, count: blogs.length },
             { id: 'banners' as const, label: 'Hero Banners', icon: ImageIcon, count: content.hero.slides.length },
+            { id: 'metrics' as const, label: 'Impact Numbers & Metrics', icon: BarChart3, count: content.impactStats.length },
             { id: 'about' as const, label: 'About Us Section', icon: Info },
             { id: 'programs' as const, label: 'Strategic Initiatives', icon: Target, count: content.programs.items.length },
             { id: 'content' as const, label: 'Site Contact & Details', icon: Sliders },
@@ -410,6 +412,134 @@ export default function AdminDashboardPage() {
                         }}
                         helperText="Exact Recommended Dimensions: 1920px width × 850px height (PNG, JPG, WEBP)."
                       />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: IMPACT NUMBERS & METRICS */}
+          {activeTab === 'metrics' && (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Impact Numbers & Metrics Counter</h2>
+                  <p className="text-xs text-[#58706a]">Customize the prominent green statistics strip displayed directly beneath the hero banner</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newStat = {
+                        id: 'stat-' + Date.now(),
+                        stat: '1,000+',
+                        label: 'New Impact Achievement',
+                        iconName: 'Award',
+                      };
+                      setContent({ ...content, impactStats: [...content.impactStats, newStat] });
+                    }}
+                    className="flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#28745e] hover:bg-[#28745e] hover:text-white transition"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Add Metric</span>
+                  </button>
+                  <button
+                    onClick={handleSaveContent}
+                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition"
+                  >
+                    <Save className="w-4 h-4 text-[#f2ad3b]" />
+                    <span>Save Metrics</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Live Preview Strip */}
+              <div className="mt-6 p-5 rounded-2xl bg-[#28745e] text-white shadow-md">
+                <p className="text-[11px] font-bold text-[#f2ad3b] uppercase tracking-wider mb-3">
+                  Live Homepage Preview:
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center divide-x divide-white/20">
+                  {content.impactStats.map((item, idx) => (
+                    <div key={item.id || idx} className="px-2">
+                      <p className="display-font text-2xl sm:text-3xl font-bold text-[#fffdf8]">{item.stat}</p>
+                      <p className="text-xs text-[#f8f4e9]/90 mt-1 line-clamp-1">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Editable Cards Grid */}
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {content.impactStats.map((item, idx) => (
+                  <div key={item.id || idx} className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-3 relative">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#123f38] text-[10px] font-bold text-[#f2ad3b]">
+                        Metric #{idx + 1}
+                      </span>
+                      {content.impactStats.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = content.impactStats.filter((_, i) => i !== idx);
+                            setContent({ ...content, impactStats: updated });
+                          }}
+                          className="text-red-500 hover:text-red-700 p-1"
+                          title="Remove Metric"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Counter Number / Stat Value *</label>
+                      <input
+                        type="text"
+                        value={item.stat}
+                        onChange={(e) => {
+                          const updated = [...content.impactStats];
+                          updated[idx].stat = e.target.value;
+                          setContent({ ...content, impactStats: updated });
+                        }}
+                        className="w-full rounded-xl border p-2.5 text-sm bg-white font-bold"
+                        placeholder="e.g. 50,000+ or 98%"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Metric Description Label *</label>
+                      <input
+                        type="text"
+                        value={item.label}
+                        onChange={(e) => {
+                          const updated = [...content.impactStats];
+                          updated[idx].label = e.target.value;
+                          setContent({ ...content, impactStats: updated });
+                        }}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                        placeholder="e.g. Lives Positively Impacted"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Icon Style</label>
+                      <select
+                        value={item.iconName || 'Users'}
+                        onChange={(e) => {
+                          const updated = [...content.impactStats];
+                          updated[idx].iconName = e.target.value;
+                          setContent({ ...content, impactStats: updated });
+                        }}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-medium"
+                      >
+                        <option value="Users">Users / Community</option>
+                        <option value="Home">Home / Empowerment Centers</option>
+                        <option value="GraduationCap">Graduation Cap / Education</option>
+                        <option value="CheckCircle2">Checkmark / Transparency Rate</option>
+                        <option value="HeartHandshake">Heart Handshake / Care</option>
+                        <option value="Award">Award / Recognition</option>
+                      </select>
                     </div>
                   </div>
                 ))}
