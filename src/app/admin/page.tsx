@@ -34,6 +34,7 @@ interface DonationItem {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'content' | 'donations'>('blogs');
 
@@ -50,13 +51,20 @@ export default function AdminDashboardPage() {
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
-    // Authenticate Admin User
-    const savedUser = typeof window !== 'undefined' ? localStorage.getItem('act_admin_user') : null;
-    
-    if (!savedUser && typeof document !== 'undefined' && !document.cookie.includes('act_admin_session')) {
-      localStorage.setItem('act_admin_user', JSON.stringify({ name: 'Administrator', email: 'admin@act.org' }));
+    setMounted(true);
+    // Ensure admin user session is initialized
+    try {
+      const savedUser = localStorage.getItem('act_admin_user');
+      if (!savedUser) {
+        localStorage.setItem(
+          'act_admin_user',
+          JSON.stringify({ name: 'Trust Administrator', email: 'admin@act.org' })
+        );
+      }
+    } catch {
+      console.warn('LocalStorage access warning');
     }
-    
+
     fetchData();
     setLoading(false);
   }, []);
@@ -81,7 +89,7 @@ export default function AdminDashboardPage() {
       }
       if (donRes.ok) {
         const dJson = await donRes.json();
-        if (dJson.donations) setDonations(dJson.donations);
+        if (dJson.donations && Array.isArray(dJson.donations)) setDonations(dJson.donations);
       }
     } catch {
       console.warn('Dashboard fetch error');
@@ -94,7 +102,11 @@ export default function AdminDashboardPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('act_admin_user');
+    try {
+      localStorage.removeItem('act_admin_user');
+    } catch {
+      // ignore
+    }
     router.push('/admin/login');
   };
 
@@ -154,7 +166,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-[#123f38] flex flex-col items-center justify-center text-white">
         <Loader2 className="w-8 h-8 animate-spin text-[#f2ad3b] mb-4" />
@@ -477,15 +489,18 @@ export default function AdminDashboardPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#dce7dc]">
-                        {donations.map((d, i) => (
-                          <tr key={d.id || i} className="hover:bg-[#f8f4e9]/50">
-                            <td className="p-3 font-bold text-[#183a35]">{d.name}</td>
-                            <td className="p-3 font-bold text-[#28745e]">₹{d.amount}</td>
-                            <td className="p-3 capitalize">{d.frequency}</td>
-                            <td className="p-3">{d.email}</td>
-                            <td className="p-3 text-[#58706a]">{new Date(d.createdAt).toLocaleDateString()}</td>
-                          </tr>
-                        ))}
+                        {donations.map((d, i) => {
+                          const dateStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString() : 'Recent';
+                          return (
+                            <tr key={d.id || i} className="hover:bg-[#f8f4e9]/50">
+                              <td className="p-3 font-bold text-[#183a35]">{d.name}</td>
+                              <td className="p-3 font-bold text-[#28745e]">₹{d.amount}</td>
+                              <td className="p-3 capitalize">{d.frequency}</td>
+                              <td className="p-3">{d.email}</td>
+                              <td className="p-3 text-[#58706a]">{dateStr}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
