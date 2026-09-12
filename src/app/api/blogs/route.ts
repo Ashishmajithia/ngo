@@ -53,6 +53,9 @@ export async function POST(request: Request) {
       excerpt: body.excerpt || '',
       content: body.content || '',
       coverImage: body.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop',
+      images: Array.isArray(body.images) && body.images.length > 0 
+        ? body.images 
+        : [body.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop'],
       author: body.author || 'ACT Trust Team',
       date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
       category: body.category || 'Education',

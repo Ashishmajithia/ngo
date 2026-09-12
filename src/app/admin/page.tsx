@@ -22,6 +22,7 @@ import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
 import { defaultContent } from '@/data/initialContent';
 import { SiteContent } from '@/types/content';
+import { ImageUploadInput } from '@/components/ImageUploadInput';
 
 interface DonationItem {
   id: string;
@@ -374,16 +375,15 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1">Image URL</label>
-                      <input
-                        type="text"
+                      <ImageUploadInput
+                        label="Hero Slide Background Image"
                         value={slide.image}
-                        onChange={(e) => {
+                        onChangeSingle={(url) => {
                           const updated = [...content.hero.slides];
-                          updated[idx].image = e.target.value;
+                          updated[idx].image = url;
                           setContent({ ...content, hero: { ...content.hero, slides: updated } });
                         }}
-                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-mono"
+                        helperText="Select or upload a high-resolution banner photo for homepage background slider"
                       />
                     </div>
                   </div>
@@ -558,13 +558,32 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold mb-1">Cover Image URL</label>
-                <input
-                  type="text"
-                  value={editingBlog.coverImage || ''}
-                  onChange={(e) => setEditingBlog({ ...editingBlog, coverImage: e.target.value })}
-                  className="w-full rounded-xl border p-2.5 text-xs bg-white font-mono"
+              {/* Cover Image Upload */}
+              <ImageUploadInput
+                label="Story Cover Image *"
+                value={editingBlog.coverImage || ''}
+                onChangeSingle={(url) => {
+                  const currentImages = editingBlog.images || [];
+                  const newImages = currentImages.length === 0 ? [url] : currentImages;
+                  setEditingBlog({ ...editingBlog, coverImage: url, images: newImages });
+                }}
+                helperText="Main header photo displayed on blog cards and post headers"
+              />
+
+              {/* Multiple Gallery Images Upload */}
+              <div className="pt-2">
+                <ImageUploadInput
+                  label="Multiple Gallery Images (Shown in Full Story Page)"
+                  multiple={true}
+                  values={editingBlog.images || (editingBlog.coverImage ? [editingBlog.coverImage] : [])}
+                  onChangeMultiple={(urls) => {
+                    setEditingBlog({
+                      ...editingBlog,
+                      images: urls,
+                      coverImage: editingBlog.coverImage || urls[0] || '',
+                    });
+                  }}
+                  helperText="Upload multiple event photos, village activity pictures, or testimonial photos for this story."
                 />
               </div>
 

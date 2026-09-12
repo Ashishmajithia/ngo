@@ -8,6 +8,11 @@ export const defaultBlogs: BlogPost[] = [
     excerpt: 'Over 500 children in remote villages received smart learning devices to master mathematics, science, and languages.',
     content: `Education is the most powerful weapon to break generational poverty. Across our 15 rural learning centers, children previously lacked access to up-to-date textbooks and interactive learning tools.\n\nThanks to our dedicated supporters, ACT Charitable Trust launched the Digital Shiksha initiative, introducing interactive tablets loaded with regional and English curriculum content. Teachers report a 40% increase in student attendance and significant improvements in reading comprehension!`,
     coverImage: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1200&auto=format&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop',
+    ],
     author: 'Priya Sharma (Education Lead)',
     date: 'September 10, 2026',
     category: 'Education',
@@ -20,6 +25,10 @@ export const defaultBlogs: BlogPost[] = [
     excerpt: 'Our volunteer doctors and nurses visited 8 remote hamlets to provide free health checkups, vision tests, and essential medicines.',
     content: `In many isolated rural villages, the nearest primary health center is over 25 kilometers away. For elderly residents and mothers with infants, traveling long distances is often impossible.\n\nLast week, ACT Charitable Trust's Mobile Healthcare Van conducted a 3-day medical drive. We screened over 1,200 patients, distributed free prescription medications, and referred 45 critical eye cataract cases for free surgeries at partner hospitals.`,
     coverImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1200&auto=format&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?q=80&w=1200&auto=format&fit=crop',
+    ],
     author: 'Dr. Rajesh Verma (Health Operations)',
     date: 'August 28, 2026',
     category: 'Healthcare',
@@ -32,6 +41,10 @@ export const defaultBlogs: BlogPost[] = [
     excerpt: 'Women graduates receive free sewing machines and micro-finance guidance to start independent tailoring micro-enterprises.',
     content: `Financial independence gives women a voice in their families and communities. At our Sakhi Empowerment Hub in Delhi, 100 women completed a 6-month intensive vocational course in textile craft, tailoring, and micro-business management.\n\nEach graduate received a brand-new tailoring machine and seed capital support to start earning independently from home. Today, over 85% of our alumni are contributing directly to household income and funding their children's education!`,
     coverImage: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200&auto=format&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=1200&auto=format&fit=crop',
+    ],
     author: 'Sunita Devi (Community Director)',
     date: 'August 15, 2026',
     category: 'Women Empowerment',
