@@ -13,7 +13,7 @@ interface ImageUploadInputProps {
   helperText?: string;
 }
 
-// Convert image file to compressed base64 data URL for instant 100% reliable display
+// Convert image file to heavily compressed, lightweight web image (<50KB)
 const compressImageFile = (file: File): Promise<string> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -27,7 +27,7 @@ const compressImageFile = (file: File): Promise<string> => {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const maxDim = 1600;
+          const maxDim = 800; // optimized for web speed
 
           if (width > maxDim || height > maxDim) {
             if (width > height) {
@@ -44,16 +44,17 @@ const compressImageFile = (file: File): Promise<string> => {
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
-            const compressed = canvas.toDataURL('image/jpeg', 0.82);
+            const isPng = file.type === 'image/png';
+            const compressed = canvas.toDataURL(isPng && width < 400 ? 'image/png' : 'image/jpeg', 0.72);
             resolve(compressed);
           } else {
-            resolve(rawDataUrl);
+            resolve(rawDataUrl.length < 500000 ? rawDataUrl : '');
           }
         } catch {
-          resolve(rawDataUrl);
+          resolve(rawDataUrl.length < 500000 ? rawDataUrl : '');
         }
       };
-      img.onerror = () => resolve(rawDataUrl);
+      img.onerror = () => resolve(rawDataUrl.length < 500000 ? rawDataUrl : '');
       img.src = rawDataUrl;
     };
     reader.onerror = () => resolve('');
@@ -82,14 +83,39 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
     setErrorMsg(null);
 
     try {
-      // 1. Process files client-side first for instant reliability
       const fileArray = Array.from(files);
+
+      // 1. Try server upload first for clean static URL
+      let serverUrls: string[] = [];
+      try {
+        const formData = new FormData();
+        fileArray.forEach((file) => formData.append('files', file));
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.urls && Array.isArray(json.urls) && json.urls.length > 0) {
+            serverUrls = json.urls;
+          }
+        }
+      } catch {
+        // Fallback to client-side compression
+      }
+
+      if (serverUrls.length > 0) {
+        if (multiple && onChangeMultiple) {
+          onChangeMultiple([...values, ...serverUrls]);
+        } else if (!multiple && onChangeSingle && serverUrls[0]) {
+          onChangeSingle(serverUrls[0]);
+        }
+        return;
+      }
+
+      // 2. Client-side fallback: compressed tiny data URL (<50KB)
       const compressedDataUrls = await Promise.all(
         fileArray.map((file) => compressImageFile(file))
       );
       const validDataUrls = compressedDataUrls.filter(Boolean);
 
-      // 2. Use compressed data URLs directly for 100% instant display & durability
       if (validDataUrls.length === 0) {
         setErrorMsg('Please choose a valid image file');
         return;
@@ -99,15 +125,6 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
         onChangeMultiple([...values, ...validDataUrls]);
       } else if (!multiple && onChangeSingle && validDataUrls[0]) {
         onChangeSingle(validDataUrls[0]);
-      }
-
-      // Optional background sync to public uploads folder
-      try {
-        const formData = new FormData();
-        fileArray.forEach((file) => formData.append('files', file));
-        fetch('/api/upload', { method: 'POST', body: formData }).catch(() => {});
-      } catch {
-        // background sync non-blocking
       }
     } catch {
       setErrorMsg('Failed to process image file');

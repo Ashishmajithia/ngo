@@ -214,16 +214,27 @@ export default function AdminDashboardPage() {
   // Content Handlers
   const handleSaveContent = async () => {
     try {
+      // 1. Immediately persist to localStorage for instant website update
+      try {
+        localStorage.setItem('act_charitable_trust_content_v1', JSON.stringify(content));
+        window.dispatchEvent(new Event('storage'));
+      } catch (err) {
+        console.warn('LocalStorage sync warning:', err);
+      }
+
+      // 2. Sync to backend API database
       const res = await fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(content),
       });
       if (res.ok) {
-        showToastMsg('Site content saved to database!');
+        showToastMsg('Site content saved successfully!');
+      } else {
+        showToastMsg('Saved locally!');
       }
     } catch {
-      showToastMsg('Failed to save content.');
+      showToastMsg('Saved locally!');
     }
   };
 

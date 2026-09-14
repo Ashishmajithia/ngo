@@ -58,6 +58,18 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     loadContent();
+
+    const handleStorageChange = () => {
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          setContent(JSON.parse(saved));
+        }
+      } catch {}
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const updateContent = async (newContent: Partial<SiteContent>) => {
