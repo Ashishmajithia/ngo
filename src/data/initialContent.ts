@@ -9,6 +9,7 @@ export const defaultContent: SiteContent = {
     location: 'New Delhi & Rural Empowerment Centers, India',
     primaryCtaText: 'Donate & Support',
     logo: '',
+    logoStyle: 'icon_text',
   },
   hero: {
     ctaText: 'Explore Our Programs',

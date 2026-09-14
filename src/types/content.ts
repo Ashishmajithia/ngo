@@ -49,6 +49,7 @@ export interface BrandConfig {
   location: string;
   primaryCtaText: string;
   logo?: string;
+  logoStyle?: 'full' | 'icon_text';
 }
 
 export interface AboutSectionData {

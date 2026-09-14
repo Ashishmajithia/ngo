@@ -17,19 +17,32 @@ export const Footer: React.FC = () => {
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
               {brand.logo ? (
-                <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#d9e1d7] bg-white shadow-sm">
+                brand.logoStyle === 'full' ? (
                   <img
                     src={brand.logo}
                     alt={brand.name}
-                    className="h-full w-full object-contain p-1"
+                    className="h-10 w-auto max-w-[200px] object-contain"
                   />
-                </span>
+                ) : (
+                  <>
+                    <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#d9e1d7] bg-white shadow-sm shrink-0">
+                      <img
+                        src={brand.logo}
+                        alt={brand.name}
+                        className="h-full w-full object-contain p-1"
+                      />
+                    </span>
+                    <span className="display-font font-bold text-lg">{brand.name}</span>
+                  </>
+                )
               ) : (
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#123f38] text-white">
-                  <HeartHandshake className="w-5 h-5 text-[#f2ad3b]" />
-                </span>
+                <>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#123f38] text-white shrink-0">
+                    <HeartHandshake className="w-5 h-5 text-[#f2ad3b]" />
+                  </span>
+                  <span className="display-font font-bold text-lg">{brand.name}</span>
+                </>
               )}
-              <span className="display-font font-bold text-lg">{brand.name}</span>
             </div>
             <p className="text-xs text-[#58706a] leading-relaxed">
               Empowering grassroots communities through quality education, rural health drives, and sustainable livelihoods.

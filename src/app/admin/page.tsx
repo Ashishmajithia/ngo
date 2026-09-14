@@ -774,13 +774,56 @@ export default function AdminDashboardPage() {
 
               <div className="mt-6 space-y-4">
                 {/* Logo Upload */}
-                <div className="rounded-2xl border border-[#d9e1d7] bg-[#f8f4e9]/60 p-4">
+                <div className="rounded-2xl border border-[#d9e1d7] bg-[#f8f4e9]/60 p-5 space-y-4">
                   <ImageUploadInput
                     label="Organization Logo (Image / Icon)"
                     value={content.brand.logo || ''}
                     onChangeSingle={(url) => setContent({ ...content, brand: { ...content.brand, logo: url } })}
-                    helperText="Upload your trust or NGO logo (PNG, JPG, SVG, WebP). It will automatically appear across the website header, footer, and admin dashboard."
+                    helperText="Upload your trust or NGO logo (PNG, JPG, SVG, WebP). It will appear across website header, footer, and admin console."
                   />
+
+                  {content.brand.logo && (
+                    <div className="pt-3 border-t border-[#d9e1d7]">
+                      <label className="block text-xs font-bold text-[#183a35] mb-2">Logo Display Style in Header</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                          (content.brand.logoStyle === 'full' || !content.brand.logoStyle)
+                            ? 'border-[#28745e] bg-[#28745e]/10 text-[#123f38] font-bold'
+                            : 'border-[#d9e1d7] bg-white text-[#58706a]'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="logoStyle"
+                            checked={content.brand.logoStyle === 'full' || !content.brand.logoStyle}
+                            onChange={() => setContent({ ...content, brand: { ...content.brand, logoStyle: 'full' } })}
+                            className="accent-[#28745e]"
+                          />
+                          <div>
+                            <p className="text-xs font-bold">Complete Logo Image (Pura Logo)</p>
+                            <p className="text-[10px] font-normal text-[#58706a]">Full logo image directly replaces text & emblem</p>
+                          </div>
+                        </label>
+
+                        <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                          content.brand.logoStyle === 'icon_text'
+                            ? 'border-[#28745e] bg-[#28745e]/10 text-[#123f38] font-bold'
+                            : 'border-[#d9e1d7] bg-white text-[#58706a]'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="logoStyle"
+                            checked={content.brand.logoStyle === 'icon_text'}
+                            onChange={() => setContent({ ...content, brand: { ...content.brand, logoStyle: 'icon_text' } })}
+                            className="accent-[#28745e]"
+                          />
+                          <div>
+                            <p className="text-xs font-bold">Logo Icon + Text</p>
+                            <p className="text-[10px] font-normal text-[#58706a]">Circular icon next to Org Name & Tagline text</p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

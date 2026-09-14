@@ -15,26 +15,50 @@ export const Header: React.FC = () => {
         {/* Brand */}
         <Link href="/" className="focusable flex items-center gap-3 rounded-lg group">
           {content.brand.logo ? (
-            <span className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-[#f8e6bd] bg-white shadow-md transition-transform group-hover:scale-105">
-              <img
-                src={content.brand.logo}
-                alt={content.brand.name}
-                className="h-full w-full object-contain p-1"
-              />
-            </span>
+            content.brand.logoStyle === 'full' ? (
+              /* Pura Logo Image Mode (Entire Brand as Logo Image) */
+              <div className="flex items-center py-1">
+                <img
+                  src={content.brand.logo}
+                  alt={content.brand.name}
+                  className="h-10 md:h-12 w-auto max-w-[240px] md:max-w-[300px] object-contain transition-transform group-hover:scale-105"
+                />
+              </div>
+            ) : (
+              /* Icon + Text Mode */
+              <>
+                <span className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-[#f8e6bd] bg-white shadow-md transition-transform group-hover:scale-105 shrink-0">
+                  <img
+                    src={content.brand.logo}
+                    alt={content.brand.name}
+                    className="h-full w-full object-contain p-1"
+                  />
+                </span>
+                <span className="flex flex-col">
+                  <span className="display-font text-lg md:text-xl font-bold leading-none text-[#183a35]">
+                    {content.brand.name}
+                  </span>
+                  <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#28745e]">
+                    {content.brand.tagline}
+                  </span>
+                </span>
+              </>
+            )
           ) : (
-            <span className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#f8e6bd] bg-[#123f38] text-[#fffdf8] shadow-lg transition-transform group-hover:scale-105">
-              <HeartHandshake className="w-6 h-6 text-[#f2ad3b]" />
-            </span>
+            <>
+              <span className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#f8e6bd] bg-[#123f38] text-[#fffdf8] shadow-lg transition-transform group-hover:scale-105 shrink-0">
+                <HeartHandshake className="w-6 h-6 text-[#f2ad3b]" />
+              </span>
+              <span className="flex flex-col">
+                <span className="display-font text-lg md:text-xl font-bold leading-none text-[#183a35]">
+                  {content.brand.name}
+                </span>
+                <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#28745e]">
+                  {content.brand.tagline}
+                </span>
+              </span>
+            </>
           )}
-          <span className="flex flex-col">
-            <span className="display-font text-lg md:text-xl font-bold leading-none text-[#183a35]">
-              {content.brand.name}
-            </span>
-            <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#28745e]">
-              {content.brand.tagline}
-            </span>
-          </span>
         </Link>
 
         {/* Desktop Nav */}
