@@ -39,6 +39,9 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           const json = await res.json();
           if (json.success && json.data) {
             setContent(json.data);
+            try {
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(json.data));
+            } catch {}
             return;
           }
         }
