@@ -8,6 +8,7 @@ export const defaultContent: SiteContent = {
     phone: '+91 98765 43210',
     location: 'New Delhi & Rural Empowerment Centers, India',
     primaryCtaText: 'Donate & Support',
+    logo: '',
   },
   hero: {
     ctaText: 'Explore Our Programs',

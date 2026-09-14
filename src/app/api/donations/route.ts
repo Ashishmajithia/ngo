@@ -1,28 +1,9 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
-
-function ensureDbExists() {
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  if (!fs.existsSync(DB_PATH)) {
-    fs.writeFileSync(
-      DB_PATH,
-      JSON.stringify({ content: null, donations: [], contacts: [] }, null, 2),
-      'utf-8'
-    );
-  }
-}
+import { getDb, saveDb } from '@/lib/db';
 
 export async function GET() {
   try {
-    ensureDbExists();
-    const dataStr = fs.readFileSync(DB_PATH, 'utf-8');
-    const db = JSON.parse(dataStr);
+    const db = getDb();
     return NextResponse.json({ success: true, donations: db.donations || [] });
   } catch (error: unknown) {
     const err = error as Error;
@@ -32,10 +13,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    ensureDbExists();
     const body = await request.json();
-    const dataStr = fs.readFileSync(DB_PATH, 'utf-8');
-    const db = JSON.parse(dataStr);
+    const db = getDb();
 
     const newDonation = {
       id: 'don_' + Date.now(),
@@ -50,7 +29,7 @@ export async function POST(request: Request) {
     db.donations = db.donations || [];
     db.donations.push(newDonation);
 
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
+    saveDb(db);
 
     return NextResponse.json({
       success: true,

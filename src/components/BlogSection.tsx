@@ -16,6 +16,18 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Try local storage cache first
+    try {
+      const saved = localStorage.getItem('act_charitable_trust_blogs_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setBlogs(parsed);
+        }
+      }
+    } catch {}
+
+    // 2. Fetch from API
     async function fetchBlogs() {
       try {
         const res = await fetch('/api/blogs');
@@ -23,6 +35,9 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
           const json = await res.json();
           if (json.success && Array.isArray(json.blogs) && json.blogs.length > 0) {
             setBlogs(json.blogs);
+            try {
+              localStorage.setItem('act_charitable_trust_blogs_v1', JSON.stringify(json.blogs));
+            } catch {}
           }
         }
       } catch (err) {

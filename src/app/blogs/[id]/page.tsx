@@ -53,6 +53,22 @@ function BlogDetailPageContent() {
         console.warn('API blog fetch fallback');
       }
 
+      // 1. Try local storage cache
+      try {
+        const saved = localStorage.getItem('act_charitable_trust_blogs_v1');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            const foundLocal = parsed.find((b: BlogPost) => b.id === id || b.slug === id);
+            if (foundLocal) {
+              setBlog(foundLocal);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+      } catch {}
+
       // Fallback to default blogs
       const fallback = defaultBlogs.find((b) => b.id === id || b.slug === id);
       setBlog(fallback || defaultBlogs[0]);

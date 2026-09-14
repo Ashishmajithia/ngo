@@ -48,6 +48,7 @@ export interface BrandConfig {
   phone: string;
   location: string;
   primaryCtaText: string;
+  logo?: string;
 }
 
 export interface AboutSectionData {

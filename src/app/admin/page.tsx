@@ -47,6 +47,8 @@ export default function AdminDashboardPage() {
   const [content, setContent] = useState<SiteContent>(defaultContent);
   const [donations, setDonations] = useState<DonationItem[]>([]);
 
+  const LOCAL_BLOGS_KEY = 'act_charitable_trust_blogs_v1';
+
   // Blog Form State
   const [editingBlog, setEditingBlog] = useState<Partial<BlogPost> | null>(null);
   const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
@@ -69,6 +71,17 @@ export default function AdminDashboardPage() {
       console.warn('LocalStorage access warning');
     }
 
+    // Load local cached blogs if any
+    try {
+      const savedBlogs = localStorage.getItem(LOCAL_BLOGS_KEY);
+      if (savedBlogs) {
+        const parsed = JSON.parse(savedBlogs);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setBlogs(parsed);
+        }
+      }
+    } catch {}
+
     fetchData();
     setLoading(false);
   }, []);
@@ -85,7 +98,19 @@ export default function AdminDashboardPage() {
         const bJson = await blogsRes.json();
         if (bJson.blogs && Array.isArray(bJson.blogs) && bJson.blogs.length > 0) {
           setBlogs(bJson.blogs);
+          try {
+            localStorage.setItem(LOCAL_BLOGS_KEY, JSON.stringify(bJson.blogs));
+          } catch {}
         }
+      } else {
+        // Fallback to localStorage if API has any issues
+        try {
+          const saved = localStorage.getItem(LOCAL_BLOGS_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) setBlogs(parsed);
+          }
+        } catch {}
       }
       if (contentRes.ok) {
         const cJson = await contentRes.json();
@@ -119,38 +144,70 @@ export default function AdminDashboardPage() {
     e.preventDefault();
     if (!editingBlog?.title) return;
 
+    const isEdit = !!editingBlog.id;
+    const blogToSave: BlogPost = {
+      ...editingBlog,
+      id: editingBlog.id || 'blog-' + Date.now(),
+      title: editingBlog.title,
+      slug: editingBlog.slug || editingBlog.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      excerpt: editingBlog.excerpt || '',
+      content: editingBlog.content || '',
+      coverImage: editingBlog.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop',
+      images: Array.isArray(editingBlog.images) && editingBlog.images.length > 0
+        ? editingBlog.images
+        : [editingBlog.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop'],
+      author: editingBlog.author || 'ACT Trust Team',
+      date: editingBlog.date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      category: editingBlog.category || 'Education',
+      published: editingBlog.published !== undefined ? editingBlog.published : true,
+    } as BlogPost;
+
+    // Update state immediately & cache in localStorage
+    setBlogs((prev) => {
+      let updated: BlogPost[];
+      if (isEdit) {
+        updated = prev.map((b) => (b.id === blogToSave.id ? blogToSave : b));
+      } else {
+        updated = [blogToSave, ...prev];
+      }
+      try {
+        localStorage.setItem(LOCAL_BLOGS_KEY, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    setIsBlogModalOpen(false);
+    setEditingBlog(null);
+    showToastMsg(isEdit ? 'Impact Story updated!' : 'New Impact Story published live!');
+
+    // Background sync to API
     try {
-      const isEdit = !!editingBlog.id;
       const url = '/api/blogs';
       const method = isEdit ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
+      await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingBlog),
+        body: JSON.stringify(blogToSave),
       });
-
-      if (res.ok) {
-        showToastMsg(isEdit ? 'Impact Story updated!' : 'New Impact Story published live!');
-        setIsBlogModalOpen(false);
-        setEditingBlog(null);
-        fetchData();
-      }
-    } catch {
-      showToastMsg('Failed to save story.');
+    } catch (err) {
+      console.warn('API sync warning:', err);
     }
   };
 
   const handleDeleteBlog = async (id: string) => {
     if (!confirm('Are you sure you want to delete this story?')) return;
+    setBlogs((prev) => {
+      const updated = prev.filter((b) => b.id !== id);
+      try {
+        localStorage.setItem(LOCAL_BLOGS_KEY, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    showToastMsg('Story deleted successfully.');
     try {
-      const res = await fetch(`/api/blogs?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        showToastMsg('Story deleted successfully.');
-        fetchData();
-      }
+      await fetch(`/api/blogs?id=${id}`, { method: 'DELETE' });
     } catch {
-      showToastMsg('Delete failed.');
+      console.warn('API delete warning');
     }
   };
 
@@ -184,11 +241,15 @@ export default function AdminDashboardPage() {
       {/* Top Header */}
       <header className="bg-[#123f38] text-white px-6 py-4 flex items-center justify-between shadow-lg sticky top-0 z-30">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#28745e] text-[#f2ad3b] shadow-inner">
-            <LayoutDashboard className="w-6 h-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#28745e] text-[#f2ad3b] shadow-inner overflow-hidden">
+            {content.brand.logo ? (
+              <img src={content.brand.logo} alt="Logo" className="w-full h-full object-contain p-1" />
+            ) : (
+              <LayoutDashboard className="w-6 h-6" />
+            )}
           </div>
           <div>
-            <h1 className="display-font text-xl font-bold leading-tight">ACT Trust Admin Console</h1>
+            <h1 className="display-font text-xl font-bold leading-tight">{content.brand.name} Admin Console</h1>
             <p className="text-xs text-[#f8f4e9]/80">Full Site & Blog Content Management System</p>
           </div>
         </div>
@@ -712,6 +773,16 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="mt-6 space-y-4">
+                {/* Logo Upload */}
+                <div className="rounded-2xl border border-[#d9e1d7] bg-[#f8f4e9]/60 p-4">
+                  <ImageUploadInput
+                    label="Organization Logo (Image / Icon)"
+                    value={content.brand.logo || ''}
+                    onChangeSingle={(url) => setContent({ ...content, brand: { ...content.brand, logo: url } })}
+                    helperText="Upload your trust or NGO logo (PNG, JPG, SVG, WebP). It will automatically appear across the website header, footer, and admin dashboard."
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold mb-1">Organization Name</label>

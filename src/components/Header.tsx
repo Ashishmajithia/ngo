@@ -14,9 +14,19 @@ export const Header: React.FC = () => {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-8">
         {/* Brand */}
         <Link href="/" className="focusable flex items-center gap-3 rounded-lg group">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#f8e6bd] bg-[#123f38] text-[#fffdf8] shadow-lg transition-transform group-hover:scale-105">
-            <HeartHandshake className="w-6 h-6 text-[#f2ad3b]" />
-          </span>
+          {content.brand.logo ? (
+            <span className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-[#f8e6bd] bg-white shadow-md transition-transform group-hover:scale-105">
+              <img
+                src={content.brand.logo}
+                alt={content.brand.name}
+                className="h-full w-full object-contain p-1"
+              />
+            </span>
+          ) : (
+            <span className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#f8e6bd] bg-[#123f38] text-[#fffdf8] shadow-lg transition-transform group-hover:scale-105">
+              <HeartHandshake className="w-6 h-6 text-[#f2ad3b]" />
+            </span>
+          )}
           <span className="flex flex-col">
             <span className="display-font text-lg md:text-xl font-bold leading-none text-[#183a35]">
               {content.brand.name}
