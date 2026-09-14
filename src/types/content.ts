@@ -101,4 +101,5 @@ export interface SiteContent {
     items: GalleryItem[];
   };
   support: SupportSectionData;
+  updatedAt?: string;
 }

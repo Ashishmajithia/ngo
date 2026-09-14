@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { UploadCloud, X, Loader2, Plus, Check } from 'lucide-react';
+import { UploadCloud, X, Loader2, Plus, Check, Link as LinkIcon } from 'lucide-react';
 
 interface ImageUploadInputProps {
   label?: string;
@@ -13,8 +13,8 @@ interface ImageUploadInputProps {
   helperText?: string;
 }
 
-// Convert image file to heavily compressed, lightweight web image (<50KB)
-const compressImageFile = (file: File): Promise<string> => {
+// Convert image file to heavily compressed, lightweight web image (<80KB)
+const compressImageFile = (file: File, maxDim = 1280): Promise<string> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -27,7 +27,6 @@ const compressImageFile = (file: File): Promise<string> => {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const maxDim = 800; // optimized for web speed
 
           if (width > maxDim || height > maxDim) {
             if (width > height) {
@@ -44,17 +43,17 @@ const compressImageFile = (file: File): Promise<string> => {
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
-            const isPng = file.type === 'image/png';
-            const compressed = canvas.toDataURL(isPng && width < 400 ? 'image/png' : 'image/jpeg', 0.72);
+            const isPng = file.type === 'image/png' && width < 400;
+            const compressed = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.76);
             resolve(compressed);
           } else {
-            resolve(rawDataUrl.length < 500000 ? rawDataUrl : '');
+            resolve(rawDataUrl.length < 200000 ? rawDataUrl : '');
           }
         } catch {
-          resolve(rawDataUrl.length < 500000 ? rawDataUrl : '');
+          resolve(rawDataUrl.length < 200000 ? rawDataUrl : '');
         }
       };
-      img.onerror = () => resolve(rawDataUrl.length < 500000 ? rawDataUrl : '');
+      img.onerror = () => resolve(rawDataUrl.length < 200000 ? rawDataUrl : '');
       img.src = rawDataUrl;
     };
     reader.onerror = () => resolve('');
@@ -74,6 +73,8 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [directUrl, setDirectUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFilesUpload = async (files: FileList | File[]) => {
@@ -85,46 +86,46 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
     try {
       const fileArray = Array.from(files);
 
-      // 1. Try server upload first for clean static URL
-      let serverUrls: string[] = [];
-      try {
-        const formData = new FormData();
-        fileArray.forEach((file) => formData.append('files', file));
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.urls && Array.isArray(json.urls) && json.urls.length > 0) {
-            serverUrls = json.urls;
-          }
-        }
-      } catch {
-        // Fallback to client-side compression
-      }
-
-      if (serverUrls.length > 0) {
-        if (multiple && onChangeMultiple) {
-          onChangeMultiple([...values, ...serverUrls]);
-        } else if (!multiple && onChangeSingle && serverUrls[0]) {
-          onChangeSingle(serverUrls[0]);
-        }
-        return;
-      }
-
-      // 2. Client-side fallback: compressed tiny data URL (<50KB)
+      // 1. Client-side compression first so image is always lightweight (< 80KB)
       const compressedDataUrls = await Promise.all(
-        fileArray.map((file) => compressImageFile(file))
+        fileArray.map((file) => compressImageFile(file, 1280))
       );
       const validDataUrls = compressedDataUrls.filter(Boolean);
 
       if (validDataUrls.length === 0) {
-        setErrorMsg('Please choose a valid image file');
+        setErrorMsg('Please select a valid image file (JPG, PNG, WEBP).');
         return;
       }
 
+      // 2. Try uploading the compressed image to /api/upload
+      let finalUrls: string[] = [];
+      try {
+        const formData = new FormData();
+        for (let i = 0; i < validDataUrls.length; i++) {
+          const dataUrl = validDataUrls[i];
+          const blob = await (await fetch(dataUrl)).blob();
+          formData.append('files', blob, `img_${Date.now()}_${i}.jpg`);
+        }
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.urls && Array.isArray(json.urls) && json.urls.length > 0) {
+            finalUrls = json.urls.filter((u: string) => typeof u === 'string' && u.startsWith('/uploads/'));
+          }
+        }
+      } catch {
+        // Fallback to compressed data URLs
+      }
+
+      // If server could not save to disk (e.g. Vercel read-only filesystem), use the tiny compressed data URLs!
+      if (finalUrls.length === 0) {
+        finalUrls = validDataUrls;
+      }
+
       if (multiple && onChangeMultiple) {
-        onChangeMultiple([...values, ...validDataUrls]);
-      } else if (!multiple && onChangeSingle && validDataUrls[0]) {
-        onChangeSingle(validDataUrls[0]);
+        onChangeMultiple([...values, ...finalUrls]);
+      } else if (!multiple && onChangeSingle && finalUrls[0]) {
+        onChangeSingle(finalUrls[0]);
       }
     } catch {
       setErrorMsg('Failed to process image file');
@@ -159,9 +160,49 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
     }
   };
 
+  const handleApplyDirectUrl = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!directUrl.trim()) return;
+    if (multiple && onChangeMultiple) {
+      onChangeMultiple([...values, directUrl.trim()]);
+    } else if (!multiple && onChangeSingle) {
+      onChangeSingle(directUrl.trim());
+    }
+    setDirectUrl('');
+    setShowUrlInput(false);
+  };
+
   return (
     <div className="space-y-2">
-      {label && <label className="block text-xs font-bold text-[#183a35]">{label}</label>}
+      <div className="flex items-center justify-between">
+        {label && <label className="block text-xs font-bold text-[#183a35]">{label}</label>}
+        <button
+          type="button"
+          onClick={() => setShowUrlInput(!showUrlInput)}
+          className="text-[11px] font-bold text-[#28745e] hover:underline flex items-center gap-1"
+        >
+          <LinkIcon className="w-3 h-3" />
+          <span>{showUrlInput ? 'Hide URL Input' : 'Paste Image Link / URL'}</span>
+        </button>
+      </div>
+
+      {showUrlInput && (
+        <form onSubmit={handleApplyDirectUrl} className="flex gap-2 p-2 rounded-xl bg-[#f8f4e9] border border-[#dce7dc]">
+          <input
+            type="url"
+            value={directUrl}
+            onChange={(e) => setDirectUrl(e.target.value)}
+            placeholder="https://images.unsplash.com/... or image web address"
+            className="flex-1 text-xs p-2 rounded-lg border bg-white"
+          />
+          <button
+            type="submit"
+            className="px-3 py-1.5 rounded-lg bg-[#123f38] text-white text-xs font-bold hover:bg-[#28745e] transition"
+          >
+            Apply URL
+          </button>
+        </form>
+      )}
 
       {/* Hidden File Input */}
       <input
@@ -258,7 +299,7 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-[#183a35] truncate">{value.substring(0, 45)}...</p>
-                <p className="text-[10px] text-green-700 font-semibold mt-0.5">✓ Image Uploaded Successfully</p>
+                <p className="text-[10px] text-green-700 font-semibold mt-0.5">✓ Image Loaded Successfully</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -295,7 +336,7 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
               {uploading ? (
                 <div className="flex items-center gap-2 text-xs font-bold text-[#28745e]">
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Processing & Uploading Image...</span>
+                  <span>Compressing & Uploading Image...</span>
                 </div>
               ) : (
                 <>

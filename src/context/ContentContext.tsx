@@ -4,6 +4,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SiteContent } from '@/types/content';
 import { defaultContent } from '@/data/initialContent';
 
+export const LOCAL_CONTENT_KEY = 'act_charitable_trust_content_v1';
+export const CONTENT_SYNC_EVENT = 'act_charitable_trust_content_updated';
+
 interface ContentContextType {
   content: SiteContent;
   updateContent: (newContent: Partial<SiteContent>) => Promise<void>;
@@ -21,8 +24,6 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'act_charitable_trust_content_v1';
-
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [content, setContent] = useState<SiteContent>(defaultContent);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -30,57 +31,110 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Fetch initial content from API database first, fallback to localStorage/defaultContent
   useEffect(() => {
-    async function loadContent() {
+    // 1. Immediately hydrate from localStorage for instant, zero-flicker render
+    let localData: SiteContent | null = null;
+    try {
+      const saved = localStorage.getItem(LOCAL_CONTENT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && parsed.brand) {
+          localData = parsed;
+          setContent(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn('Initial localStorage read error:', e);
+    }
+
+    // 2. Fetch fresh content from API route with cache busting
+    async function syncWithServer() {
       try {
-        const res = await fetch('/api/content');
+        const res = await fetch(`/api/content?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' },
+        });
+
         if (res.ok) {
           const json = await res.json();
           if (json.success && json.data) {
-            setContent(json.data);
+            const serverData: SiteContent = json.data;
+
+            // Re-read latest localStorage in case user made edits during fetch
+            let currentLocal: SiteContent | null = localData;
             try {
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(json.data));
+              const freshSaved = localStorage.getItem(LOCAL_CONTENT_KEY);
+              if (freshSaved) currentLocal = JSON.parse(freshSaved);
             } catch {}
-            return;
+
+            const serverTime = serverData.updatedAt ? new Date(serverData.updatedAt).getTime() : 0;
+            const localTime = currentLocal?.updatedAt ? new Date(currentLocal.updatedAt).getTime() : 0;
+
+            if (serverTime > localTime) {
+              // Server has newer content
+              setContent(serverData);
+              try {
+                localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(serverData));
+              } catch {}
+            } else if (localTime > serverTime && currentLocal) {
+              // Local changes are newer! Retain local edits and sync to server in background
+              setContent(currentLocal);
+              fetch('/api/content', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentLocal),
+              }).catch(() => {});
+            }
           }
         }
       } catch (err) {
-        console.warn('API content fetch failed, using local backup:', err);
-      }
-
-      // Local storage fallback
-      try {
-        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (saved) {
-          setContent(JSON.parse(saved));
-        }
-      } catch (e) {
-        console.error('Local storage read error:', e);
+        console.warn('API content sync warning:', err);
       }
     }
 
-    loadContent();
+    syncWithServer();
 
-    const handleStorageChange = () => {
-      try {
-        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (saved) {
-          setContent(JSON.parse(saved));
-        }
-      } catch {}
+    // 3. Listen for cross-tab or same-window content updates
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === LOCAL_CONTENT_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed && parsed.brand) {
+            setContent(parsed);
+          }
+        } catch {}
+      }
+    };
+
+    const handleCustomSync = (e: Event) => {
+      const customEvt = e as CustomEvent<SiteContent>;
+      if (customEvt.detail && customEvt.detail.brand) {
+        setContent(customEvt.detail);
+      } else {
+        try {
+          const saved = localStorage.getItem(LOCAL_CONTENT_KEY);
+          if (saved) setContent(JSON.parse(saved));
+        } catch {}
+      }
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener(CONTENT_SYNC_EVENT, handleCustomSync);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener(CONTENT_SYNC_EVENT, handleCustomSync);
+    };
   }, []);
 
   const updateContent = async (newContent: Partial<SiteContent>) => {
-    const updated = { ...content, ...newContent };
+    const timestamp = new Date().toISOString();
+    const updated: SiteContent = { ...content, ...newContent, updatedAt: timestamp };
     setContent(updated);
 
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+      localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(updated));
+      window.dispatchEvent(new CustomEvent(CONTENT_SYNC_EVENT, { detail: updated }));
     } catch (e) {
       console.error('LocalStorage write error:', e);
     }
@@ -97,13 +151,16 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const resetContent = async () => {
-    setContent(defaultContent);
+    const timestamp = new Date().toISOString();
+    const resetData: SiteContent = { ...defaultContent, updatedAt: timestamp };
+    setContent(resetData);
     try {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      localStorage.removeItem(LOCAL_CONTENT_KEY);
+      window.dispatchEvent(new CustomEvent(CONTENT_SYNC_EVENT, { detail: resetData }));
       await fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(defaultContent),
+        body: JSON.stringify(resetData),
       });
     } catch (e) {
       console.error('Reset content error:', e);

@@ -24,8 +24,9 @@ import {
 import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
 import { defaultContent } from '@/data/initialContent';
-import { SiteContent } from '@/types/content';
+import { SiteContent, HeroSlide, ProgramItem } from '@/types/content';
 import { ImageUploadInput } from '@/components/ImageUploadInput';
+import { LOCAL_CONTENT_KEY, CONTENT_SYNC_EVENT } from '@/context/ContentContext';
 
 interface DonationItem {
   id: string;
@@ -46,6 +47,7 @@ export default function AdminDashboardPage() {
   const [blogs, setBlogs] = useState<BlogPost[]>(defaultBlogs);
   const [content, setContent] = useState<SiteContent>(defaultContent);
   const [donations, setDonations] = useState<DonationItem[]>([]);
+  const [savingSection, setSavingSection] = useState<string | null>(null);
 
   const LOCAL_BLOGS_KEY = 'act_charitable_trust_blogs_v1';
 
@@ -71,13 +73,24 @@ export default function AdminDashboardPage() {
       console.warn('LocalStorage access warning');
     }
 
-    // Load local cached blogs if any
+    // 1. Load local cached blogs if any
     try {
       const savedBlogs = localStorage.getItem(LOCAL_BLOGS_KEY);
       if (savedBlogs) {
         const parsed = JSON.parse(savedBlogs);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setBlogs(parsed);
+        }
+      }
+    } catch {}
+
+    // 2. Load local cached content FIRST so user changes never disappear
+    try {
+      const savedContent = localStorage.getItem(LOCAL_CONTENT_KEY);
+      if (savedContent) {
+        const parsed = JSON.parse(savedContent);
+        if (parsed && typeof parsed === 'object' && parsed.brand) {
+          setContent(parsed);
         }
       }
     } catch {}
@@ -89,9 +102,9 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     try {
       const [blogsRes, contentRes, donRes] = await Promise.all([
-        fetch('/api/blogs'),
-        fetch('/api/content'),
-        fetch('/api/donations'),
+        fetch(`/api/blogs?t=${Date.now()}`, { cache: 'no-store' }),
+        fetch(`/api/content?t=${Date.now()}`, { cache: 'no-store' }),
+        fetch(`/api/donations?t=${Date.now()}`, { cache: 'no-store' }),
       ]);
 
       if (blogsRes.ok) {
@@ -112,10 +125,31 @@ export default function AdminDashboardPage() {
           }
         } catch {}
       }
+
       if (contentRes.ok) {
         const cJson = await contentRes.json();
-        if (cJson.data) setContent(cJson.data);
+        if (cJson.data) {
+          const serverData: SiteContent = cJson.data;
+          let currentLocal: SiteContent | null = null;
+          try {
+            const saved = localStorage.getItem(LOCAL_CONTENT_KEY);
+            if (saved) currentLocal = JSON.parse(saved);
+          } catch {}
+
+          const serverTime = serverData.updatedAt ? new Date(serverData.updatedAt).getTime() : 0;
+          const localTime = currentLocal?.updatedAt ? new Date(currentLocal.updatedAt).getTime() : 0;
+
+          if (serverTime > localTime) {
+            setContent(serverData);
+            try {
+              localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(serverData));
+            } catch {}
+          } else if (currentLocal) {
+            setContent(currentLocal);
+          }
+        }
       }
+
       if (donRes.ok) {
         const dJson = await donRes.json();
         if (dJson.donations && Array.isArray(dJson.donations)) setDonations(dJson.donations);
@@ -212,29 +246,41 @@ export default function AdminDashboardPage() {
   };
 
   // Content Handlers
-  const handleSaveContent = async () => {
-    try {
-      // 1. Immediately persist to localStorage for instant website update
-      try {
-        localStorage.setItem('act_charitable_trust_content_v1', JSON.stringify(content));
-        window.dispatchEvent(new Event('storage'));
-      } catch (err) {
-        console.warn('LocalStorage sync warning:', err);
-      }
+  const handleSaveContent = async (sectionName?: string) => {
+    const secLabel = sectionName || 'Content';
+    setSavingSection(secLabel);
+    const timestamp = new Date().toISOString();
+    const updatedContent: SiteContent = {
+      ...content,
+      updatedAt: timestamp,
+    };
+    setContent(updatedContent);
 
-      // 2. Sync to backend API database
+    // 1. Immediately persist to localStorage for instant website update
+    try {
+      localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(updatedContent));
+      window.dispatchEvent(new CustomEvent(CONTENT_SYNC_EVENT, { detail: updatedContent }));
+      window.dispatchEvent(new Event('storage'));
+    } catch (err) {
+      console.warn('LocalStorage sync warning:', err);
+    }
+
+    // 2. Sync to backend API database
+    try {
       const res = await fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(content),
+        body: JSON.stringify(updatedContent),
       });
       if (res.ok) {
-        showToastMsg('Site content saved successfully!');
+        showToastMsg(`✓ ${secLabel} saved & updated live!`);
       } else {
-        showToastMsg('Saved locally!');
+        showToastMsg(`✓ ${secLabel} saved locally!`);
       }
     } catch {
-      showToastMsg('Saved locally!');
+      showToastMsg(`✓ ${secLabel} saved locally!`);
+    } finally {
+      setTimeout(() => setSavingSection(null), 500);
     }
   };
 
@@ -405,18 +451,54 @@ export default function AdminDashboardPage() {
           {/* TAB 2: HERO BANNERS */}
           {activeTab === 'banners' && (
             <div>
-              <div className="flex items-center justify-between pb-6 border-b border-[#d9e1d7]">
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
                 <div>
                   <h2 className="display-font text-2xl font-bold text-[#183a35]">Hero Banner Carousel</h2>
-                  <p className="text-xs text-[#58706a]">Update main homepage background slide images and copy</p>
+                  <p className="text-xs text-[#58706a]">Update, add, or delete main homepage background slide images and copy</p>
                 </div>
-                <button
-                  onClick={handleSaveContent}
-                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition"
-                >
-                  <Save className="w-4 h-4 text-[#f2ad3b]" />
-                  <span>Save Banners</span>
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSlide: HeroSlide = {
+                        id: 'slide-' + Date.now(),
+                        image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1920&auto=format&fit=crop',
+                        eyebrow: 'New Initiative • Community Support',
+                        title: 'Empowering Communities & Changing Lives',
+                        copy: 'Dedicated to providing grassroots support, high quality education, and healthcare access to all.',
+                      };
+                      setContent((prev) => ({
+                        ...prev,
+                        hero: {
+                          ...prev.hero,
+                          slides: [...prev.hero.slides, newSlide],
+                        },
+                      }));
+                      showToastMsg('New banner slide added! Configure details below.');
+                    }}
+                    className="flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#28745e] hover:bg-[#28745e] hover:text-white transition shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add Banner</span>
+                  </button>
+                  <button
+                    onClick={() => handleSaveContent('Hero Banners')}
+                    disabled={savingSection === 'Hero Banners'}
+                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
+                  >
+                    {savingSection === 'Hero Banners' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                        <span>Saving Banners...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 text-[#f2ad3b]" />
+                        <span>Save Banners</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="mt-4 p-4 rounded-2xl bg-[#e8f0e8] border border-[#28745e]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
@@ -426,7 +508,7 @@ export default function AdminDashboardPage() {
                     <span>Recommended Banner Image Size & Proportions</span>
                   </p>
                   <p className="text-[11px] text-[#58706a] mt-0.5">
-                    Best Resolution: <strong className="text-[#123f38]">Width: 1920 px × Height: 850 px</strong> (Landscape 16:9 ratio). Subject looks best centered or on the right side.
+                    Best Resolution: <strong className="text-[#123f38]">Width: 1920 px × Height: 850 px</strong> (Landscape 16:9 ratio). You can upload image files from your computer or paste direct image links.
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 text-[11px] font-bold bg-[#123f38] text-[#f2ad3b] px-3.5 py-1.5 rounded-full shrink-0 shadow-sm">
@@ -438,10 +520,39 @@ export default function AdminDashboardPage() {
                 {content.hero.slides.map((slide, idx) => (
                   <div key={slide.id || idx} className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-[#28745e]">Hero Banner Slide #{idx + 1}</p>
-                      <span className="text-[10px] font-mono bg-white border border-[#dce7dc] px-2 py-0.5 rounded text-[#58706a]">
-                        Size: 1920 × 850 px
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#28745e] text-xs font-bold text-white">
+                          {idx + 1}
+                        </span>
+                        <p className="text-xs font-bold text-[#28745e]">Hero Banner Slide #{idx + 1}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-mono bg-white border border-[#dce7dc] px-2 py-0.5 rounded text-[#58706a]">
+                          1920 × 850 px
+                        </span>
+                        {content.hero.slides.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to delete banner slide #${idx + 1}?`)) {
+                                setContent((prev) => ({
+                                  ...prev,
+                                  hero: {
+                                    ...prev.hero,
+                                    slides: prev.hero.slides.filter((_, i) => i !== idx),
+                                  },
+                                }));
+                                showToastMsg(`Banner slide #${idx + 1} deleted.`);
+                              }
+                            }}
+                            className="flex items-center gap-1 text-[11px] font-bold text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition"
+                            title="Delete this banner slide"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete Slide</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -451,11 +562,16 @@ export default function AdminDashboardPage() {
                           type="text"
                           value={slide.title}
                           onChange={(e) => {
-                            const updated = [...content.hero.slides];
-                            updated[idx].title = e.target.value;
-                            setContent({ ...content, hero: { ...content.hero, slides: updated } });
+                            setContent((prev) => ({
+                              ...prev,
+                              hero: {
+                                ...prev.hero,
+                                slides: prev.hero.slides.map((sl, i) => (i === idx ? { ...sl, title: e.target.value } : sl)),
+                              },
+                            }));
                           }}
                           className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                          placeholder="e.g. Building Hope & Resilient Futures Together"
                         />
                       </div>
                       <div>
@@ -464,13 +580,37 @@ export default function AdminDashboardPage() {
                           type="text"
                           value={slide.eyebrow}
                           onChange={(e) => {
-                            const updated = [...content.hero.slides];
-                            updated[idx].eyebrow = e.target.value;
-                            setContent({ ...content, hero: { ...content.hero, slides: updated } });
+                            setContent((prev) => ({
+                              ...prev,
+                              hero: {
+                                ...prev.hero,
+                                slides: prev.hero.slides.map((sl, i) => (i === idx ? { ...sl, eyebrow: e.target.value } : sl)),
+                              },
+                            }));
                           }}
                           className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                          placeholder="e.g. Empower Communities • Transform Lives"
                         />
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Banner Description / Subtitle (Copy)</label>
+                      <textarea
+                        rows={2}
+                        value={slide.copy || ''}
+                        onChange={(e) => {
+                          setContent((prev) => ({
+                            ...prev,
+                            hero: {
+                              ...prev.hero,
+                              slides: prev.hero.slides.map((sl, i) => (i === idx ? { ...sl, copy: e.target.value } : sl)),
+                            },
+                          }));
+                        }}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                        placeholder="Brief summary paragraph displayed beneath the heading on the banner"
+                      />
                     </div>
 
                     <div>
@@ -478,15 +618,45 @@ export default function AdminDashboardPage() {
                         label="Hero Slide Background Image (Recommended: 1920 × 850 px)"
                         value={slide.image}
                         onChangeSingle={(url) => {
-                          const updated = [...content.hero.slides];
-                          updated[idx].image = url;
-                          setContent({ ...content, hero: { ...content.hero, slides: updated } });
+                          setContent((prev) => ({
+                            ...prev,
+                            hero: {
+                              ...prev.hero,
+                              slides: prev.hero.slides.map((sl, i) => (i === idx ? { ...sl, image: url } : sl)),
+                            },
+                          }));
                         }}
-                        helperText="Exact Recommended Dimensions: 1920px width × 850px height (PNG, JPG, WEBP)."
+                        helperText="Exact Recommended Dimensions: 1920px width × 850px height. Supports file uploads or paste web image links."
                       />
                     </div>
                   </div>
                 ))}
+
+                {/* Add Another Banner Slide Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSlide: HeroSlide = {
+                      id: 'slide-' + Date.now(),
+                      image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1920&auto=format&fit=crop',
+                      eyebrow: 'New Initiative • Community Support',
+                      title: 'Empowering Communities & Changing Lives',
+                      copy: 'Dedicated to providing grassroots support, high quality education, and healthcare access to all.',
+                    };
+                    setContent((prev) => ({
+                      ...prev,
+                      hero: {
+                        ...prev.hero,
+                        slides: [...prev.hero.slides, newSlide],
+                      },
+                    }));
+                    showToastMsg('New banner slide added!');
+                  }}
+                  className="w-full py-4 rounded-2xl border-2 border-dashed border-[#28745e]/40 bg-[#f8f4e9]/50 hover:bg-[#e8f0e8] text-[#28745e] font-bold text-xs flex items-center justify-center gap-2 transition"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ Add Another Banner Slide</span>
+                </button>
               </div>
             </div>
           )}
@@ -509,7 +679,11 @@ export default function AdminDashboardPage() {
                         label: 'New Impact Achievement',
                         iconName: 'Award',
                       };
-                      setContent({ ...content, impactStats: [...content.impactStats, newStat] });
+                      setContent((prev) => ({
+                        ...prev,
+                        impactStats: [...prev.impactStats, newStat],
+                      }));
+                      showToastMsg('New metric added!');
                     }}
                     className="flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#28745e] hover:bg-[#28745e] hover:text-white transition"
                   >
@@ -517,11 +691,21 @@ export default function AdminDashboardPage() {
                     <span>+ Add Metric</span>
                   </button>
                   <button
-                    onClick={handleSaveContent}
-                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition"
+                    onClick={() => handleSaveContent('Impact Metrics')}
+                    disabled={savingSection === 'Impact Metrics'}
+                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
                   >
-                    <Save className="w-4 h-4 text-[#f2ad3b]" />
-                    <span>Save Metrics</span>
+                    {savingSection === 'Impact Metrics' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                        <span>Saving Metrics...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 text-[#f2ad3b]" />
+                        <span>Save Metrics</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -553,8 +737,12 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            const updated = content.impactStats.filter((_, i) => i !== idx);
-                            setContent({ ...content, impactStats: updated });
+                            if (confirm(`Remove metric #${idx + 1}?`)) {
+                              setContent((prev) => ({
+                                ...prev,
+                                impactStats: prev.impactStats.filter((_, i) => i !== idx),
+                              }));
+                            }
                           }}
                           className="text-red-500 hover:text-red-700 p-1"
                           title="Remove Metric"
@@ -570,12 +758,13 @@ export default function AdminDashboardPage() {
                         type="text"
                         value={item.stat}
                         onChange={(e) => {
-                          const updated = [...content.impactStats];
-                          updated[idx].stat = e.target.value;
-                          setContent({ ...content, impactStats: updated });
+                          setContent((prev) => ({
+                            ...prev,
+                            impactStats: prev.impactStats.map((st, i) => (i === idx ? { ...st, stat: e.target.value } : st)),
+                          }));
                         }}
                         className="w-full rounded-xl border p-2.5 text-sm bg-white font-bold"
-                        placeholder="e.g. 50,000+ or 98%"
+                        placeholder="e.g. 50,000+ or 4000+ or 98%"
                       />
                     </div>
 
@@ -585,9 +774,10 @@ export default function AdminDashboardPage() {
                         type="text"
                         value={item.label}
                         onChange={(e) => {
-                          const updated = [...content.impactStats];
-                          updated[idx].label = e.target.value;
-                          setContent({ ...content, impactStats: updated });
+                          setContent((prev) => ({
+                            ...prev,
+                            impactStats: prev.impactStats.map((st, i) => (i === idx ? { ...st, label: e.target.value } : st)),
+                          }));
                         }}
                         className="w-full rounded-xl border p-2.5 text-xs bg-white"
                         placeholder="e.g. Lives Positively Impacted"
@@ -599,9 +789,10 @@ export default function AdminDashboardPage() {
                       <select
                         value={item.iconName || 'Users'}
                         onChange={(e) => {
-                          const updated = [...content.impactStats];
-                          updated[idx].iconName = e.target.value;
-                          setContent({ ...content, impactStats: updated });
+                          setContent((prev) => ({
+                            ...prev,
+                            impactStats: prev.impactStats.map((st, i) => (i === idx ? { ...st, iconName: e.target.value } : st)),
+                          }));
                         }}
                         className="w-full rounded-xl border p-2.5 text-xs bg-white font-medium"
                       >
@@ -628,11 +819,21 @@ export default function AdminDashboardPage() {
                   <p className="text-xs text-[#58706a]">Customize mission story, transparency badge, and section photo</p>
                 </div>
                 <button
-                  onClick={handleSaveContent}
-                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition"
+                  onClick={() => handleSaveContent('About Us')}
+                  disabled={savingSection === 'About Us'}
+                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
                 >
-                  <Save className="w-4 h-4 text-[#f2ad3b]" />
-                  <span>Save About Section</span>
+                  {savingSection === 'About Us' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                      <span>Saving About Section...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 text-[#f2ad3b]" />
+                      <span>Save About Section</span>
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -643,7 +844,7 @@ export default function AdminDashboardPage() {
                     <input
                       type="text"
                       value={content.about.eyebrow}
-                      onChange={(e) => setContent({ ...content, about: { ...content.about, eyebrow: e.target.value } })}
+                      onChange={(e) => setContent((prev) => ({ ...prev, about: { ...prev.about, eyebrow: e.target.value } }))}
                       className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
                     />
                   </div>
@@ -652,7 +853,7 @@ export default function AdminDashboardPage() {
                     <input
                       type="text"
                       value={content.about.badgeTitle}
-                      onChange={(e) => setContent({ ...content, about: { ...content.about, badgeTitle: e.target.value } })}
+                      onChange={(e) => setContent((prev) => ({ ...prev, about: { ...prev.about, badgeTitle: e.target.value } }))}
                       className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
                     />
                   </div>
@@ -663,7 +864,7 @@ export default function AdminDashboardPage() {
                   <input
                     type="text"
                     value={content.about.title}
-                    onChange={(e) => setContent({ ...content, about: { ...content.about, title: e.target.value } })}
+                    onChange={(e) => setContent((prev) => ({ ...prev, about: { ...prev.about, title: e.target.value } }))}
                     className="w-full rounded-xl border p-2.5 text-sm bg-white font-bold"
                   />
                 </div>
@@ -673,7 +874,7 @@ export default function AdminDashboardPage() {
                   <textarea
                     rows={3}
                     value={content.about.copyOne}
-                    onChange={(e) => setContent({ ...content, about: { ...content.about, copyOne: e.target.value } })}
+                    onChange={(e) => setContent((prev) => ({ ...prev, about: { ...prev.about, copyOne: e.target.value } }))}
                     className="w-full rounded-xl border p-2.5 text-xs bg-white"
                   />
                 </div>
@@ -683,7 +884,7 @@ export default function AdminDashboardPage() {
                   <textarea
                     rows={3}
                     value={content.about.copyTwo}
-                    onChange={(e) => setContent({ ...content, about: { ...content.about, copyTwo: e.target.value } })}
+                    onChange={(e) => setContent((prev) => ({ ...prev, about: { ...prev.about, copyTwo: e.target.value } }))}
                     className="w-full rounded-xl border p-2.5 text-xs bg-white"
                   />
                 </div>
@@ -692,7 +893,7 @@ export default function AdminDashboardPage() {
                 <ImageUploadInput
                   label="About Us Main Showcase Photo"
                   value={content.about.image}
-                  onChangeSingle={(url) => setContent({ ...content, about: { ...content.about, image: url } })}
+                  onChangeSingle={(url) => setContent((prev) => ({ ...prev, about: { ...prev.about, image: url } }))}
                   helperText="Upload or change the primary featured photo for the About Us section on the homepage."
                 />
               </div>
@@ -702,24 +903,84 @@ export default function AdminDashboardPage() {
           {/* TAB 4: STRATEGIC INITIATIVES / PROGRAMS */}
           {activeTab === 'programs' && (
             <div>
-              <div className="flex items-center justify-between pb-6 border-b border-[#d9e1d7]">
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
                 <div>
                   <h2 className="display-font text-2xl font-bold text-[#183a35]">Strategic Initiatives Editor</h2>
                   <p className="text-xs text-[#58706a]">Update program titles, descriptions, and background images</p>
                 </div>
-                <button
-                  onClick={handleSaveContent}
-                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition"
-                >
-                  <Save className="w-4 h-4 text-[#f2ad3b]" />
-                  <span>Save Initiatives</span>
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newProg: ProgramItem = {
+                        id: 'prog-' + Date.now(),
+                        title: 'New Community Initiative',
+                        description: 'Focused grassroots program to empower underprivileged individuals and families with sustainable skills.',
+                        image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
+                        icon: 'Sparkles',
+                        badgeBg: 'bg-[#dcece5]',
+                        badgeTextColor: 'text-[#28745e]',
+                      };
+                      setContent((prev) => ({
+                        ...prev,
+                        programs: {
+                          ...prev.programs,
+                          items: [...prev.programs.items, newProg],
+                        },
+                      }));
+                      showToastMsg('New strategic initiative added!');
+                    }}
+                    className="flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#28745e] hover:bg-[#28745e] hover:text-white transition shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add Initiative</span>
+                  </button>
+                  <button
+                    onClick={() => handleSaveContent('Initiatives')}
+                    disabled={savingSection === 'Initiatives'}
+                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
+                  >
+                    {savingSection === 'Initiatives' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                        <span>Saving Initiatives...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 text-[#f2ad3b]" />
+                        <span>Save Initiatives</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="mt-6 space-y-6">
                 {content.programs.items.map((prog, idx) => (
                   <div key={prog.id || idx} className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-4">
-                    <p className="text-xs font-bold text-[#28745e]">Program Card #{idx + 1}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-[#28745e]">Program Card #{idx + 1}</p>
+                      {content.programs.items.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Remove Program Card #${idx + 1}?`)) {
+                              setContent((prev) => ({
+                                ...prev,
+                                programs: {
+                                  ...prev.programs,
+                                  items: prev.programs.items.filter((_, i) => i !== idx),
+                                },
+                              }));
+                            }
+                          }}
+                          className="flex items-center gap-1 text-[11px] font-bold text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete Program</span>
+                        </button>
+                      )}
+                    </div>
                     
                     <div>
                       <label className="block text-xs font-bold mb-1">Program Title</label>
@@ -727,9 +988,13 @@ export default function AdminDashboardPage() {
                         type="text"
                         value={prog.title}
                         onChange={(e) => {
-                          const updated = [...content.programs.items];
-                          updated[idx].title = e.target.value;
-                          setContent({ ...content, programs: { ...content.programs, items: updated } });
+                          setContent((prev) => ({
+                            ...prev,
+                            programs: {
+                              ...prev.programs,
+                              items: prev.programs.items.map((pr, i) => (i === idx ? { ...pr, title: e.target.value } : pr)),
+                            },
+                          }));
                         }}
                         className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
                       />
@@ -741,9 +1006,13 @@ export default function AdminDashboardPage() {
                         rows={2}
                         value={prog.description}
                         onChange={(e) => {
-                          const updated = [...content.programs.items];
-                          updated[idx].description = e.target.value;
-                          setContent({ ...content, programs: { ...content.programs, items: updated } });
+                          setContent((prev) => ({
+                            ...prev,
+                            programs: {
+                              ...prev.programs,
+                              items: prev.programs.items.map((pr, i) => (i === idx ? { ...pr, description: e.target.value } : pr)),
+                            },
+                          }));
                         }}
                         className="w-full rounded-xl border p-2.5 text-xs bg-white"
                       />
@@ -754,9 +1023,13 @@ export default function AdminDashboardPage() {
                       label="Program Card Background Photo"
                       value={prog.image}
                       onChangeSingle={(url) => {
-                        const updated = [...content.programs.items];
-                        updated[idx].image = url;
-                        setContent({ ...content, programs: { ...content.programs, items: updated } });
+                        setContent((prev) => ({
+                          ...prev,
+                          programs: {
+                            ...prev.programs,
+                            items: prev.programs.items.map((pr, i) => (i === idx ? { ...pr, image: url } : pr)),
+                          },
+                        }));
                       }}
                       helperText="Select or upload a high-quality photo representing this program initiative."
                     />
@@ -775,11 +1048,21 @@ export default function AdminDashboardPage() {
                   <p className="text-xs text-[#58706a]">Update trust name, tagline, email, phone, and location</p>
                 </div>
                 <button
-                  onClick={handleSaveContent}
-                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition"
+                  onClick={() => handleSaveContent('Site Details')}
+                  disabled={savingSection === 'Site Details'}
+                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
                 >
-                  <Save className="w-4 h-4 text-[#f2ad3b]" />
-                  <span>Save Site Details</span>
+                  {savingSection === 'Site Details' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                      <span>Saving Details...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 text-[#f2ad3b]" />
+                      <span>Save Site Details</span>
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -789,7 +1072,7 @@ export default function AdminDashboardPage() {
                   <ImageUploadInput
                     label="Organization Logo (Image / Icon)"
                     value={content.brand.logo || ''}
-                    onChangeSingle={(url) => setContent({ ...content, brand: { ...content.brand, logo: url } })}
+                    onChangeSingle={(url) => setContent((prev) => ({ ...prev, brand: { ...prev.brand, logo: url } }))}
                     helperText="Upload your trust or NGO logo (PNG, JPG, SVG, WebP). It will appear across website header, footer, and admin console."
                   />
 
@@ -806,7 +1089,7 @@ export default function AdminDashboardPage() {
                             type="radio"
                             name="logoStyle"
                             checked={content.brand.logoStyle === 'full' || !content.brand.logoStyle}
-                            onChange={() => setContent({ ...content, brand: { ...content.brand, logoStyle: 'full' } })}
+                            onChange={() => setContent((prev) => ({ ...prev, brand: { ...prev.brand, logoStyle: 'full' } }))}
                             className="accent-[#28745e]"
                           />
                           <div>
@@ -824,7 +1107,7 @@ export default function AdminDashboardPage() {
                             type="radio"
                             name="logoStyle"
                             checked={content.brand.logoStyle === 'icon_text'}
-                            onChange={() => setContent({ ...content, brand: { ...content.brand, logoStyle: 'icon_text' } })}
+                            onChange={() => setContent((prev) => ({ ...prev, brand: { ...prev.brand, logoStyle: 'icon_text' } }))}
                             className="accent-[#28745e]"
                           />
                           <div>
@@ -843,7 +1126,7 @@ export default function AdminDashboardPage() {
                     <input
                       type="text"
                       value={content.brand.name}
-                      onChange={(e) => setContent({ ...content, brand: { ...content.brand, name: e.target.value } })}
+                      onChange={(e) => setContent((prev) => ({ ...prev, brand: { ...prev.brand, name: e.target.value } }))}
                       className="w-full rounded-xl border p-2.5 text-sm bg-white font-bold"
                     />
                   </div>
@@ -852,7 +1135,7 @@ export default function AdminDashboardPage() {
                     <input
                       type="text"
                       value={content.brand.tagline}
-                      onChange={(e) => setContent({ ...content, brand: { ...content.brand, tagline: e.target.value } })}
+                      onChange={(e) => setContent((prev) => ({ ...prev, brand: { ...prev.brand, tagline: e.target.value } }))}
                       className="w-full rounded-xl border p-2.5 text-sm bg-white"
                     />
                   </div>
@@ -864,7 +1147,7 @@ export default function AdminDashboardPage() {
                     <input
                       type="email"
                       value={content.brand.email}
-                      onChange={(e) => setContent({ ...content, brand: { ...content.brand, email: e.target.value } })}
+                      onChange={(e) => setContent((prev) => ({ ...prev, brand: { ...prev.brand, email: e.target.value } }))}
                       className="w-full rounded-xl border p-2.5 text-sm bg-white"
                     />
                   </div>
@@ -873,7 +1156,7 @@ export default function AdminDashboardPage() {
                     <input
                       type="text"
                       value={content.brand.phone}
-                      onChange={(e) => setContent({ ...content, brand: { ...content.brand, phone: e.target.value } })}
+                      onChange={(e) => setContent((prev) => ({ ...prev, brand: { ...prev.brand, phone: e.target.value } }))}
                       className="w-full rounded-xl border p-2.5 text-sm bg-white"
                     />
                   </div>
@@ -884,7 +1167,7 @@ export default function AdminDashboardPage() {
                   <input
                     type="text"
                     value={content.brand.location}
-                    onChange={(e) => setContent({ ...content, brand: { ...content.brand, location: e.target.value } })}
+                    onChange={(e) => setContent((prev) => ({ ...prev, brand: { ...prev.brand, location: e.target.value } }))}
                     className="w-full rounded-xl border p-2.5 text-sm bg-white"
                   />
                 </div>
