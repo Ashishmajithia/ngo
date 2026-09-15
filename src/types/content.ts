@@ -79,6 +79,17 @@ export interface SupportSectionData {
   ctaText: string;
 }
 
+export interface PaymentConfig {
+  qrCodeImage?: string;
+  upiId?: string;
+  accountName?: string;
+  bankName?: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  instructions?: string;
+  enableQrDonation?: boolean;
+}
+
 export interface SiteContent {
   brand: BrandConfig;
   hero: {
@@ -101,5 +112,6 @@ export interface SiteContent {
     items: GalleryItem[];
   };
   support: SupportSectionData;
+  payment?: PaymentConfig;
   updatedAt?: string;
 }

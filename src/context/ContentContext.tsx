@@ -11,7 +11,15 @@ interface ContentContextType {
   content: SiteContent;
   updateContent: (newContent: Partial<SiteContent>) => Promise<void>;
   resetContent: () => Promise<void>;
-  submitDonation: (donationData: { amount: string; frequency: string; name: string; email: string; phone?: string }) => Promise<boolean>;
+  submitDonation: (donationData: {
+    amount: string;
+    frequency: string;
+    name: string;
+    email: string;
+    phone?: string;
+    utr?: string;
+    paymentMethod?: string;
+  }) => Promise<boolean>;
   isAdminOpen: boolean;
   setIsAdminOpen: (open: boolean) => void;
   isDonateOpen: boolean;
@@ -168,7 +176,15 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     showToast('Reset to original default content!');
   };
 
-  const submitDonation = async (donationData: { amount: string; frequency: string; name: string; email: string; phone?: string }): Promise<boolean> => {
+  const submitDonation = async (donationData: {
+    amount: string;
+    frequency: string;
+    name: string;
+    email: string;
+    phone?: string;
+    utr?: string;
+    paymentMethod?: string;
+  }): Promise<boolean> => {
     try {
       const res = await fetch('/api/donations', {
         method: 'POST',

@@ -20,6 +20,8 @@ import {
   Info,
   Target,
   BarChart3,
+  QrCode,
+  Building,
 } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
@@ -34,6 +36,9 @@ interface DonationItem {
   frequency: string;
   name: string;
   email: string;
+  phone?: string;
+  utr?: string;
+  paymentMethod?: string;
   createdAt: string;
 }
 
@@ -41,7 +46,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'content' | 'donations'>('blogs');
+  const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'content' | 'payment' | 'donations'>('blogs');
 
   // Data states
   const [blogs, setBlogs] = useState<BlogPost[]>(defaultBlogs);
@@ -344,6 +349,7 @@ export default function AdminDashboardPage() {
             { id: 'metrics' as const, label: 'Impact Numbers & Metrics', icon: BarChart3, count: content.impactStats.length },
             { id: 'about' as const, label: 'About Us Section', icon: Info },
             { id: 'programs' as const, label: 'Strategic Initiatives', icon: Target, count: content.programs.items.length },
+            { id: 'payment' as const, label: 'Payment QR & Bank Details', icon: QrCode },
             { id: 'content' as const, label: 'Site Contact & Details', icon: Sliders },
             { id: 'donations' as const, label: 'Donation Records', icon: Heart, count: donations.length },
           ].map((item) => {
@@ -1175,26 +1181,276 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
+          {/* TAB: PAYMENT & QR CODE CONFIGURATION */}
+          {activeTab === 'payment' && (
+            <div className="space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Payment Barcode & UPI QR Settings</h2>
+                  <p className="text-xs text-[#58706a]">Upload your organization&apos;s UPI Barcode/QR Code image and configure bank transfer details</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSaveContent('Payment & QR Settings')}
+                  disabled={savingSection === 'Payment & QR Settings'}
+                  className="flex items-center gap-2 rounded-xl bg-[#123f38] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#28745e] transition shadow-md disabled:opacity-50"
+                >
+                  {savingSection === 'Payment & QR Settings' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 text-[#f2ad3b]" />}
+                  <span>Save QR & Payment Info</span>
+                </button>
+              </div>
+
+              {/* Status Banner */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#e8f0e8] border border-[#28745e]/30">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#123f38] text-white">
+                    <QrCode className="w-5 h-5 text-[#f2ad3b]" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-[#123f38]">Enable UPI QR Code Donations</h4>
+                    <p className="text-xs text-[#58706a]">Display QR code in Donation Modal & Website Footer for direct scan & pay</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={content.payment?.enableQrDonation !== false}
+                    onChange={(e) =>
+                      setContent((prev) => ({
+                        ...prev,
+                        payment: { ...prev.payment, enableQrDonation: e.target.checked },
+                      }))
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#28745e]"></div>
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Form Column */}
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-[#f8f4e9] border border-[#dce7dc] space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#123f38] flex items-center gap-2">
+                      <QrCode className="w-4 h-4 text-[#28745e]" />
+                      <span>QR Code / Barcode Image</span>
+                    </h3>
+
+                    <ImageUploadInput
+                      label="Upload Payment QR Code / Barcode Image *"
+                      value={content.payment?.qrCodeImage || ''}
+                      onChangeSingle={(url) =>
+                        setContent((prev) => ({
+                          ...prev,
+                          payment: { ...prev.payment, qrCodeImage: url },
+                        }))
+                      }
+                      helperText="Upload official PhonePe / Google Pay / Paytm / BHIM UPI Barcode QR code (PNG, JPG, SVG or paste URL)"
+                    />
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Official UPI ID (VPA) *</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. actcharitabletrust@upi or 9876543210@paytm"
+                        value={content.payment?.upiId || ''}
+                        onChange={(e) =>
+                          setContent((prev) => ({
+                            ...prev,
+                            payment: { ...prev.payment, upiId: e.target.value },
+                          }))
+                        }
+                        className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono"
+                      />
+                      <p className="text-[11px] text-[#58706a] mt-1">Donors will be able to copy this with 1 click to pay in their UPI app.</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Beneficiary / Account Name *</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. ACT Charitable Trust"
+                        value={content.payment?.accountName || ''}
+                        onChange={(e) =>
+                          setContent((prev) => ({
+                            ...prev,
+                            payment: { ...prev.payment, accountName: e.target.value },
+                          }))
+                        }
+                        className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bank Account Details */}
+                  <div className="p-4 rounded-2xl bg-[#f8f4e9] border border-[#dce7dc] space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#123f38] flex items-center gap-2">
+                      <Building className="w-4 h-4 text-[#28745e]" />
+                      <span>Direct Bank Transfer Details (IMPS / NEFT)</span>
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold mb-1">Bank Name</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. State Bank of India"
+                          value={content.payment?.bankName || ''}
+                          onChange={(e) =>
+                            setContent((prev) => ({
+                              ...prev,
+                              payment: { ...prev.payment, bankName: e.target.value },
+                            }))
+                          }
+                          className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold mb-1">IFSC Code</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. SBIN0001234"
+                          value={content.payment?.ifscCode || ''}
+                          onChange={(e) =>
+                            setContent((prev) => ({
+                              ...prev,
+                              payment: { ...prev.payment, ifscCode: e.target.value.toUpperCase() },
+                            }))
+                          }
+                          className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono uppercase"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Account Number</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 98765432101234"
+                        value={content.payment?.accountNumber || ''}
+                        onChange={(e) =>
+                          setContent((prev) => ({
+                            ...prev,
+                            payment: { ...prev.payment, accountNumber: e.target.value },
+                          }))
+                        }
+                        className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Payment Instructions / Note</label>
+                      <textarea
+                        rows={3}
+                        placeholder="Instructions displayed to donor below the QR code..."
+                        value={content.payment?.instructions || ''}
+                        onChange={(e) =>
+                          setContent((prev) => ({
+                            ...prev,
+                            payment: { ...prev.payment, instructions: e.target.value },
+                          }))
+                        }
+                        className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live Preview Column */}
+                <div>
+                  <div className="sticky top-24 rounded-2xl bg-white p-6 border-2 border-dashed border-[#28745e]/40 shadow-md space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-[#dce7dc]">
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#28745e] flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-[#28745e]" />
+                        <span>Live Donor View Preview</span>
+                      </span>
+                      <span className="text-[10px] bg-[#e8f0e8] text-[#123f38] px-2.5 py-0.5 rounded-full font-bold">
+                        Interactive
+                      </span>
+                    </div>
+
+                    <div className="text-center space-y-3">
+                      <h4 className="font-bold text-base text-[#123f38]">
+                        Scan to Pay with Any UPI App
+                      </h4>
+                      <p className="text-xs text-[#58706a]">
+                        Google Pay • PhonePe • Paytm • BHIM • Any UPI App
+                      </p>
+
+                      {/* QR Image Box */}
+                      <div className="mx-auto w-56 h-56 bg-white p-3 rounded-2xl border-2 border-[#123f38] shadow-lg flex items-center justify-center relative overflow-hidden">
+                        {content.payment?.qrCodeImage ? (
+                          <img
+                            src={content.payment.qrCodeImage}
+                            alt="Payment QR Code"
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <div className="text-center p-4 text-[#58706a]">
+                            <QrCode className="w-12 h-12 mx-auto text-[#28745e] opacity-40 mb-2" />
+                            <p className="text-xs font-bold">No QR Code Uploaded</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* UPI ID display */}
+                      {content.payment?.upiId && (
+                        <div className="inline-flex items-center gap-2 bg-[#f8f4e9] border border-[#dce7dc] px-4 py-2 rounded-xl text-xs font-mono font-bold text-[#123f38]">
+                          <span>UPI ID: {content.payment.upiId}</span>
+                        </div>
+                      )}
+
+                      {/* Beneficiary Name */}
+                      {content.payment?.accountName && (
+                        <p className="text-xs text-[#58706a]">
+                          Account Name: <strong className="text-[#183a35]">{content.payment.accountName}</strong>
+                        </p>
+                      )}
+
+                      {/* Bank Details Snippet */}
+                      {(content.payment?.bankName || content.payment?.accountNumber) && (
+                        <div className="rounded-xl bg-[#f8f4e9] p-3 text-left text-xs border border-[#dce7dc] space-y-1">
+                          <p className="font-bold text-[#123f38]">Bank Transfer Details:</p>
+                          {content.payment?.bankName && <p className="text-[#58706a]">Bank: {content.payment.bankName}</p>}
+                          {content.payment?.accountNumber && <p className="text-[#58706a]">A/C No: {content.payment.accountNumber}</p>}
+                          {content.payment?.ifscCode && <p className="text-[#58706a]">IFSC: {content.payment.ifscCode}</p>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB 4: DONATIONS */}
           {activeTab === 'donations' && (
             <div>
-              <div className="pb-6 border-b border-[#d9e1d7]">
-                <h2 className="display-font text-2xl font-bold text-[#183a35]">Donation Submissions</h2>
-                <p className="text-xs text-[#58706a]">Real-time donor contributions recorded from website forms</p>
+              <div className="pb-6 border-b border-[#d9e1d7] flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Donation Submissions</h2>
+                  <p className="text-xs text-[#58706a]">Real-time donor contributions & UPI reference transactions recorded</p>
+                </div>
+                <div className="flex items-center gap-2 bg-[#e8f0e8] px-3.5 py-1.5 rounded-full text-xs font-bold text-[#123f38]">
+                  <Heart className="w-4 h-4 text-[#28745e] fill-[#28745e]" />
+                  <span>Total Donors: {donations.length}</span>
+                </div>
               </div>
 
               <div className="mt-6">
                 {donations.length === 0 ? (
                   <div className="py-12 text-center text-[#58706a] text-sm font-medium">No donations recorded yet.</div>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto rounded-2xl border border-[#dce7dc]">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-[#f8f4e9] border-b border-[#dce7dc] text-[#123f38] uppercase font-bold">
                           <th className="p-3">Donor Name</th>
                           <th className="p-3">Amount</th>
                           <th className="p-3">Frequency</th>
-                          <th className="p-3">Email</th>
+                          <th className="p-3">Contact</th>
+                          <th className="p-3">Payment Method</th>
+                          <th className="p-3">UTR / Transaction #</th>
                           <th className="p-3">Date</th>
                         </tr>
                       </thead>
@@ -1203,10 +1459,28 @@ export default function AdminDashboardPage() {
                           const dateStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString() : 'Recent';
                           return (
                             <tr key={d.id || i} className="hover:bg-[#f8f4e9]/50">
-                              <td className="p-3 font-bold text-[#183a35]">{d.name}</td>
-                              <td className="p-3 font-bold text-[#28745e]">₹{d.amount}</td>
+                              <td className="p-3 font-bold text-[#183a35]">{d.name || 'Anonymous'}</td>
+                              <td className="p-3 font-bold text-[#28745e] text-sm">₹{d.amount}</td>
                               <td className="p-3 capitalize">{d.frequency}</td>
-                              <td className="p-3">{d.email}</td>
+                              <td className="p-3">
+                                <div className="text-[#183a35] font-medium">{d.email}</div>
+                                {d.phone && <div className="text-[11px] text-[#58706a]">{d.phone}</div>}
+                              </td>
+                              <td className="p-3">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#e8f0e8] px-2.5 py-0.5 font-bold text-[10px] text-[#123f38]">
+                                  <QrCode className="w-3 h-3 text-[#28745e]" />
+                                  <span>{d.paymentMethod || 'UPI / QR'}</span>
+                                </span>
+                              </td>
+                              <td className="p-3 font-mono">
+                                {d.utr ? (
+                                  <span className="font-bold text-[#123f38] bg-[#f8f4e9] px-2 py-0.5 rounded border border-[#dce7dc]">
+                                    {d.utr}
+                                  </span>
+                                ) : (
+                                  <span className="text-[#58706a] italic">N/A</span>
+                                )}
+                              </td>
                               <td className="p-3 text-[#58706a]">{dateStr}</td>
                             </tr>
                           );

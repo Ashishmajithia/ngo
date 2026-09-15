@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Save, RotateCcw, Sliders } from 'lucide-react';
+import { X, Save, RotateCcw, Sliders, QrCode } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { ImageUploadInput } from '@/components/ImageUploadInput';
 
-type TabType = 'brand' | 'hero' | 'stats' | 'programs' | 'about';
+type TabType = 'brand' | 'hero' | 'stats' | 'programs' | 'about' | 'payment';
 
 export const AdminDrawer: React.FC = () => {
   const { content, updateContent, resetContent, isAdminOpen, setIsAdminOpen, showToast } = useContent();
@@ -64,6 +65,7 @@ export const AdminDrawer: React.FC = () => {
         <div className="flex border-b border-[#d9e1d7] bg-[#f8f4e9] px-4 overflow-x-auto">
           {[
             { id: 'brand' as const, label: 'Brand & Contact' },
+            { id: 'payment' as const, label: 'Payment & QR Code' },
             { id: 'hero' as const, label: 'Hero Banner' },
             { id: 'stats' as const, label: 'Impact Stats' },
             { id: 'programs' as const, label: 'Programs' },
@@ -258,6 +260,134 @@ export const AdminDrawer: React.FC = () => {
                   rows={3}
                   value={content.about.copyOne}
                   onChange={(e) => updateContent({ about: { ...content.about, copyOne: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'payment' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2 flex items-center gap-2">
+                <QrCode className="w-4 h-4 text-[#28745e]" />
+                <span>UPI Payment QR & Details</span>
+              </h4>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#f8f4e9] border border-[#dce7dc]">
+                <div>
+                  <span className="text-xs font-bold text-[#123f38]">Enable QR Code Donations</span>
+                  <p className="text-[11px] text-[#58706a]">Show QR barcode in modal & footer</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={content.payment?.enableQrDonation !== false}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, enableQrDonation: e.target.checked },
+                    })
+                  }
+                  className="h-4 w-4 rounded accent-[#28745e]"
+                />
+              </div>
+
+              <ImageUploadInput
+                label="Payment QR Code / Barcode Image"
+                value={content.payment?.qrCodeImage || ''}
+                onChangeSingle={(url) =>
+                  updateContent({
+                    payment: { ...content.payment, qrCodeImage: url },
+                  })
+                }
+                helperText="Upload official PhonePe / Google Pay / UPI Barcode image"
+              />
+
+              <div>
+                <label className="block text-xs font-bold mb-1">Official UPI ID (VPA)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. actcharitabletrust@upi"
+                  value={content.payment?.upiId || ''}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, upiId: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1">Account Holder / Trust Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. ACT Charitable Trust"
+                  value={content.payment?.accountName || ''}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, accountName: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold mb-1">Bank Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. SBI"
+                    value={content.payment?.bankName || ''}
+                    onChange={(e) =>
+                      updateContent({
+                        payment: { ...content.payment, bankName: e.target.value },
+                      })
+                    }
+                    className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1">IFSC Code</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. SBIN0001234"
+                    value={content.payment?.ifscCode || ''}
+                    onChange={(e) =>
+                      updateContent({
+                        payment: { ...content.payment, ifscCode: e.target.value.toUpperCase() },
+                      })
+                    }
+                    className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono uppercase"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1">Account Number</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 98765432101234"
+                  value={content.payment?.accountNumber || ''}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, accountNumber: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1">Payment Instructions</label>
+                <textarea
+                  rows={2}
+                  placeholder="Scan QR code using any UPI app..."
+                  value={content.payment?.instructions || ''}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, instructions: e.target.value },
+                    })
+                  }
                   className="w-full rounded-xl border p-2.5 text-sm bg-white"
                 />
               </div>

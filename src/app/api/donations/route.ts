@@ -32,6 +32,8 @@ export async function POST(request: Request) {
       name: body.name,
       email: body.email,
       phone: body.phone || '',
+      utr: body.utr || '',
+      paymentMethod: body.paymentMethod || 'UPI QR / Online',
       createdAt: new Date().toISOString(),
     };
 

@@ -1,18 +1,43 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { HeartHandshake, Phone, Mail, MapPin, Heart, Lock } from 'lucide-react';
+import {
+  HeartHandshake,
+  Phone,
+  Mail,
+  MapPin,
+  Heart,
+  Lock,
+  QrCode,
+  Copy,
+  Check,
+  ArrowRight,
+} from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 
 export const Footer: React.FC = () => {
-  const { content } = useContent();
-  const { brand } = content;
+  const { content, setIsDonateOpen, showToast } = useContent();
+  const { brand, payment } = content;
+  const [copiedUpi, setCopiedUpi] = useState(false);
+
+  const qrImage = payment?.qrCodeImage || 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=actcharitabletrust@upi&pn=ACT%20Charitable%20Trust&cu=INR';
+  const upiId = payment?.upiId || 'actcharitabletrust@upi';
+  const isQrEnabled = payment?.enableQrDonation !== false;
+
+  const handleCopyUpi = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!upiId) return;
+    navigator.clipboard.writeText(upiId);
+    setCopiedUpi(true);
+    showToast('✓ UPI ID copied to clipboard!');
+    setTimeout(() => setCopiedUpi(false), 3000);
+  };
 
   return (
     <footer className="border-t border-[#d9e1d7] bg-[#f8f4e9] text-[#183a35]">
       <div className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 pb-8 border-b border-[#d9e1d7]">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 pb-10 border-b border-[#d9e1d7]">
           {/* Brand Info */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
@@ -45,31 +70,17 @@ export const Footer: React.FC = () => {
               )}
             </div>
             <p className="text-xs text-[#58706a] leading-relaxed">
-              Empowering grassroots communities through quality education, rural health drives, and sustainable livelihoods.
+              Empowering grassroots communities through quality education, rural healthcare drives, and sustainable livelihoods.
             </p>
-          </div>
-
-          {/* Contact Details */}
-          <div>
-            <h4 className="font-bold text-sm text-[#123f38] uppercase tracking-wider mb-3">
-              Contact Info
-            </h4>
-            <ul className="space-y-2 text-xs text-[#58706a]">
-              <li className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#28745e] shrink-0" />
-                <span>{brand.location}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#28745e] shrink-0" />
-                <a href={`mailto:${brand.email}`} className="hover:underline">
-                  {brand.email}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-[#28745e] shrink-0" />
-                <span>{brand.phone}</span>
-              </li>
-            </ul>
+            <div className="pt-2">
+              <Link
+                href="/admin/login"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#58706a] hover:text-[#123f38] transition"
+              >
+                <Lock className="w-3 h-3 text-[#28745e]" />
+                <span>Admin Login Portal</span>
+              </Link>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -77,30 +88,100 @@ export const Footer: React.FC = () => {
             <h4 className="font-bold text-sm text-[#123f38] uppercase tracking-wider mb-3">
               Quick Links
             </h4>
-            <ul className="space-y-1.5 text-xs font-semibold text-[#58706a]">
-              <li><a href="#about" className="hover:text-[#28745e]">About Our Mission</a></li>
-              <li><a href="#programs" className="hover:text-[#28745e]">Grassroots Programs</a></li>
-              <li><a href="#approach" className="hover:text-[#28745e]">Core Principles</a></li>
-              <li><a href="#gallery" className="hover:text-[#28745e]">Impact Stories & Blogs</a></li>
-              <li><a href="#impact" className="hover:text-[#28745e]">Impact Reports</a></li>
+            <ul className="space-y-2 text-xs font-semibold text-[#58706a]">
+              <li><a href="#about" className="hover:text-[#28745e] transition">About Our Mission</a></li>
+              <li><a href="#programs" className="hover:text-[#28745e] transition">Grassroots Programs</a></li>
+              <li><a href="#approach" className="hover:text-[#28745e] transition">Core Principles</a></li>
+              <li><a href="#gallery" className="hover:text-[#28745e] transition">Impact Stories & Blogs</a></li>
+              <li><a href="#impact" className="hover:text-[#28745e] transition">Impact Reports & Metrics</a></li>
             </ul>
           </div>
 
-          {/* Admin Control Link */}
+          {/* Contact Details */}
           <div>
             <h4 className="font-bold text-sm text-[#123f38] uppercase tracking-wider mb-3">
-              Admin & Controls
+              Contact Info
             </h4>
-            <p className="text-xs text-[#58706a] mb-3">
-              Secure login portal for managing blogs, hero banners, and viewing donation records.
-            </p>
-            <Link
-              href="/admin/login"
-              className="focusable inline-flex items-center gap-2 rounded-full bg-[#123f38] px-4 py-2 text-xs font-bold text-white hover:bg-[#28745e] transition"
-            >
-              <Lock className="w-3.5 h-3.5 text-[#f2ad3b]" />
-              <span>Admin Login Portal</span>
-            </Link>
+            <ul className="space-y-2.5 text-xs text-[#58706a]">
+              <li className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-[#28745e] shrink-0 mt-0.5" />
+                <span>{brand.location}</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#28745e] shrink-0" />
+                <a href={`mailto:${brand.email}`} className="hover:underline text-[#183a35]">
+                  {brand.email}
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-[#28745e] shrink-0" />
+                <span className="text-[#183a35] font-semibold">{brand.phone}</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* UPI Scan & Pay QR Card */}
+          <div>
+            <h4 className="font-bold text-sm text-[#123f38] uppercase tracking-wider mb-3 flex items-center gap-2">
+              <QrCode className="w-4 h-4 text-[#28745e]" />
+              <span>Scan & Pay Via UPI</span>
+            </h4>
+
+            {isQrEnabled ? (
+              <div
+                onClick={() => setIsDonateOpen(true)}
+                className="group cursor-pointer rounded-2xl bg-white p-3.5 border border-[#dce7dc] shadow-sm hover:shadow-md hover:border-[#28745e] transition space-y-2.5"
+              >
+                <div className="flex items-center gap-3">
+                  {/* QR Image Box */}
+                  <div className="h-20 w-20 shrink-0 rounded-xl bg-white p-1 border border-[#123f38]/30 shadow-inner flex items-center justify-center overflow-hidden">
+                    <img
+                      src={qrImage}
+                      alt="UPI Payment QR Code"
+                      className="h-full w-full object-contain group-hover:scale-105 transition duration-300"
+                    />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-[#123f38] leading-tight group-hover:text-[#28745e] transition">
+                      Scan with any UPI App
+                    </p>
+                    <p className="text-[10px] text-[#58706a] mt-0.5">
+                      GPay • PhonePe • Paytm
+                    </p>
+                    <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-[#28745e]">
+                      <span>Open Form</span>
+                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition" />
+                    </span>
+                  </div>
+                </div>
+
+                {/* UPI ID One-Click Copy */}
+                {upiId && (
+                  <div className="flex items-center justify-between gap-1 bg-[#f8f4e9] px-2.5 py-1.5 rounded-lg border border-[#dce7dc] text-[11px]">
+                    <span className="font-mono text-[#183a35] font-bold truncate">{upiId}</span>
+                    <button
+                      type="button"
+                      onClick={handleCopyUpi}
+                      className="inline-flex items-center gap-1 text-[#28745e] hover:text-[#123f38] font-bold shrink-0 ml-1"
+                      title="Copy UPI ID"
+                    >
+                      {copiedUpi ? <Check className="w-3 h-3 text-[#28745e]" /> : <Copy className="w-3 h-3" />}
+                      <span className="text-[10px]">{copiedUpi ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsDonateOpen(true)}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#123f38] px-4 py-3 text-xs font-bold text-white hover:bg-[#28745e] transition shadow-sm"
+              >
+                <Heart className="w-4 h-4 text-[#f2ad3b]" />
+                <span>Contribute to {brand.name}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -114,3 +195,4 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+

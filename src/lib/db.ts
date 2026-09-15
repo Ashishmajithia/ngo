@@ -13,6 +13,8 @@ export interface DonationRecord {
   name: string;
   email: string;
   phone?: string;
+  utr?: string;
+  paymentMethod?: string;
   createdAt: string;
 }
 

@@ -197,4 +197,14 @@ export const defaultContent: SiteContent = {
     image: 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=1920&auto=format&fit=crop',
     ctaText: 'Send Us An Email / Donate Now',
   },
+  payment: {
+    qrCodeImage: 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=actcharitabletrust@upi&pn=ACT%20Charitable%20Trust&cu=INR',
+    upiId: 'actcharitabletrust@upi',
+    accountName: 'ACT Charitable Trust',
+    bankName: 'State Bank of India',
+    accountNumber: '98765432101234',
+    ifscCode: 'SBIN0001234',
+    instructions: 'Scan this QR code using any UPI app (Google Pay, PhonePe, Paytm, BHIM) to contribute directly to our grassroots trust account.',
+    enableQrDonation: true,
+  },
 };
