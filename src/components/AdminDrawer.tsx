@@ -5,7 +5,7 @@ import { X, Save, RotateCcw, Sliders, QrCode } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { ImageUploadInput } from '@/components/ImageUploadInput';
 
-type TabType = 'brand' | 'hero' | 'stats' | 'programs' | 'about' | 'payment';
+type TabType = 'brand' | 'payment' | 'hero' | 'stats' | 'programs' | 'about' | 'approach' | 'gallery' | 'support';
 
 export const AdminDrawer: React.FC = () => {
   const { content, updateContent, resetContent, isAdminOpen, setIsAdminOpen, showToast } = useContent();
@@ -70,6 +70,9 @@ export const AdminDrawer: React.FC = () => {
             { id: 'stats' as const, label: 'Impact Stats' },
             { id: 'programs' as const, label: 'Programs' },
             { id: 'about' as const, label: 'About Info' },
+            { id: 'approach' as const, label: 'Approach' },
+            { id: 'gallery' as const, label: 'Gallery' },
+            { id: 'support' as const, label: 'Support Banner' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -391,6 +394,106 @@ export const AdminDrawer: React.FC = () => {
                   className="w-full rounded-xl border p-2.5 text-sm bg-white"
                 />
               </div>
+            </div>
+          )}
+
+          {activeTab === 'approach' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Approach & Core Principles</h4>
+              <div>
+                <label className="block text-xs font-bold mb-1">Section Title</label>
+                <input
+                  type="text"
+                  value={content.approach.title}
+                  onChange={(e) => updateContent({ approach: { ...content.approach, title: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Section Description</label>
+                <textarea
+                  rows={2}
+                  value={content.approach.copy}
+                  onChange={(e) => updateContent({ approach: { ...content.approach, copy: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <ImageUploadInput
+                label="Approach Section Image"
+                value={content.approach.image}
+                onChangeSingle={(url) => updateContent({ approach: { ...content.approach, image: url } })}
+                helperText="Main featured photo for Approach section"
+              />
+            </div>
+          )}
+
+          {activeTab === 'gallery' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Moments of Hope Gallery</h4>
+              <div>
+                <label className="block text-xs font-bold mb-1">Section Title</label>
+                <input
+                  type="text"
+                  value={content.gallery.title}
+                  onChange={(e) => updateContent({ gallery: { ...content.gallery, title: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Section Description</label>
+                <textarea
+                  rows={2}
+                  value={content.gallery.copy}
+                  onChange={(e) => updateContent({ gallery: { ...content.gallery, copy: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold text-[#123f38]">Gallery Photos ({content.gallery.items.length}):</p>
+                {content.gallery.items.map((item, idx) => (
+                  <div key={item.id || idx} className="p-3 bg-[#f8f4e9] rounded-xl border border-[#dce7dc] space-y-2">
+                    <p className="text-[11px] font-bold text-[#28745e]">Photo #{idx + 1}: {item.title}</p>
+                    <ImageUploadInput
+                      label={`Photo #${idx + 1} Image`}
+                      value={item.image}
+                      onChangeSingle={(url) => {
+                        const updated = content.gallery.items.map((g, i) => (i === idx ? { ...g, image: url } : g));
+                        updateContent({ gallery: { ...content.gallery, items: updated } });
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'support' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Support & Callout Banner</h4>
+              <div>
+                <label className="block text-xs font-bold mb-1">Banner Title</label>
+                <input
+                  type="text"
+                  value={content.support.title}
+                  onChange={(e) => updateContent({ support: { ...content.support, title: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Banner Description</label>
+                <textarea
+                  rows={3}
+                  value={content.support.copy}
+                  onChange={(e) => updateContent({ support: { ...content.support, copy: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <ImageUploadInput
+                label="Banner Full-Width Background Photo"
+                value={content.support.image}
+                onChangeSingle={(url) => updateContent({ support: { ...content.support, image: url } })}
+                helperText="Upload background image for the bottom callout section"
+              />
             </div>
           )}
         </div>

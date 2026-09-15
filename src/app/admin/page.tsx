@@ -22,11 +22,14 @@ import {
   BarChart3,
   QrCode,
   Building,
+  Compass,
+  Images,
+  HeartHandshake,
 } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
 import { defaultContent } from '@/data/initialContent';
-import { SiteContent, HeroSlide, ProgramItem } from '@/types/content';
+import { SiteContent, HeroSlide, ProgramItem, PrincipleItem, GalleryItem } from '@/types/content';
 import { ImageUploadInput } from '@/components/ImageUploadInput';
 import { LOCAL_CONTENT_KEY, CONTENT_SYNC_EVENT } from '@/context/ContentContext';
 
@@ -46,7 +49,9 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'content' | 'payment' | 'donations'>('blogs');
+  const [activeTab, setActiveTab] = useState<
+    'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'approach' | 'gallery' | 'support' | 'payment' | 'content' | 'donations'
+  >('blogs');
 
   // Data states
   const [blogs, setBlogs] = useState<BlogPost[]>(defaultBlogs);
@@ -349,6 +354,9 @@ export default function AdminDashboardPage() {
             { id: 'metrics' as const, label: 'Impact Numbers & Metrics', icon: BarChart3, count: content.impactStats.length },
             { id: 'about' as const, label: 'About Us Section', icon: Info },
             { id: 'programs' as const, label: 'Strategic Initiatives', icon: Target, count: content.programs.items.length },
+            { id: 'approach' as const, label: 'Approach & Principles', icon: Compass, count: content.approach?.principles?.length || 3 },
+            { id: 'gallery' as const, label: 'Moments of Hope (Gallery)', icon: Images, count: content.gallery?.items?.length || 5 },
+            { id: 'support' as const, label: 'Support & CTA Banner', icon: HeartHandshake },
             { id: 'payment' as const, label: 'Payment QR & Bank Details', icon: QrCode },
             { id: 'content' as const, label: 'Site Contact & Details', icon: Sliders },
             { id: 'donations' as const, label: 'Donation Records', icon: Heart, count: donations.length },
@@ -1041,6 +1049,457 @@ export default function AdminDashboardPage() {
                     />
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: OUR APPROACH & CORE PRINCIPLES */}
+          {activeTab === 'approach' && (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Our Approach & Core Principles</h2>
+                  <p className="text-xs text-[#58706a]">Manage the &apos;How We Ensure Ethical & Long-Term Impact&apos; section, image, and principles cards</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newPrinciple: PrincipleItem = {
+                        id: 'p-' + Date.now(),
+                        title: 'New Core Principle',
+                        description: 'Description of this foundational principle that guides our grassroots intervention.',
+                        icon: 'Sprout',
+                        iconBg: 'bg-[#28745e]',
+                        iconColor: 'text-[#fffdf8]',
+                      };
+                      setContent((prev) => ({
+                        ...prev,
+                        approach: {
+                          ...prev.approach,
+                          principles: [...(prev.approach.principles || []), newPrinciple],
+                        },
+                      }));
+                      showToastMsg('New core principle added!');
+                    }}
+                    className="flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#28745e] hover:bg-[#28745e] hover:text-white transition shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add Principle</span>
+                  </button>
+                  <button
+                    onClick={() => handleSaveContent('Approach & Principles')}
+                    disabled={savingSection === 'Approach & Principles'}
+                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
+                  >
+                    {savingSection === 'Approach & Principles' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 text-[#f2ad3b]" />
+                        <span>Save Principles</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-6">
+                {/* Section Headings & Main Copy */}
+                <div className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#123f38]">Section Header & Copy</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Eyebrow Tag</label>
+                      <input
+                        type="text"
+                        value={content.approach.eyebrow}
+                        onChange={(e) => setContent((prev) => ({ ...prev, approach: { ...prev.approach, eyebrow: e.target.value } }))}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Section Title</label>
+                      <input
+                        type="text"
+                        value={content.approach.title}
+                        onChange={(e) => setContent((prev) => ({ ...prev, approach: { ...prev.approach, title: e.target.value } }))}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Section Main Description</label>
+                    <textarea
+                      rows={2}
+                      value={content.approach.copy}
+                      onChange={(e) => setContent((prev) => ({ ...prev, approach: { ...prev.approach, copy: e.target.value } }))}
+                      className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                    />
+                  </div>
+
+                  {/* Section Main Image Upload */}
+                  <ImageUploadInput
+                    label="Approach Section Feature Photo"
+                    value={content.approach.image}
+                    onChangeSingle={(url) => setContent((prev) => ({ ...prev, approach: { ...prev.approach, image: url } }))}
+                    helperText="Upload or change the primary high-res photo representing community empowerment in the Approach section."
+                  />
+                </div>
+
+                {/* Principles Cards List */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#123f38]">Core Principle Cards</h3>
+                  {content.approach.principles.map((pr, idx) => (
+                    <div key={pr.id || idx} className="p-4 rounded-2xl bg-white border border-[#dce7dc] shadow-sm space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#28745e]">Principle #{idx + 1}</span>
+                        {content.approach.principles.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (confirm(`Remove Principle #${idx + 1}?`)) {
+                                setContent((prev) => ({
+                                  ...prev,
+                                  approach: {
+                                    ...prev.approach,
+                                    principles: prev.approach.principles.filter((_, i) => i !== idx),
+                                  },
+                                }));
+                              }
+                            }}
+                            className="flex items-center gap-1 text-[11px] font-bold text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Remove</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold mb-1">Principle Title</label>
+                          <input
+                            type="text"
+                            value={pr.title}
+                            onChange={(e) => {
+                              setContent((prev) => ({
+                                ...prev,
+                                approach: {
+                                  ...prev.approach,
+                                  principles: prev.approach.principles.map((p, i) => (i === idx ? { ...p, title: e.target.value } : p)),
+                                },
+                              }));
+                            }}
+                            className="w-full rounded-xl border p-2 text-xs bg-white font-bold"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold mb-1">Icon Style</label>
+                          <select
+                            value={pr.icon}
+                            onChange={(e) => {
+                              setContent((prev) => ({
+                                ...prev,
+                                approach: {
+                                  ...prev.approach,
+                                  principles: prev.approach.principles.map((p, i) => (i === idx ? { ...p, icon: e.target.value } : p)),
+                                },
+                              }));
+                            }}
+                            className="w-full rounded-xl border p-2 text-xs bg-white"
+                          >
+                            <option value="Ear">Ear (Listening First)</option>
+                            <option value="HandHeart">HandHeart (Community Driven)</option>
+                            <option value="Sprout">Sprout (Sustainable Growth)</option>
+                            <option value="Sparkles">Sparkles (Transformation)</option>
+                            <option value="ShieldCheck">ShieldCheck (Ethical & Transparent)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold mb-1">Principle Description</label>
+                        <textarea
+                          rows={2}
+                          value={pr.description}
+                          onChange={(e) => {
+                            setContent((prev) => ({
+                              ...prev,
+                              approach: {
+                                ...prev.approach,
+                                principles: prev.approach.principles.map((p, i) => (i === idx ? { ...p, description: e.target.value } : p)),
+                              },
+                            }));
+                          }}
+                          className="w-full rounded-xl border p-2 text-xs bg-white"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 7: MOMENTS OF HOPE (GALLERY) */}
+          {activeTab === 'gallery' && (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Moments of Hope (Image Gallery)</h2>
+                  <p className="text-xs text-[#58706a]">Manage photo showcase cards, titles, captions, and images displayed on the homepage</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newGalItem: GalleryItem = {
+                        id: 'gal-' + Date.now(),
+                        title: 'New Community Moment',
+                        caption: 'Capturing real moments of change across our centers.',
+                        image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
+                      };
+                      setContent((prev) => ({
+                        ...prev,
+                        gallery: {
+                          ...prev.gallery,
+                          items: [...(prev.gallery.items || []), newGalItem],
+                        },
+                      }));
+                      showToastMsg('New gallery photo card added!');
+                    }}
+                    className="flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#28745e] hover:bg-[#28745e] hover:text-white transition shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add Photo Card</span>
+                  </button>
+                  <button
+                    onClick={() => handleSaveContent('Moments of Hope Gallery')}
+                    disabled={savingSection === 'Moments of Hope Gallery'}
+                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
+                  >
+                    {savingSection === 'Moments of Hope Gallery' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 text-[#f2ad3b]" />
+                        <span>Save Gallery</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-6">
+                {/* Section Header */}
+                <div className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#123f38]">Gallery Section Header</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Eyebrow Tag</label>
+                      <input
+                        type="text"
+                        value={content.gallery.eyebrow}
+                        onChange={(e) => setContent((prev) => ({ ...prev, gallery: { ...prev.gallery, eyebrow: e.target.value } }))}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Section Title</label>
+                      <input
+                        type="text"
+                        value={content.gallery.title}
+                        onChange={(e) => setContent((prev) => ({ ...prev, gallery: { ...prev.gallery, title: e.target.value } }))}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Section Description</label>
+                    <textarea
+                      rows={2}
+                      value={content.gallery.copy}
+                      onChange={(e) => setContent((prev) => ({ ...prev, gallery: { ...prev.gallery, copy: e.target.value } }))}
+                      className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Gallery Photo Cards */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#123f38]">Photo Gallery Cards</h3>
+                  {content.gallery.items.map((item, idx) => (
+                    <div key={item.id || idx} className="p-5 rounded-2xl bg-white border border-[#dce7dc] shadow-sm space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#28745e]">Gallery Card #{idx + 1}</span>
+                        {content.gallery.items.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (confirm(`Remove Gallery Card #${idx + 1}?`)) {
+                                setContent((prev) => ({
+                                  ...prev,
+                                  gallery: {
+                                    ...prev.gallery,
+                                    items: prev.gallery.items.filter((_, i) => i !== idx),
+                                  },
+                                }));
+                              }
+                            }}
+                            className="flex items-center gap-1 text-[11px] font-bold text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Remove Card</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold mb-1">Card Title</label>
+                          <input
+                            type="text"
+                            value={item.title}
+                            onChange={(e) => {
+                              setContent((prev) => ({
+                                ...prev,
+                                gallery: {
+                                  ...prev.gallery,
+                                  items: prev.gallery.items.map((g, i) => (i === idx ? { ...g, title: e.target.value } : g)),
+                                },
+                              }));
+                            }}
+                            className="w-full rounded-xl border p-2 text-xs bg-white font-bold"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold mb-1">Caption / Subtext</label>
+                          <input
+                            type="text"
+                            value={item.caption}
+                            onChange={(e) => {
+                              setContent((prev) => ({
+                                ...prev,
+                                gallery: {
+                                  ...prev.gallery,
+                                  items: prev.gallery.items.map((g, i) => (i === idx ? { ...g, caption: e.target.value } : g)),
+                                },
+                              }));
+                            }}
+                            className="w-full rounded-xl border p-2 text-xs bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Image Upload Input */}
+                      <ImageUploadInput
+                        label="Gallery Card Image *"
+                        value={item.image}
+                        onChangeSingle={(url) => {
+                          setContent((prev) => ({
+                            ...prev,
+                            gallery: {
+                              ...prev.gallery,
+                              items: prev.gallery.items.map((g, i) => (i === idx ? { ...g, image: url } : g)),
+                            },
+                          }));
+                        }}
+                        helperText="Upload official field photo to display on this gallery card."
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 8: SUPPORT & CTA BANNER */}
+          {activeTab === 'support' && (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Support & CTA Banner Editor</h2>
+                  <p className="text-xs text-[#58706a]">Manage the &apos;Make A Difference Today&apos; full-width callout section and background image</p>
+                </div>
+                <button
+                  onClick={() => handleSaveContent('Support CTA Banner')}
+                  disabled={savingSection === 'Support CTA Banner'}
+                  className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
+                >
+                  {savingSection === 'Support CTA Banner' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 text-[#f2ad3b]" />
+                      <span>Save Support Banner</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-6">
+                <div className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Eyebrow Badge</label>
+                      <input
+                        type="text"
+                        value={content.support.eyebrow}
+                        onChange={(e) => setContent((prev) => ({ ...prev, support: { ...prev.support, eyebrow: e.target.value } }))}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Main Heading</label>
+                      <input
+                        type="text"
+                        value={content.support.title}
+                        onChange={(e) => setContent((prev) => ({ ...prev, support: { ...prev.support, title: e.target.value } }))}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Banner Description Text</label>
+                    <textarea
+                      rows={3}
+                      value={content.support.copy}
+                      onChange={(e) => setContent((prev) => ({ ...prev, support: { ...prev.support, copy: e.target.value } }))}
+                      className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Action Button Text</label>
+                    <input
+                      type="text"
+                      value={content.support.ctaText}
+                      onChange={(e) => setContent((prev) => ({ ...prev, support: { ...prev.support, ctaText: e.target.value } }))}
+                      className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                    />
+                  </div>
+
+                  {/* Banner Background Image Upload */}
+                  <ImageUploadInput
+                    label="Full-Width Callout Background Photo *"
+                    value={content.support.image}
+                    onChangeSingle={(url) => setContent((prev) => ({ ...prev, support: { ...prev.support, image: url } }))}
+                    helperText="Upload or change the high-resolution background photo for the bottom 'Make A Difference Today' callout section."
+                  />
+                </div>
               </div>
             </div>
           )}
