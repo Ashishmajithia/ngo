@@ -15,6 +15,11 @@ $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
 
+// In serverless environments (Vercel/Lambda), filesystem is read-only except /tmp
+if (isset($_ENV['VERCEL']) || getenv('VERCEL') || !is_writable($app->storagePath())) {
+    $app->useStoragePath('/tmp/storage');
+}
+
 /*
 |--------------------------------------------------------------------------
 | Bind Important Interfaces
