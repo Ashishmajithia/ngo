@@ -1,0 +1,525 @@
+'use client';
+
+import React, { useState } from 'react';
+import { X, Save, RotateCcw, Sliders, QrCode } from 'lucide-react';
+import { useContent } from '@/context/ContentContext';
+import { ImageUploadInput } from '@/components/ImageUploadInput';
+
+type TabType = 'brand' | 'payment' | 'hero' | 'stats' | 'programs' | 'about' | 'approach' | 'gallery' | 'support';
+
+export const AdminDrawer: React.FC = () => {
+  const { content, updateContent, resetContent, isAdminOpen, setIsAdminOpen, showToast } = useContent();
+  const [activeTab, setActiveTab] = useState<TabType>('brand');
+
+  if (!isAdminOpen) return null;
+
+  const handleBrandChange = (key: string, val: string) => {
+    updateContent({
+      brand: { ...content.brand, [key]: val },
+    });
+  };
+
+  const handleHeroSlideChange = (index: number, key: string, val: string) => {
+    const updatedSlides = [...content.hero.slides];
+    updatedSlides[index] = { ...updatedSlides[index], [key]: val };
+    updateContent({
+      hero: { ...content.hero, slides: updatedSlides },
+    });
+  };
+
+  const handleStatChange = (index: number, key: string, val: string) => {
+    const updatedStats = [...content.impactStats];
+    updatedStats[index] = { ...updatedStats[index], [key]: val };
+    updateContent({ impactStats: updatedStats });
+  };
+
+  const handleProgramChange = (index: number, key: string, val: string) => {
+    const updatedPrograms = [...content.programs.items];
+    updatedPrograms[index] = { ...updatedPrograms[index], [key]: val };
+    updateContent({
+      programs: { ...content.programs, items: updatedPrograms },
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-xl h-full bg-[#fffdf8] text-[#183a35] shadow-2xl flex flex-col border-l border-[#d9e1d7]">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[#d9e1d7] bg-[#123f38] px-6 py-4 text-white">
+          <div className="flex items-center gap-3">
+            <Sliders className="w-5 h-5 text-[#f2ad3b]" />
+            <div>
+              <h3 className="display-font font-bold text-lg">Dynamic Content Customizer</h3>
+              <p className="text-xs text-[#f8f4e9]/80">Live edit all text, slides, and stats</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsAdminOpen(false)}
+            className="rounded-full p-1.5 text-white/80 hover:bg-white/10 hover:text-white"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Category Tabs */}
+        <div className="flex border-b border-[#d9e1d7] bg-[#f8f4e9] px-4 overflow-x-auto">
+          {[
+            { id: 'brand' as const, label: 'Brand & Contact' },
+            { id: 'payment' as const, label: 'Payment & QR Code' },
+            { id: 'hero' as const, label: 'Hero Banner' },
+            { id: 'stats' as const, label: 'Impact Stats' },
+            { id: 'programs' as const, label: 'Programs' },
+            { id: 'about' as const, label: 'About Info' },
+            { id: 'approach' as const, label: 'Approach' },
+            { id: 'gallery' as const, label: 'Gallery' },
+            { id: 'support' as const, label: 'Support Banner' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition ${
+                activeTab === tab.id
+                  ? 'border-[#28745e] text-[#123f38] bg-white'
+                  : 'border-transparent text-[#58706a] hover:text-[#183a35]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Form Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {activeTab === 'brand' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Brand Info</h4>
+              <div>
+                <label className="block text-xs font-bold mb-1">Organization Name</label>
+                <input
+                  type="text"
+                  value={content.brand.name}
+                  onChange={(e) => handleBrandChange('name', e.target.value)}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Tagline</label>
+                <input
+                  type="text"
+                  value={content.brand.tagline}
+                  onChange={(e) => handleBrandChange('tagline', e.target.value)}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={content.brand.email}
+                  onChange={(e) => handleBrandChange('email', e.target.value)}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Phone Number</label>
+                <input
+                  type="text"
+                  value={content.brand.phone}
+                  onChange={(e) => handleBrandChange('phone', e.target.value)}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Primary Button Text</label>
+                <input
+                  type="text"
+                  value={content.brand.primaryCtaText}
+                  onChange={(e) => handleBrandChange('primaryCtaText', e.target.value)}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'hero' && (
+            <div className="space-y-6">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Hero Banner Slides</h4>
+              {content.hero.slides.map((slide, idx) => (
+                <div key={slide.id || idx} className="p-4 rounded-2xl bg-[#f8f4e9] border border-[#dce7dc] space-y-3">
+                  <p className="text-xs font-bold text-[#28745e]">Slide #{idx + 1}</p>
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Eyebrow Badge</label>
+                    <input
+                      type="text"
+                      value={slide.eyebrow}
+                      onChange={(e) => handleHeroSlideChange(idx, 'eyebrow', e.target.value)}
+                      className="w-full rounded-lg border p-2 text-xs bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Heading Title</label>
+                    <input
+                      type="text"
+                      value={slide.title}
+                      onChange={(e) => handleHeroSlideChange(idx, 'title', e.target.value)}
+                      className="w-full rounded-lg border p-2 text-xs bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Description Copy</label>
+                    <textarea
+                      rows={2}
+                      value={slide.copy}
+                      onChange={(e) => handleHeroSlideChange(idx, 'copy', e.target.value)}
+                      className="w-full rounded-lg border p-2 text-xs bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Image URL</label>
+                    <input
+                      type="text"
+                      value={slide.image}
+                      onChange={(e) => handleHeroSlideChange(idx, 'image', e.target.value)}
+                      className="w-full rounded-lg border p-2 text-xs bg-white font-mono"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'stats' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Impact Statistics</h4>
+              {content.impactStats.map((st, idx) => (
+                <div key={st.id || idx} className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[#f8f4e9] border">
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Metric Number</label>
+                    <input
+                      type="text"
+                      value={st.stat}
+                      onChange={(e) => handleStatChange(idx, 'stat', e.target.value)}
+                      className="w-full rounded-lg border p-2 text-xs bg-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Label</label>
+                    <input
+                      type="text"
+                      value={st.label}
+                      onChange={(e) => handleStatChange(idx, 'label', e.target.value)}
+                      className="w-full rounded-lg border p-2 text-xs bg-white"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'programs' && (
+            <div className="space-y-6">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Programs & Initiatives</h4>
+              {content.programs.items.map((prog, idx) => (
+                <div key={prog.id || idx} className="p-4 rounded-2xl bg-[#f8f4e9] border border-[#dce7dc] space-y-3">
+                  <p className="text-xs font-bold text-[#28745e]">Card #{idx + 1}</p>
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Title</label>
+                    <input
+                      type="text"
+                      value={prog.title}
+                      onChange={(e) => handleProgramChange(idx, 'title', e.target.value)}
+                      className="w-full rounded-lg border p-2 text-xs bg-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold mb-1">Description</label>
+                    <textarea
+                      rows={2}
+                      value={prog.description}
+                      onChange={(e) => handleProgramChange(idx, 'description', e.target.value)}
+                      className="w-full rounded-lg border p-2 text-xs bg-white"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'about' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">About Section</h4>
+              <div>
+                <label className="block text-xs font-bold mb-1">Main Title</label>
+                <input
+                  type="text"
+                  value={content.about.title}
+                  onChange={(e) => updateContent({ about: { ...content.about, title: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Paragraph 1</label>
+                <textarea
+                  rows={3}
+                  value={content.about.copyOne}
+                  onChange={(e) => updateContent({ about: { ...content.about, copyOne: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'payment' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2 flex items-center gap-2">
+                <QrCode className="w-4 h-4 text-[#28745e]" />
+                <span>UPI Payment QR & Details</span>
+              </h4>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#f8f4e9] border border-[#dce7dc]">
+                <div>
+                  <span className="text-xs font-bold text-[#123f38]">Enable QR Code Donations</span>
+                  <p className="text-[11px] text-[#58706a]">Show QR barcode in modal & footer</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={content.payment?.enableQrDonation !== false}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, enableQrDonation: e.target.checked },
+                    })
+                  }
+                  className="h-4 w-4 rounded accent-[#28745e]"
+                />
+              </div>
+
+              <ImageUploadInput
+                label="Payment QR Code / Barcode Image"
+                value={content.payment?.qrCodeImage || ''}
+                onChangeSingle={(url) =>
+                  updateContent({
+                    payment: { ...content.payment, qrCodeImage: url },
+                  })
+                }
+                helperText="Upload official PhonePe / Google Pay / UPI Barcode image"
+              />
+
+              <div>
+                <label className="block text-xs font-bold mb-1">Official UPI ID (VPA)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. actcharitabletrust@upi"
+                  value={content.payment?.upiId || ''}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, upiId: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1">Account Holder / Trust Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. ACT Charitable Trust"
+                  value={content.payment?.accountName || ''}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, accountName: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold mb-1">Bank Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. SBI"
+                    value={content.payment?.bankName || ''}
+                    onChange={(e) =>
+                      updateContent({
+                        payment: { ...content.payment, bankName: e.target.value },
+                      })
+                    }
+                    className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1">IFSC Code</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. SBIN0001234"
+                    value={content.payment?.ifscCode || ''}
+                    onChange={(e) =>
+                      updateContent({
+                        payment: { ...content.payment, ifscCode: e.target.value.toUpperCase() },
+                      })
+                    }
+                    className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono uppercase"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1">Account Number</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 98765432101234"
+                  value={content.payment?.accountNumber || ''}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, accountNumber: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1">Payment Instructions</label>
+                <textarea
+                  rows={2}
+                  placeholder="Scan QR code using any UPI app..."
+                  value={content.payment?.instructions || ''}
+                  onChange={(e) =>
+                    updateContent({
+                      payment: { ...content.payment, instructions: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'approach' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Approach & Core Principles</h4>
+              <div>
+                <label className="block text-xs font-bold mb-1">Section Title</label>
+                <input
+                  type="text"
+                  value={content.approach.title}
+                  onChange={(e) => updateContent({ approach: { ...content.approach, title: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Section Description</label>
+                <textarea
+                  rows={2}
+                  value={content.approach.copy}
+                  onChange={(e) => updateContent({ approach: { ...content.approach, copy: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <ImageUploadInput
+                label="Approach Section Image"
+                value={content.approach.image}
+                onChangeSingle={(url) => updateContent({ approach: { ...content.approach, image: url } })}
+                helperText="Main featured photo for Approach section"
+              />
+            </div>
+          )}
+
+          {activeTab === 'gallery' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Moments of Hope Gallery</h4>
+              <div>
+                <label className="block text-xs font-bold mb-1">Section Title</label>
+                <input
+                  type="text"
+                  value={content.gallery.title}
+                  onChange={(e) => updateContent({ gallery: { ...content.gallery, title: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Section Description</label>
+                <textarea
+                  rows={2}
+                  value={content.gallery.copy}
+                  onChange={(e) => updateContent({ gallery: { ...content.gallery, copy: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold text-[#123f38]">Gallery Photos ({content.gallery.items.length}):</p>
+                {content.gallery.items.map((item, idx) => (
+                  <div key={item.id || idx} className="p-3 bg-[#f8f4e9] rounded-xl border border-[#dce7dc] space-y-2">
+                    <p className="text-[11px] font-bold text-[#28745e]">Photo #{idx + 1}: {item.title}</p>
+                    <ImageUploadInput
+                      label={`Photo #${idx + 1} Image`}
+                      value={item.image}
+                      onChangeSingle={(url) => {
+                        const updated = content.gallery.items.map((g, i) => (i === idx ? { ...g, image: url } : g));
+                        updateContent({ gallery: { ...content.gallery, items: updated } });
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'support' && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm text-[#123f38] border-b pb-2">Support & Callout Banner</h4>
+              <div>
+                <label className="block text-xs font-bold mb-1">Banner Title</label>
+                <input
+                  type="text"
+                  value={content.support.title}
+                  onChange={(e) => updateContent({ support: { ...content.support, title: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1">Banner Description</label>
+                <textarea
+                  rows={3}
+                  value={content.support.copy}
+                  onChange={(e) => updateContent({ support: { ...content.support, copy: e.target.value } })}
+                  className="w-full rounded-xl border p-2.5 text-sm bg-white"
+                />
+              </div>
+              <ImageUploadInput
+                label="Banner Full-Width Background Photo"
+                value={content.support.image}
+                onChangeSingle={(url) => updateContent({ support: { ...content.support, image: url } })}
+                helperText="Upload background image for the bottom callout section"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="border-t border-[#d9e1d7] bg-[#f8f4e9] p-4 flex items-center justify-between">
+          <button
+            onClick={resetContent}
+            className="flex items-center gap-1.5 rounded-xl border border-red-300 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Reset Defaults</span>
+          </button>
+
+          <button
+            onClick={() => {
+              showToast('Dynamic site content updated live!');
+              setIsAdminOpen(false);
+            }}
+            className="flex items-center gap-2 rounded-xl bg-[#123f38] px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-[#28745e] transition"
+          >
+            <Save className="w-4 h-4 text-[#f2ad3b]" />
+            <span>Apply Changes</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
