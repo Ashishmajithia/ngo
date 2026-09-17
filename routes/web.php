@@ -9,5 +9,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/{any?}', function () {
-    return view('app');
+    $initialContent = null;
+    try {
+        $initialContent = \App\Http\Controllers\Api\ContentController::getContentArray();
+    } catch (\Throwable $e) {
+        // Fallback gracefully if database connection is temporarily slow
+    }
+    return view('app', compact('initialContent'));
 })->where('any', '^(?!api|uploads).*$');

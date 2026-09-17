@@ -15,7 +15,7 @@ class ContentController extends Controller
     /**
      * Build unified site content from dedicated relational tables.
      */
-    public function index()
+    public static function getContentArray()
     {
         $settings = Setting::all()->pluck('value', 'key');
 
@@ -63,11 +63,13 @@ class ContentController extends Controller
         // Baseline fallbacks if settings are not yet set
         $defaultBrand = [
             'name' => 'ACT Charitable Trust',
-            'email' => 'hello@actcharitabletrust.org',
-            'phone' => '+91 98765 43210',
-            'tagline' => 'Together We Rise • Grassroots Empowerment',
-            'location' => 'New Delhi & Rural Empowerment Centers, India',
-            'logoStyle' => 'icon_text',
+            'regNo' => 'REG.NO.220',
+            'tagline' => 'Rising Hope for Children',
+            'email' => '',
+            'phone' => '',
+            'location' => '',
+            'logo' => '/uploads/act_official_logo.jpg',
+            'logoStyle' => 'full',
             'primaryCtaText' => 'Donate & Support',
         ];
 
@@ -127,7 +129,7 @@ class ContentController extends Controller
             'ctaText' => '',
         ];
 
-        $content = [
+        return [
             'brand' => $settings['brand'] ?? $defaultBrand,
             'hero' => [
                 'slides' => $banners,
@@ -152,6 +154,11 @@ class ContentController extends Controller
             'impactStats' => $settings['impactStats'] ?? $defaultImpactStats,
             'updatedAt' => now()->toISOString(),
         ];
+    }
+
+    public function index()
+    {
+        $content = self::getContentArray();
 
         return response()->json([
             'success' => true,

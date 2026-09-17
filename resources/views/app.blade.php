@@ -28,6 +28,9 @@
         }
     @endphp
     <link rel="stylesheet" href="{{ $cssFile }}">
+    @if(!empty($initialContent))
+    <script id="server-initial-content" type="application/json">{!! json_encode($initialContent, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES) !!}</script>
+    @endif
     <script type="module" src="{{ $jsFile }}"></script>
 </head>
 <body class="bg-[#fffdf8] text-[#183a35] antialiased selection:bg-[#f2ad3b]/30 selection:text-[#123f38]">
