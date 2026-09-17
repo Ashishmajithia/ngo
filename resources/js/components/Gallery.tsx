@@ -11,9 +11,9 @@ export const Gallery: React.FC = () => {
     ? content.gallery
     : defaultContent.gallery;
 
-  const items = (Array.isArray(gallery?.items) && gallery.items.length > 0)
-    ? gallery.items
-    : defaultContent.gallery.items;
+  const items = Array.isArray(gallery?.items) ? gallery.items : [];
+
+  if (items.length === 0) return null;
 
   return (
     <section id="gallery" className="bg-[#123f38] px-5 py-20 lg:px-8 lg:py-28 text-[#fffdf8]">
@@ -44,7 +44,7 @@ export const Gallery: React.FC = () => {
               <div className="overflow-hidden h-72 sm:h-80 relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={item.image || "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1000&auto=format&fit=crop"}
+                  src={item.image}
                   alt={item.title}
                   className="h-full w-full object-cover group-hover:scale-110 transition duration-700"
                 />

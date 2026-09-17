@@ -13,13 +13,10 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
 
 export const Approach: React.FC = () => {
   const { content } = useContent();
-  const approach = (content && content.approach && typeof content.approach === 'object')
-    ? content.approach
-    : defaultContent.approach;
+  const approach = content?.approach;
+  const principles = Array.isArray(approach?.principles) ? approach.principles : [];
 
-  const principles = (Array.isArray(approach?.principles) && approach.principles.length > 0)
-    ? approach.principles
-    : defaultContent.approach.principles;
+  if (principles.length === 0 && !approach?.title && !approach?.image) return null;
 
   return (
     <section id="approach" className="px-5 py-20 lg:px-8 lg:py-28 bg-[#fffdf8]">
@@ -28,7 +25,7 @@ export const Approach: React.FC = () => {
         <div className="photo-frame relative order-2 lg:order-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={approach?.image || "https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=1000&auto=format&fit=crop"}
+            src={approach?.image}
             alt={approach?.title || 'Our Approach'}
             className="h-[380px] sm:h-[480px] w-full rounded-[2rem] object-cover shadow-2xl"
           />

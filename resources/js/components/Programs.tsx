@@ -20,9 +20,9 @@ export const Programs: React.FC = () => {
     ? content.programs
     : defaultContent.programs;
 
-  const items = (Array.isArray(programs?.items) && programs.items.length > 0)
-    ? programs.items
-    : defaultContent.programs.items;
+  const items = Array.isArray(programs?.items) ? programs.items : [];
+
+  if (items.length === 0) return null;
 
   return (
     <section id="programs" className="bg-[#e8f0e8] px-5 py-20 lg:px-8 lg:py-28">
@@ -55,7 +55,7 @@ export const Programs: React.FC = () => {
                   <div className="overflow-hidden h-56 relative">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={item.image || "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=800&auto=format&fit=crop"}
+                      src={item.image}
                       alt={item.title}
                       className="h-full w-full object-cover"
                     />

@@ -19,6 +19,7 @@ class Donation extends Model
         'phone',
         'utr',
         'payment_method',
+        'screenshot',
         'status',
     ];
 }

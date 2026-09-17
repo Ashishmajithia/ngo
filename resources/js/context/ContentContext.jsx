@@ -1,9 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { defaultContent } from '../data/initialContent';
-
-// Key incremented to v3 to automatically flush any corrupt cached null states
-export const LOCAL_CONTENT_KEY = 'act_charitable_trust_content_v3';
-export const CONTENT_SYNC_EVENT = 'act_charitable_trust_content_updated_v3';
+import { emptyContent } from '../data/initialContent';
 
 const ContentContext = createContext(undefined);
 
@@ -17,51 +13,43 @@ export function safeMerge(base, override) {
     approach: (override.approach && typeof override.approach === 'object') ? { ...base.approach, ...override.approach } : base.approach,
     support: (override.support && typeof override.support === 'object') ? { ...base.support, ...override.support } : base.support,
     payment: (override.payment && typeof override.payment === 'object') ? { ...base.payment, ...override.payment } : base.payment,
-    impactStats: (Array.isArray(override.impactStats) && override.impactStats.length > 0) ? override.impactStats : base.impactStats,
+    impactStats: Array.isArray(override.impactStats) ? override.impactStats : [],
     hero: {
       ...base.hero,
       ...(override.hero || {}),
-      slides: (Array.isArray(override.hero?.slides) && override.hero.slides.length > 0) ? override.hero.slides : base.hero.slides,
+      slides: Array.isArray(override.hero?.slides) ? override.hero.slides : [],
     },
     programs: {
       ...base.programs,
       ...(override.programs || {}),
-      items: (Array.isArray(override.programs?.items) && override.programs.items.length > 0) ? override.programs.items : base.programs.items,
+      items: Array.isArray(override.programs?.items) ? override.programs.items : [],
     },
     gallery: {
       ...base.gallery,
       ...(override.gallery || {}),
-      items: (Array.isArray(override.gallery?.items) && override.gallery.items.length > 0) ? override.gallery.items : base.gallery.items,
+      items: Array.isArray(override.gallery?.items) ? override.gallery.items : [],
     },
   };
 }
 
 export const ContentProvider = ({ children }) => {
-  const [content, setContent] = useState(defaultContent);
+  const [content, setContent] = useState(emptyContent);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
   useEffect(() => {
-    // 1. Clean up old corrupted keys if present
+    // Clear any residual localStorage cache
     try {
-      localStorage.removeItem('act_charitable_trust_content_v1');
-      localStorage.removeItem('act_charitable_trust_content_v2');
-    } catch {}
-
-    // 2. Check local storage cache for v3
-    try {
-      const saved = localStorage.getItem(LOCAL_CONTENT_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') {
-          setContent(prev => safeMerge(prev, parsed));
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('act_charitable_trust_')) {
+          localStorage.removeItem(key);
         }
-      }
+      });
     } catch {}
 
-    // 3. Fetch fresh content from Laravel backend API
+    // Fetch live content exclusively from database API
     async function syncWithServer() {
       try {
         const res = await fetch(`/api/content?t=${Date.now()}`);
@@ -73,9 +61,6 @@ export const ContentProvider = ({ children }) => {
           }
           if (serverData && typeof serverData === 'object') {
             setContent(prev => safeMerge(prev, serverData));
-            try {
-              localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(serverData));
-            } catch {}
           }
         }
       } catch (err) {
@@ -84,45 +69,12 @@ export const ContentProvider = ({ children }) => {
     }
 
     syncWithServer();
-
-    // 4. Listen for cross-tab or same-window content updates
-    const handleStorageChange = (e) => {
-      if (e.key === LOCAL_CONTENT_KEY && e.newValue) {
-        try {
-          const parsed = JSON.parse(e.newValue);
-          if (parsed) {
-            setContent(prev => safeMerge(prev, parsed));
-          }
-        } catch {}
-      }
-    };
-
-    const handleCustomSync = (e) => {
-      if (e.detail) {
-        setContent(prev => safeMerge(prev, e.detail));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener(CONTENT_SYNC_EVENT, handleCustomSync);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener(CONTENT_SYNC_EVENT, handleCustomSync);
-    };
   }, []);
 
   const updateContent = async (newContent) => {
     const timestamp = new Date().toISOString();
     const updated = safeMerge(content, { ...newContent, updatedAt: timestamp });
     setContent(updated);
-
-    try {
-      localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(updated));
-      window.dispatchEvent(new CustomEvent(CONTENT_SYNC_EVENT, { detail: updated }));
-    } catch (e) {
-      console.error('LocalStorage write error:', e);
-    }
 
     try {
       const res = await fetch('/api/content', {
@@ -138,9 +90,6 @@ export const ContentProvider = ({ children }) => {
         const json = await res.json();
         if (json.data) {
           setContent(prev => safeMerge(prev, json.data));
-          try {
-            localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(json.data));
-          } catch {}
         }
       }
     } catch (err) {
@@ -149,12 +98,8 @@ export const ContentProvider = ({ children }) => {
   };
 
   const resetContent = async () => {
-    const timestamp = new Date().toISOString();
-    const resetData = { ...defaultContent, updatedAt: timestamp };
-    setContent(resetData);
+    setContent(emptyContent);
     try {
-      localStorage.removeItem(LOCAL_CONTENT_KEY);
-      window.dispatchEvent(new CustomEvent(CONTENT_SYNC_EVENT, { detail: resetData }));
       await fetch('/api/content', {
         method: 'POST',
         headers: {
@@ -162,12 +107,12 @@ export const ContentProvider = ({ children }) => {
           'Accept': 'application/json',
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         },
-        body: JSON.stringify(resetData),
+        body: JSON.stringify(emptyContent),
       });
     } catch (e) {
       console.error('Reset content error:', e);
     }
-    showToast('Reset to original default content!');
+    showToast('Content reset to empty state');
   };
 
   const submitDonation = async (donationData) => {

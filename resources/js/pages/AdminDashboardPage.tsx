@@ -27,13 +27,15 @@ import {
   Database,
   Download,
   Search,
+  Eye,
+  ExternalLink,
+  X,
 } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
 import { defaultContent } from '@/data/initialContent';
 import { SiteContent, HeroSlide, ProgramItem, PrincipleItem, GalleryItem } from '@/types/content';
 import { ImageUploadInput } from '@/components/ImageUploadInput';
-import { LOCAL_CONTENT_KEY, CONTENT_SYNC_EVENT } from '@/context/ContentContext';
 
 interface DonationItem {
   id: string;
@@ -43,17 +45,19 @@ interface DonationItem {
   email: string;
   phone?: string;
   utr?: string;
+  screenshot?: string;
   paymentMethod?: string;
   status?: 'pending' | 'verified' | 'rejected' | string;
   createdAt: string;
 }
 
+const router = {
+  push: (url: string) => {
+    window.location.href = url;
+  },
+};
+
 export default function AdminDashboardPage() {
-  const router = {
-    push: (url: string) => {
-      window.location.href = url;
-    },
-  };
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
@@ -68,9 +72,8 @@ export default function AdminDashboardPage() {
   const [content, setContent] = useState<SiteContent>(defaultContent);
   const [donations, setDonations] = useState<DonationItem[]>([]);
   const [donationSearch, setDonationSearch] = useState('');
+  const [previewScreenshot, setPreviewScreenshot] = useState<string | null>(null);
   const [savingSection, setSavingSection] = useState<string | null>(null);
-
-  const LOCAL_BLOGS_KEY = 'act_charitable_trust_blogs_v3';
 
   // Blog Form State
   const [editingBlog, setEditingBlog] = useState<Partial<BlogPost> | null>(null);
@@ -82,18 +85,21 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     setMounted(true);
 
+    // Clear any residual localStorage cache
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('act_charitable_trust_')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch {}
+
     // Verify admin authentication
     fetch('/api/admin/verify')
       .then(async (res) => {
         if (res.status === 401) {
-          let hasLocal = false;
-          try {
-            hasLocal = !!localStorage.getItem('act_admin_user');
-          } catch {}
-          if (!hasLocal) {
-            router.push('/admin/login');
-            return null;
-          }
+          router.push('/admin/login');
+          return null;
         }
         return res.json();
       })
@@ -104,31 +110,8 @@ export default function AdminDashboardPage() {
       })
       .catch(() => {});
 
-    // 1. Load local cached blogs if any
-    try {
-      const savedBlogs = localStorage.getItem(LOCAL_BLOGS_KEY);
-      if (savedBlogs) {
-        const parsed = JSON.parse(savedBlogs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setBlogs(parsed);
-        }
-      }
-    } catch {}
-
-    // 2. Load local cached content FIRST so user changes never disappear
-    try {
-      const savedContent = localStorage.getItem(LOCAL_CONTENT_KEY);
-      if (savedContent) {
-        const parsed = JSON.parse(savedContent);
-        if (parsed && typeof parsed === 'object' && parsed.brand) {
-          setContent(parsed);
-        }
-      }
-    } catch {}
-
     fetchData();
-    setLoading(false);
-  }, [router]);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -140,31 +123,20 @@ export default function AdminDashboardPage() {
 
       if (blogsRes.ok) {
         const bJson = await blogsRes.json();
-        if (bJson.blogs && Array.isArray(bJson.blogs) ) {
+        if (bJson.blogs && Array.isArray(bJson.blogs)) {
           setBlogs(bJson.blogs);
-          try {
-            localStorage.setItem(LOCAL_BLOGS_KEY, JSON.stringify(bJson.blogs));
-          } catch {}
+        } else {
+          setBlogs([]);
         }
         if (bJson.dbStatus) setDbStatus(bJson.dbStatus);
       } else {
-        try {
-          const saved = localStorage.getItem(LOCAL_BLOGS_KEY);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) setBlogs(parsed);
-          }
-        } catch {}
+        setBlogs([]);
       }
 
       if (contentRes.ok) {
         const cJson = await contentRes.json();
         if (cJson.data) {
-          const serverData: SiteContent = cJson.data;
-          setContent(serverData);
-          try {
-            localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(serverData));
-          } catch {}
+          setContent(cJson.data);
         }
         if (cJson.dbStatus) setDbStatus(cJson.dbStatus);
       }
@@ -173,11 +145,14 @@ export default function AdminDashboardPage() {
         const dJson = await donRes.json();
         if (dJson.donations && Array.isArray(dJson.donations)) {
           setDonations(dJson.donations);
+        } else {
+          setDonations([]);
         }
-        if (dJson.dbStatus) setDbStatus(dJson.dbStatus);
       }
-    } catch {
-      console.warn('Dashboard fetch error');
+    } catch (err) {
+      console.warn('API fetch warning:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -255,11 +230,9 @@ export default function AdminDashboardPage() {
       slug: editingBlog.slug || editingBlog.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       excerpt: editingBlog.excerpt || '',
       content: editingBlog.content || '',
-      coverImage: editingBlog.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop',
-      images: Array.isArray(editingBlog.images) && editingBlog.images.length > 0
-        ? editingBlog.images
-        : [editingBlog.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop'],
-      author: editingBlog.author || 'ACT Trust Team',
+      coverImage: editingBlog.coverImage || '',
+      images: Array.isArray(editingBlog.images) ? editingBlog.images : (editingBlog.coverImage ? [editingBlog.coverImage] : []),
+      author: editingBlog.author || '',
       date: editingBlog.date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
       category: editingBlog.category || 'Education',
       published: editingBlog.published !== undefined ? editingBlog.published : true,
@@ -273,9 +246,6 @@ export default function AdminDashboardPage() {
       } else {
         updated = [blogToSave, ...prev];
       }
-      try {
-        localStorage.setItem(LOCAL_BLOGS_KEY, JSON.stringify(updated));
-      } catch {}
       return updated;
     });
 
@@ -283,15 +253,18 @@ export default function AdminDashboardPage() {
     setEditingBlog(null);
     showToastMsg(isEdit ? 'Impact Story updated!' : 'New Impact Story published live!');
 
-    // Background sync to API
+    // Sync to API
     try {
       const url = '/api/blogs';
       const method = isEdit ? 'PUT' : 'POST';
-      await fetch(url, {
+      const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(blogToSave),
       });
+      if (res.ok) {
+        fetchData();
+      }
     } catch (err) {
       console.warn('API sync warning:', err);
     }
@@ -299,16 +272,13 @@ export default function AdminDashboardPage() {
 
   const handleDeleteBlog = async (id: string) => {
     if (!confirm('Are you sure you want to delete this story?')) return;
-    setBlogs((prev) => {
-      const updated = prev.filter((b) => b.id !== id);
-      try {
-        localStorage.setItem(LOCAL_BLOGS_KEY, JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
+    setBlogs((prev) => prev.filter((b) => b.id !== id));
     showToastMsg('Story deleted successfully.');
     try {
-      await fetch(`/api/blogs?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/blogs?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchData();
+      }
     } catch {
       console.warn('API delete warning');
     }
@@ -325,16 +295,6 @@ export default function AdminDashboardPage() {
     };
     setContent(updatedContent);
 
-    // 1. Immediately persist to localStorage for instant website update
-    try {
-      localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(updatedContent));
-      window.dispatchEvent(new CustomEvent(CONTENT_SYNC_EVENT, { detail: updatedContent }));
-      window.dispatchEvent(new Event('storage'));
-    } catch (err) {
-      console.warn('LocalStorage sync warning:', err);
-    }
-
-    // 2. Sync to backend API database
     try {
       const res = await fetch('/api/content', {
         method: 'POST',
@@ -345,17 +305,14 @@ export default function AdminDashboardPage() {
         const json = await res.json();
         if (json.data) {
           setContent(json.data);
-          try {
-            localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(json.data));
-          } catch {}
         }
-        if (json.dbStatus) setDbStatus(json.dbStatus);
-        showToastMsg(`✓ ${secLabel} saved to Supabase database!`);
+        showToastMsg(`${secLabel} saved to database!`);
       } else {
-        showToastMsg(`✓ ${secLabel} saved!`);
+        showToastMsg(`Failed to save ${secLabel}`);
       }
-    } catch {
-      showToastMsg(`✓ ${secLabel} saved!`);
+    } catch (err) {
+      console.error('API save error:', err);
+      showToastMsg(`Failed to save ${secLabel}`);
     } finally {
       setTimeout(() => setSavingSection(null), 500);
     }
@@ -431,12 +388,12 @@ export default function AdminDashboardPage() {
           </div>
           {[
             { id: 'blogs' as const, label: 'Impact Stories (Blogs)', icon: FileText, count: blogs.length },
-            { id: 'banners' as const, label: 'Hero Banners', icon: ImageIcon, count: content.hero.slides.length },
-            { id: 'metrics' as const, label: 'Impact Numbers & Metrics', icon: BarChart3, count: content.impactStats.length },
+            { id: 'banners' as const, label: 'Hero Banners', icon: ImageIcon, count: content.hero?.slides?.length ?? 0 },
+            { id: 'metrics' as const, label: 'Impact Numbers & Metrics', icon: BarChart3, count: content.impactStats?.length ?? 0 },
             { id: 'about' as const, label: 'About Us Section', icon: Info },
-            { id: 'programs' as const, label: 'Strategic Initiatives', icon: Target, count: content.programs.items.length },
-            { id: 'approach' as const, label: 'Approach & Principles', icon: Compass, count: content.approach?.principles?.length || 3 },
-            { id: 'gallery' as const, label: 'Moments of Hope (Gallery)', icon: Images, count: content.gallery?.items?.length || 5 },
+            { id: 'programs' as const, label: 'Strategic Initiatives', icon: Target, count: content.programs?.items?.length ?? 0 },
+            { id: 'approach' as const, label: 'Approach & Principles', icon: Compass, count: content.approach?.principles?.length ?? 0 },
+            { id: 'gallery' as const, label: 'Moments of Hope (Gallery)', icon: Images, count: content.gallery?.items?.length ?? 0 },
             { id: 'support' as const, label: 'Support & CTA Banner', icon: HeartHandshake },
             { id: 'payment' as const, label: 'Payment QR & Bank Details', icon: QrCode },
             { id: 'content' as const, label: 'Site Contact & Details', icon: Sliders },
@@ -484,8 +441,9 @@ export default function AdminDashboardPage() {
                       excerpt: '',
                       content: '',
                       category: 'Education',
-                      coverImage: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop',
-                      author: 'Trust Team',
+                      coverImage: '',
+                      author: '',
+                      images: [],
                     });
                     setIsBlogModalOpen(true);
                   }}
@@ -557,10 +515,10 @@ export default function AdminDashboardPage() {
                     onClick={() => {
                       const newSlide: HeroSlide = {
                         id: 'slide-' + Date.now(),
-                        image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1920&auto=format&fit=crop',
-                        eyebrow: 'New Initiative • Community Support',
-                        title: 'Empowering Communities & Changing Lives',
-                        copy: 'Dedicated to providing grassroots support, high quality education, and healthcare access to all.',
+                        image: '',
+                        eyebrow: '',
+                        title: '',
+                        copy: '',
                       };
                       setContent((prev) => ({
                         ...prev,
@@ -1009,9 +967,9 @@ export default function AdminDashboardPage() {
                     onClick={() => {
                       const newProg: ProgramItem = {
                         id: 'prog-' + Date.now(),
-                        title: 'New Community Initiative',
-                        description: 'Focused grassroots program to empower underprivileged individuals and families with sustainable skills.',
-                        image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
+                        title: '',
+                        description: '',
+                        image: '',
                         icon: 'Sparkles',
                         badgeBg: 'bg-[#dcece5]',
                         badgeTextColor: 'text-[#28745e]',
@@ -1341,9 +1299,9 @@ export default function AdminDashboardPage() {
                     onClick={() => {
                       const newGalItem: GalleryItem = {
                         id: 'gal-' + Date.now(),
-                        title: 'New Community Moment',
-                        caption: 'Capturing real moments of change across our centers.',
-                        image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
+                        title: '',
+                        caption: '',
+                        image: '',
                       };
                       setContent((prev) => ({
                         ...prev,
@@ -1661,6 +1619,45 @@ export default function AdminDashboardPage() {
                             <p className="text-[10px] font-normal text-[#58706a]">Circular icon next to Org Name & Tagline text</p>
                           </div>
                         </label>
+                      </div>
+
+                      {/* Logo Height / Size Control */}
+                      <div className="mt-4 pt-3 border-t border-[#d9e1d7]">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                          <label className="text-xs font-bold text-[#183a35]">
+                            Logo Size in Header ({content.brand.logoHeight || 70}px)
+                          </label>
+                          <div className="flex flex-wrap gap-1 text-[11px]">
+                            {[
+                              { label: 'Normal (50px)', val: 50 },
+                              { label: 'Medium (70px)', val: 70 },
+                              { label: 'Large (90px)', val: 90 },
+                              { label: 'Extra Large (110px)', val: 110 },
+                            ].map((preset) => (
+                              <button
+                                key={preset.val}
+                                type="button"
+                                onClick={() => setContent((prev) => ({ ...prev, brand: { ...prev.brand, logoHeight: preset.val } }))}
+                                className={`px-2.5 py-1 rounded-lg border transition ${
+                                  (content.brand.logoHeight || 70) === preset.val
+                                    ? 'bg-[#28745e] text-white border-[#28745e] font-bold shadow-xs'
+                                    : 'bg-white text-[#58706a] hover:border-[#28745e]'
+                                }`}
+                              >
+                                {preset.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <input
+                          type="range"
+                          min="40"
+                          max="140"
+                          step="5"
+                          value={content.brand.logoHeight || 70}
+                          onChange={(e) => setContent((prev) => ({ ...prev, brand: { ...prev.brand, logoHeight: Number(e.target.value) } }))}
+                          className="w-full accent-[#28745e] cursor-pointer"
+                        />
                       </div>
                     </div>
                   )}
@@ -2040,6 +2037,7 @@ export default function AdminDashboardPage() {
                             <th className="p-3">Contact</th>
                             <th className="p-3">Payment Method</th>
                             <th className="p-3">UTR / Transaction #</th>
+                            <th className="p-3">Payment Proof</th>
                             <th className="p-3">Status</th>
                             <th className="p-3">Date</th>
                           </tr>
@@ -2071,6 +2069,28 @@ export default function AdminDashboardPage() {
                                     </span>
                                   ) : (
                                     <span className="text-[#58706a] italic">N/A</span>
+                                  )}
+                                </td>
+                                <td className="p-3">
+                                  {d.screenshot ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => setPreviewScreenshot(d.screenshot || null)}
+                                      className="group inline-flex items-center gap-1.5 p-1 rounded-lg border border-[#dce7dc] hover:border-[#28745e] bg-white shadow-xs transition"
+                                      title="Click to view payment proof screenshot"
+                                    >
+                                      <img
+                                        src={d.screenshot}
+                                        alt="Screenshot receipt"
+                                        className="w-8 h-8 object-cover rounded"
+                                      />
+                                      <span className="text-[11px] font-bold text-[#28745e] pr-1 flex items-center gap-1">
+                                        <Eye className="w-3.5 h-3.5" />
+                                        <span>View</span>
+                                      </span>
+                                    </button>
+                                  ) : (
+                                    <span className="text-[#58706a] italic text-[11px]">No proof</span>
                                   )}
                                 </td>
                                 <td className="p-3">
@@ -2169,7 +2189,7 @@ export default function AdminDashboardPage() {
                 <ImageUploadInput
                   label="Multiple Gallery Images (Shown in Full Story Page)"
                   multiple={true}
-                  values={editingBlog.images || (editingBlog.coverImage ? [editingBlog.coverImage] : [])}
+                  values={editingBlog.images || []}
                   onChangeMultiple={(urls) => {
                     setEditingBlog({
                       ...editingBlog,
@@ -2218,6 +2238,49 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* SCREENSHOT PREVIEW MODAL */}
+      {previewScreenshot && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setPreviewScreenshot(null)}
+        >
+          <div
+            className="relative max-w-2xl w-full bg-[#fffdf8] rounded-3xl overflow-hidden shadow-2xl border border-[#dce7dc] p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[#dce7dc]">
+              <h3 className="font-bold text-[#183a35] text-sm flex items-center gap-2">
+                <span>Donor Payment Proof Screenshot</span>
+              </h3>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewScreenshot}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs font-bold text-[#28745e] hover:underline flex items-center gap-1 px-3 py-1 rounded-lg bg-[#e8f0e8] transition"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open Full Size</span>
+                </a>
+                <button
+                  onClick={() => setPreviewScreenshot(null)}
+                  className="p-1.5 text-[#58706a] hover:text-[#183a35] rounded-xl hover:bg-black/5 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-center bg-[#f8f4e9] rounded-2xl p-3 max-h-[75vh] overflow-auto">
+              <img
+                src={previewScreenshot}
+                alt="Payment proof screenshot"
+                className="max-h-[68vh] w-auto object-contain rounded-xl shadow-md"
+              />
+            </div>
           </div>
         </div>
       )}

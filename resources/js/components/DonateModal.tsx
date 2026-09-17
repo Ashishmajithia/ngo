@@ -13,6 +13,10 @@ import {
   ChevronDown,
   ChevronUp,
   Sparkles,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  Loader2,
 } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 
@@ -25,6 +29,9 @@ export const DonateModal: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [utr, setUtr] = useState('');
+  const [screenshot, setScreenshot] = useState('');
+  const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,6 +55,39 @@ export const DonateModal: React.FC = () => {
     setTimeout(() => setCopiedUpi(false), 3000);
   };
 
+  const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingScreenshot(true);
+    setUploadError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setScreenshot(data.url);
+        showToast('✓ Payment screenshot attached!');
+      } else {
+        setUploadError(data.message || 'Failed to upload screenshot.');
+      }
+    } catch (err: any) {
+      setUploadError(err.message || 'Upload failed');
+    } finally {
+      setIsUploadingScreenshot(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalAmount = amount === 'custom' ? customAmount : amount;
@@ -64,6 +104,7 @@ export const DonateModal: React.FC = () => {
       email,
       phone,
       utr,
+      screenshot,
       paymentMethod: isQrEnabled ? 'UPI QR Barcode' : 'Direct Support',
     });
 
@@ -80,6 +121,8 @@ export const DonateModal: React.FC = () => {
       setEmail('');
       setPhone('');
       setUtr('');
+      setScreenshot('');
+      setUploadError('');
     }, 2000);
   };
 
@@ -314,6 +357,83 @@ export const DonateModal: React.FC = () => {
                 <p className="text-[10px] text-[#58706a] mt-1">
                   Optional: Enter your UPI reference / UTR number for immediate receipt issuance.
                 </p>
+              </div>
+
+              {/* Payment Proof / Screenshot Upload */}
+              <div>
+                <label className="block text-xs font-bold text-[#183a35] mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-[#28745e]" />
+                    <span>Upload Payment Screenshot / Proof</span>
+                  </span>
+                  <span className="text-[10px] text-[#58706a] font-normal">(Optional)</span>
+                </label>
+
+                {screenshot ? (
+                  <div className="relative flex items-center gap-3 p-2.5 rounded-xl border border-[#28745e]/40 bg-[#28745e]/5">
+                    <img
+                      src={screenshot}
+                      alt="Payment screenshot proof"
+                      className="w-14 h-14 object-cover rounded-lg border border-[#28745e]/30 shadow-sm"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-[#123f38] flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        Screenshot Attached
+                      </p>
+                      <a
+                        href={screenshot}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-[#28745e] hover:underline truncate block"
+                      >
+                        Click to view receipt image
+                      </a>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setScreenshot('')}
+                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
+                      title="Remove Screenshot"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-[#dce7dc] hover:border-[#28745e] rounded-xl cursor-pointer bg-white transition group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleScreenshotUpload}
+                      disabled={isUploadingScreenshot}
+                    />
+                    {isUploadingScreenshot ? (
+                      <div className="flex items-center gap-2 text-xs font-bold text-[#28745e]">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Uploading screenshot...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2.5 text-center">
+                        <div className="w-8 h-8 rounded-full bg-[#f8f4e9] group-hover:bg-[#e8f0e8] flex items-center justify-center text-[#28745e] transition shrink-0">
+                          <Upload className="w-4 h-4" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-xs font-bold text-[#183a35] group-hover:text-[#28745e] transition">
+                            Upload UPI payment screenshot
+                          </p>
+                          <p className="text-[10px] text-[#58706a]">
+                            Attach screenshot from PhonePe, Google Pay, Paytm, BHIM etc.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </label>
+                )}
+
+                {uploadError && (
+                  <p className="text-[11px] text-red-600 mt-1">{uploadError}</p>
+                )}
               </div>
             </div>
 

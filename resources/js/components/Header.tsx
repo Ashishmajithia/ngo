@@ -21,13 +21,17 @@ export const Header: React.FC = () => {
                 <img
                   src={content.brand.logo}
                   alt={content.brand.name}
-                  className="h-10 md:h-12 w-auto max-w-[240px] md:max-w-[300px] object-contain transition-transform group-hover:scale-105"
+                  style={content.brand.logoHeight ? { height: `${content.brand.logoHeight}px`, maxHeight: '90px' } : undefined}
+                  className="h-14 sm:h-16 md:h-20 w-auto max-w-[280px] sm:max-w-[360px] md:max-w-[460px] object-contain transition-transform group-hover:scale-105"
                 />
               </div>
             ) : (
               /* Icon + Text Mode */
               <>
-                <span className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-[#f8e6bd] bg-white shadow-md transition-transform group-hover:scale-105 shrink-0">
+                <span 
+                  style={content.brand.logoHeight ? { height: `${content.brand.logoHeight}px`, width: `${content.brand.logoHeight}px` } : undefined}
+                  className="relative flex h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 items-center justify-center overflow-hidden rounded-2xl border-2 border-[#f8e6bd] bg-white shadow-md transition-transform group-hover:scale-105 shrink-0"
+                >
                   <img
                     src={content.brand.logo}
                     alt={content.brand.name}
@@ -35,10 +39,10 @@ export const Header: React.FC = () => {
                   />
                 </span>
                 <span className="flex flex-col">
-                  <span className="display-font text-lg md:text-xl font-bold leading-none text-[#183a35]">
+                  <span className="display-font text-lg md:text-2xl font-bold leading-none text-[#183a35]">
                     {content.brand.name}
                   </span>
-                  <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#28745e]">
+                  <span className="mt-1 text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#28745e]">
                     {content.brand.tagline}
                   </span>
                 </span>

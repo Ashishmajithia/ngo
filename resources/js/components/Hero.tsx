@@ -11,9 +11,7 @@ export const Hero: React.FC = () => {
     ? content.hero
     : defaultContent.hero;
 
-  const slides = (Array.isArray(hero?.slides) && hero.slides.length > 0)
-    ? hero.slides
-    : defaultContent.hero.slides;
+  const slides = Array.isArray(hero?.slides) ? hero.slides : [];
 
   const [activeSlide, setActiveSlide] = useState(0);
   const touchStartX = useRef<number>(0);
@@ -27,10 +25,12 @@ export const Hero: React.FC = () => {
   }, [slides.length]);
 
   const handlePrev = () => {
+    if (slides.length === 0) return;
     setActiveSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   const handleNext = () => {
+    if (slides.length === 0) return;
     setActiveSlide((prev) => (prev + 1) % slides.length);
   };
 
@@ -46,10 +46,13 @@ export const Hero: React.FC = () => {
     }
   };
 
-  const current = slides[activeSlide] || slides[0] || defaultContent.hero.slides[0];
+  const current = slides[activeSlide] || slides[0] || null;
 
   return (
     <section id="home" className="relative overflow-hidden bg-[#123f38] text-[#fffdf8]">
+      {slides.length === 0 && (
+        <div className="absolute inset-0 bg-gradient-to-br from-[#123f38] via-[#1a4941] to-[#183a35]" />
+      )}
       {/* Background Image Carousel */}
       <div
         className="absolute inset-0 select-none"
@@ -65,7 +68,7 @@ export const Hero: React.FC = () => {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={slide.image || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1920&auto=format&fit=crop"}
+              src={slide.image}
               alt={slide.title || 'Hero Banner'}
               className="h-full w-full object-cover object-center scale-100 transition-transform duration-[10000ms] ease-out"
             />

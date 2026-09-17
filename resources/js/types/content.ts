@@ -50,6 +50,7 @@ export interface BrandConfig {
   primaryCtaText: string;
   logo?: string;
   logoStyle?: 'full' | 'icon_text';
+  logoHeight?: number;
 }
 
 export interface AboutSectionData {

@@ -104,17 +104,19 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
         for (let i = 0; i < validDataUrls.length; i++) {
           const dataUrl = validDataUrls[i];
           const blob = await (await fetch(dataUrl)).blob();
-          formData.append('files', blob, `img_${Date.now()}_${i}.jpg`);
+          formData.append('files[]', blob, `img_${Date.now()}_${i}.jpg`);
         }
         const res = await fetch('/api/upload', { method: 'POST', body: formData });
         if (res.ok) {
           const json = await res.json();
           if (json.urls && Array.isArray(json.urls) && json.urls.length > 0) {
-            finalUrls = json.urls.filter((u: string) => typeof u === 'string' && u.startsWith('/uploads/'));
+            finalUrls = json.urls;
+          } else if (json.url) {
+            finalUrls = [json.url];
           }
         }
-      } catch {
-        // Fallback to compressed data URLs
+      } catch (uploadErr) {
+        console.warn('Server upload warning:', uploadErr);
       }
 
       // If server could not save to disk (e.g. Vercel read-only filesystem), use the tiny compressed data URLs!
@@ -228,9 +230,6 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
                   src={url}
                   alt={`Gallery ${idx + 1}`}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400';
-                  }}
                 />
                 <button
                   type="button"
@@ -292,9 +291,6 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
                   src={value}
                   alt="Uploaded preview"
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400';
-                  }}
                 />
               </div>
               <div className="flex-1 min-w-0">

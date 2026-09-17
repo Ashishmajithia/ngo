@@ -72,68 +72,59 @@ class ContentController extends Controller
         ];
 
         $defaultAbout = [
-            'eyebrow' => 'Who We Are',
-            'title' => 'A Legacy of Compassion, Inclusion, and Sustainable Action',
-            'copyOne' => 'ACT Charitable Trust was established with a singular vision: to bridge the socio-economic divide through targeted grassroots action.',
-            'copyTwo' => 'From rural education initiatives and mobile health clinics to women-led micro-enterprises, every project is driven by empathy and impact.',
-            'ctaText' => 'View Our Photo Gallery',
-            'image' => 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop',
-            'badgeTitle' => '100% Transparent',
-            'badgeCopy' => 'Over 94% of direct funds go directly to grassroots programs.',
+            'eyebrow' => '',
+            'title' => '',
+            'copyOne' => '',
+            'copyTwo' => '',
+            'ctaText' => '',
+            'image' => '',
+            'badgeTitle' => '',
+            'badgeCopy' => '',
         ];
 
         $defaultApproach = [
-            'eyebrow' => 'Our Principles',
-            'title' => 'How We Ensure Ethical & Long-Term Impact',
-            'copy' => 'We collaborate with local elders, teachers, and youth leaders to craft tailored interventions that endure.',
-            'image' => 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=1000&auto=format&fit=crop',
-            'principles' => [
-                ['id' => 'p-1', 'title' => 'Listening First', 'description' => 'Every project begins with consultations to understand priority needs.', 'icon' => 'Ear', 'iconBg' => 'bg-[#123f38]', 'iconColor' => 'text-[#fffdf8]'],
-                ['id' => 'p-2', 'title' => 'Community Driven', 'description' => 'Local champions lead project execution, fostering ownership.', 'icon' => 'HandHeart', 'iconBg' => 'bg-[#f2ad3b]', 'iconColor' => 'text-[#183a35]'],
-                ['id' => 'p-3', 'title' => 'Sustainable Growth', 'description' => 'Focusing on long-term capacity building rather than temporary relief.', 'icon' => 'Sprout', 'iconBg' => 'bg-[#28745e]', 'iconColor' => 'text-[#fffdf8]'],
-            ],
+            'eyebrow' => '',
+            'title' => '',
+            'copy' => '',
+            'image' => '',
+            'principles' => [],
         ];
 
         $defaultSupport = [
-            'eyebrow' => 'Make A Difference Today',
-            'title' => 'Your Generosity Can Change A Child’s World Forever',
-            'copy' => 'Join hands with ACT Charitable Trust today. Every contribution fuels education, healthcare, and meal programs.',
-            'image' => 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=1920&auto=format&fit=crop',
-            'ctaText' => 'Send Us An Email / Donate Now',
+            'eyebrow' => '',
+            'title' => '',
+            'copy' => '',
+            'image' => '',
+            'ctaText' => '',
         ];
 
         $defaultPayment = [
-            'qrCodeImage' => 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=actcharitabletrust@upi&pn=ACT%20Charitable%20Trust&cu=INR',
-            'upiId' => 'actcharitabletrust@upi',
-            'accountName' => 'ACT Charitable Trust',
-            'bankName' => 'State Bank of India',
-            'accountNumber' => '98765432101234',
-            'ifscCode' => 'SBIN0001234',
-            'instructions' => 'Scan this QR code using any UPI app (Google Pay, PhonePe, Paytm, BHIM) to contribute directly.',
-            'enableQrDonation' => true,
+            'qrCodeImage' => '',
+            'upiId' => '',
+            'accountName' => '',
+            'bankName' => '',
+            'accountNumber' => '',
+            'ifscCode' => '',
+            'instructions' => '',
+            'enableQrDonation' => false,
         ];
 
-        $defaultImpactStats = [
-            ['id' => 'stat-1', 'stat' => '50,000+', 'label' => 'Lives Positively Impacted', 'iconName' => 'Users'],
-            ['id' => 'stat-2', 'stat' => '120+', 'label' => 'Village Empowerment Centers', 'iconName' => 'Home'],
-            ['id' => 'stat-3', 'stat' => '15,000+', 'label' => 'Children Educated', 'iconName' => 'GraduationCap'],
-            ['id' => 'stat-4', 'stat' => '98%', 'label' => 'Direct Impact Rate', 'iconName' => 'CheckCircle2'],
-        ];
+        $defaultImpactStats = [];
 
         $programsMeta = $settings['programs_meta'] ?? [
-            'eyebrow' => 'What We Do',
-            'title' => 'Comprehensive Programs Designed For Real Change',
-            'copy' => 'We focus on four foundational pillars of human development to create lasting generational change.',
+            'eyebrow' => '',
+            'title' => '',
+            'copy' => '',
         ];
 
         $galleryMeta = $settings['gallery_meta'] ?? [
-            'eyebrow' => 'Moments Of Hope',
-            'title' => 'Witness Our Impact In Action',
-            'copy' => 'Real stories, real faces, and vibrant moments of change captured across our centers.',
+            'eyebrow' => '',
+            'title' => '',
+            'copy' => '',
         ];
 
         $heroMeta = $settings['hero_meta'] ?? [
-            'ctaText' => 'Explore Our Programs',
+            'ctaText' => '',
         ];
 
         $content = [

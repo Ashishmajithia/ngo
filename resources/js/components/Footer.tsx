@@ -46,11 +46,11 @@ export const Footer: React.FC = () => {
                   <img
                     src={brand.logo}
                     alt={brand.name}
-                    className="h-10 w-auto max-w-[200px] object-contain"
+                    className="h-12 sm:h-16 w-auto max-w-[240px] sm:max-w-[320px] object-contain"
                   />
                 ) : (
                   <>
-                    <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#d9e1d7] bg-white shadow-sm shrink-0">
+                    <span className="relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center overflow-hidden rounded-xl border border-[#d9e1d7] bg-white shadow-sm shrink-0">
                       <img
                         src={brand.logo}
                         alt={brand.name}

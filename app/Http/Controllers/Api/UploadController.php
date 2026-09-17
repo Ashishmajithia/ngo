@@ -9,56 +9,70 @@ class UploadController extends Controller
 {
     public function upload(Request $request)
     {
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
-            $destinationPath = public_path('uploads');
-
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0777, true);
-            }
-
-            $file->move($destinationPath, $filename);
-
-            return response()->json([
-                'success' => true,
-                'url' => '/uploads/' . $filename,
-                'filename' => $filename,
-            ]);
+        $destinationPath = public_path('uploads');
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0777, true);
         }
 
-        // Handle base64 upload
-        if ($request->has('image')) {
-            $imageData = $request->input('image');
-            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
-                $imageData = substr($imageData, strpos($imageData, ',') + 1);
-                $type = strtolower($type[1]); // jpg, png, gif, webp
+        $uploadedUrls = [];
+        $uploadedFilenames = [];
 
-                $imageData = base64_decode($imageData);
-                if ($imageData === false) {
-                    return response()->json(['success' => false, 'error' => 'base64_decode failed'], 400);
-                }
+        // 1. Check for array of files: files, files[], or file
+        $fileInputs = [];
+        if ($request->hasFile('files')) {
+            $f = $request->file('files');
+            $fileInputs = is_array($f) ? $f : [$f];
+        } elseif ($request->hasFile('file')) {
+            $f = $request->file('file');
+            $fileInputs = is_array($f) ? $f : [$f];
+        }
 
-                $filename = 'img_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 6) . '.' . $type;
-                $destinationPath = public_path('uploads');
-
-                if (!file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0777, true);
-                }
-
-                file_put_contents($destinationPath . '/' . $filename, $imageData);
-
-                return response()->json([
-                    'success' => true,
-                    'url' => '/uploads/' . $filename,
-                    'filename' => $filename,
-                ]);
+        foreach ($fileInputs as $file) {
+            if ($file && $file->isValid()) {
+                $ext = $file->getClientOriginalExtension() ?: 'jpg';
+                $cleanOriginal = preg_replace('/[^a-zA-Z0-9_-]/', '', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+                $filename = 'up_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . ($cleanOriginal ? '_' . substr($cleanOriginal, 0, 20) : '') . '.' . strtolower($ext);
+                $file->move($destinationPath, $filename);
+                $uploadedUrls[] = '/uploads/' . $filename;
+                $uploadedFilenames[] = $filename;
             }
+        }
+
+        // 2. Handle base64 upload if no multipart files
+        if (empty($uploadedUrls) && ($request->has('image') || $request->has('images'))) {
+            $rawImages = $request->input('images') ?? [$request->input('image')];
+            if (!is_array($rawImages)) {
+                $rawImages = [$rawImages];
+            }
+
+            foreach ($rawImages as $imageData) {
+                if (is_string($imageData) && preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                    $typeExt = strtolower($type[1]);
+                    $pureBase64 = substr($imageData, strpos($imageData, ',') + 1);
+                    $decoded = base64_decode($pureBase64);
+                    if ($decoded !== false) {
+                        $filename = 'b64_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '.' . ($typeExt === 'jpeg' ? 'jpg' : $typeExt);
+                        file_put_contents($destinationPath . '/' . $filename, $decoded);
+                        $uploadedUrls[] = '/uploads/' . $filename;
+                        $uploadedFilenames[] = $filename;
+                    }
+                }
+            }
+        }
+
+        if (!empty($uploadedUrls)) {
+            return response()->json([
+                'success' => true,
+                'url' => $uploadedUrls[0],
+                'urls' => $uploadedUrls,
+                'filename' => $uploadedFilenames[0],
+                'filenames' => $uploadedFilenames,
+            ]);
         }
 
         return response()->json([
             'success' => false,
-            'error' => 'No file or image uploaded',
+            'error' => 'No valid image file or data received',
         ], 400);
     }
 }

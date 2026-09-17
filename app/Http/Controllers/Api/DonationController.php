@@ -22,6 +22,7 @@ class DonationController extends Controller
                 'phone' => $d->phone ?? '',
                 'utr' => $d->utr ?? '',
                 'paymentMethod' => $d->payment_method ?? 'UPI QR',
+                'screenshot' => $d->screenshot ?? '',
                 'status' => $d->status ?? 'pending',
                 'createdAt' => $d->created_at->toISOString(),
             ];
@@ -44,6 +45,15 @@ class DonationController extends Controller
     {
         $id = $request->id ?: 'don-' . time() . '-' . substr(bin2hex(random_bytes(4)), 0, 5);
 
+        $screenshot = $request->screenshot ?: '';
+        if ($request->hasFile('screenshot')) {
+            $file = $request->file('screenshot');
+            $ext = $file->getClientOriginalExtension() ?: 'jpg';
+            $filename = 'pay_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '.' . strtolower($ext);
+            $file->move(public_path('uploads'), $filename);
+            $screenshot = '/uploads/' . $filename;
+        }
+
         $donation = Donation::create([
             'id' => $id,
             'amount' => (string)($request->amount ?: '0'),
@@ -53,6 +63,7 @@ class DonationController extends Controller
             'phone' => $request->phone ?: '',
             'utr' => $request->utr ?: '',
             'payment_method' => $request->paymentMethod ?: 'UPI QR',
+            'screenshot' => $screenshot,
             'status' => 'pending',
         ]);
 

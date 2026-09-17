@@ -16,32 +16,22 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Try local storage cache first
-    try {
-      const saved = localStorage.getItem('act_charitable_trust_blogs_v3');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setBlogs(parsed);
-        }
-      }
-    } catch {}
-
-    // 2. Fetch from API
     async function fetchBlogs() {
       try {
         const res = await fetch('/api/blogs');
         if (res.ok) {
           const json = await res.json();
-          if (json.success && Array.isArray(json.blogs) ) {
+          if (json.success && Array.isArray(json.blogs)) {
             setBlogs(json.blogs);
-            try {
-              localStorage.setItem('act_charitable_trust_blogs_v3', JSON.stringify(json.blogs));
-            } catch {}
+          } else {
+            setBlogs([]);
           }
+        } else {
+          setBlogs([]);
         }
       } catch (err) {
         console.warn('Failed to fetch blogs from API:', err);
+        setBlogs([]);
       } finally {
         setLoading(false);
       }
@@ -50,6 +40,8 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
   }, []);
 
   const categories = ['All', 'Education', 'Healthcare', 'Women Empowerment', 'Nutrition'];
+
+  if (blogs.length === 0) return null;
 
   const filteredBlogs = selectedCategory === 'All'
     ? blogs

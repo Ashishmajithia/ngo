@@ -16,9 +16,9 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
 
 export const ImpactStats: React.FC = () => {
   const { content } = useContent();
-  const stats = (Array.isArray(content?.impactStats) && content.impactStats.length > 0)
-    ? content.impactStats
-    : defaultContent.impactStats;
+  const stats = Array.isArray(content?.impactStats) ? content.impactStats : [];
+
+  if (stats.length === 0) return null;
 
   return (
     <section id="impact" className="bg-[#28745e] text-[#fffdf8] py-12 relative overflow-hidden">

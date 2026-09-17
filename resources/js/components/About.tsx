@@ -7,9 +7,9 @@ import { defaultContent } from '@/data/initialContent';
 
 export const About: React.FC = () => {
   const { content } = useContent();
-  const about = (content && content.about && typeof content.about === 'object') 
-    ? content.about 
-    : defaultContent.about;
+  const about = content?.about;
+
+  if (!about?.title && !about?.image && !about?.copyOne) return null;
 
   return (
     <section id="about" className="mx-auto max-w-7xl px-5 py-20 lg:px-8 lg:py-28">
@@ -41,7 +41,7 @@ export const About: React.FC = () => {
         <div className="photo-frame relative w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={about?.image || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop"}
+            src={about?.image}
             alt={about?.title || 'About us'}
             className="h-[400px] sm:h-[480px] w-full rounded-[2rem] object-cover shadow-2xl transition duration-500 hover:scale-[1.01]"
           />

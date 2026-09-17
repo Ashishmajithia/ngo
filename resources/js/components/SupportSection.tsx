@@ -7,19 +7,17 @@ import { defaultContent } from '@/data/initialContent';
 
 export const SupportSection: React.FC = () => {
   const { content, setIsDonateOpen } = useContent();
-  const support = (content && content.support && typeof content.support === 'object')
-    ? content.support
-    : defaultContent.support;
-  const brand = (content && content.brand && typeof content.brand === 'object')
-    ? content.brand
-    : defaultContent.brand;
+  const support = content?.support;
+  const brand = content?.brand;
+
+  if (!support?.title && !support?.image && !support?.copy) return null;
 
   return (
     <section id="support" className="px-5 py-20 lg:px-8 lg:py-28 bg-[#fffdf8]">
       <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] shadow-2xl">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={support?.image || "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=1920&auto=format&fit=crop"}
+          src={support?.image}
           alt={support?.title || 'Support ACT'}
           className="absolute inset-0 h-full w-full object-cover"
         />
