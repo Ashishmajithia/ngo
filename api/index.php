@@ -58,12 +58,9 @@ foreach ($defaults as $key => $val) {
     }
 }
 
-// Pre-seed package and services cache from build if available
-if (!file_exists('/tmp/storage/framework/cache/packages.php') && file_exists(__DIR__ . '/../bootstrap/cache/packages.php')) {
+// Pre-seed package cache from build
+if (file_exists(__DIR__ . '/../bootstrap/cache/packages.php')) {
     @copy(__DIR__ . '/../bootstrap/cache/packages.php', '/tmp/storage/framework/cache/packages.php');
-}
-if (!file_exists('/tmp/storage/framework/cache/services.php') && file_exists(__DIR__ . '/../bootstrap/cache/services.php')) {
-    @copy(__DIR__ . '/../bootstrap/cache/services.php', '/tmp/storage/framework/cache/services.php');
 }
 
 // Forward to Laravel's index.php
