@@ -43,6 +43,11 @@ $defaults = [
     'CACHE_DRIVER' => 'array',
     'LOG_CHANNEL' => 'stderr',
     'VIEW_COMPILED_PATH' => '/tmp/storage/framework/views',
+    'APP_PACKAGES_CACHE' => '/tmp/storage/framework/cache/packages.php',
+    'APP_SERVICES_CACHE' => '/tmp/storage/framework/cache/services.php',
+    'APP_CONFIG_CACHE' => '/tmp/storage/framework/cache/config.php',
+    'APP_ROUTES_CACHE' => '/tmp/storage/framework/cache/routes.php',
+    'APP_EVENTS_CACHE' => '/tmp/storage/framework/cache/events.php',
 ];
 
 foreach ($defaults as $key => $val) {
@@ -51,6 +56,14 @@ foreach ($defaults as $key => $val) {
         $_ENV[$key] = $val;
         $_SERVER[$key] = $val;
     }
+}
+
+// Pre-seed package and services cache from build if available
+if (!file_exists('/tmp/storage/framework/cache/packages.php') && file_exists(__DIR__ . '/../bootstrap/cache/packages.php')) {
+    @copy(__DIR__ . '/../bootstrap/cache/packages.php', '/tmp/storage/framework/cache/packages.php');
+}
+if (!file_exists('/tmp/storage/framework/cache/services.php') && file_exists(__DIR__ . '/../bootstrap/cache/services.php')) {
+    @copy(__DIR__ . '/../bootstrap/cache/services.php', '/tmp/storage/framework/cache/services.php');
 }
 
 // Forward to Laravel's index.php

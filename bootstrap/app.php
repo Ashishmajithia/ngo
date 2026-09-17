@@ -11,11 +11,24 @@
 |
 */
 
+// In serverless environments (Vercel/Lambda), filesystem is read-only except /tmp
+if (isset($_ENV['VERCEL']) || getenv('VERCEL') || !is_writable(__DIR__ . '/cache')) {
+    putenv('APP_PACKAGES_CACHE=/tmp/storage/framework/cache/packages.php');
+    putenv('APP_SERVICES_CACHE=/tmp/storage/framework/cache/services.php');
+    putenv('APP_CONFIG_CACHE=/tmp/storage/framework/cache/config.php');
+    putenv('APP_ROUTES_CACHE=/tmp/storage/framework/cache/routes.php');
+    putenv('APP_EVENTS_CACHE=/tmp/storage/framework/cache/events.php');
+    $_ENV['APP_PACKAGES_CACHE'] = '/tmp/storage/framework/cache/packages.php';
+    $_ENV['APP_SERVICES_CACHE'] = '/tmp/storage/framework/cache/services.php';
+    $_ENV['APP_CONFIG_CACHE'] = '/tmp/storage/framework/cache/config.php';
+    $_ENV['APP_ROUTES_CACHE'] = '/tmp/storage/framework/cache/routes.php';
+    $_ENV['APP_EVENTS_CACHE'] = '/tmp/storage/framework/cache/events.php';
+}
+
 $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
 
-// In serverless environments (Vercel/Lambda), filesystem is read-only except /tmp
 if (isset($_ENV['VERCEL']) || getenv('VERCEL') || !is_writable($app->storagePath())) {
     $app->useStoragePath('/tmp/storage');
 }

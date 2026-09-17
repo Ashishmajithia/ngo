@@ -1,2 +1,4 @@
-*
+# Allow cached manifests for serverless immutable filesystems (Vercel)
+!packages.php
+!services.php
 !.gitignore
