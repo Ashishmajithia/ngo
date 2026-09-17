@@ -131,18 +131,18 @@ class ContentController extends Controller
             'brand' => $settings['brand'] ?? $defaultBrand,
             'hero' => [
                 'slides' => $banners,
-                'ctaText' => $heroMeta['ctaText'] ?? 'Explore Our Programs',
+                'ctaText' => $heroMeta['ctaText'] ?? 'Donate & Support',
             ],
             'programs' => [
-                'eyebrow' => $programsMeta['eyebrow'] ?? 'What We Do',
-                'title' => $programsMeta['title'] ?? 'Comprehensive Programs Designed For Real Change',
-                'copy' => $programsMeta['copy'] ?? 'We focus on four foundational pillars of human development to create lasting generational change.',
+                'eyebrow' => $programsMeta['eyebrow'] ?? '',
+                'title' => $programsMeta['title'] ?? '',
+                'copy' => $programsMeta['copy'] ?? '',
                 'items' => $programs,
             ],
             'gallery' => [
-                'eyebrow' => $galleryMeta['eyebrow'] ?? 'Moments Of Hope',
-                'title' => $galleryMeta['title'] ?? 'Witness Our Impact In Action',
-                'copy' => $galleryMeta['copy'] ?? 'Real stories, real faces, and vibrant moments of change captured across our centers.',
+                'eyebrow' => $galleryMeta['eyebrow'] ?? '',
+                'title' => $galleryMeta['title'] ?? '',
+                'copy' => $galleryMeta['copy'] ?? '',
                 'items' => $gallery,
             ],
             'about' => $settings['about'] ?? $defaultAbout,
@@ -175,18 +175,21 @@ class ContentController extends Controller
         if (isset($body['hero']['slides']) && is_array($body['hero']['slides'])) {
             $slideIds = [];
             foreach ($body['hero']['slides'] as $index => $slide) {
-                if (!empty($slide['id']) && !empty($slide['title'])) {
-                    $slideIds[] = $slide['id'];
+                $hasContent = !empty($slide['image']) || !empty($slide['title']);
+                if ($hasContent) {
+                    $id = !empty($slide['id']) ? $slide['id'] : 'slide-' . time() . '-' . $index;
+                    $slideIds[] = $id;
                     Banner::updateOrCreate(
-                        ['id' => $slide['id']],
+                        ['id' => $id],
                         [
-                            'title' => $slide['title'],
+                            'title' => !empty($slide['title']) ? $slide['title'] : 'Banner ' . ($index + 1),
                             'eyebrow' => $slide['eyebrow'] ?? '',
                             'copy' => $slide['copy'] ?? '',
                             'image' => $slide['image'] ?? '',
-                            'cta_text' => $slide['ctaText'] ?? 'Explore Our Programs',
+                            'cta_text' => $slide['ctaText'] ?? 'Donate & Support',
                             'cta_link' => $slide['ctaLink'] ?? '#programs',
                             'order' => $index,
+                            'is_active' => true,
                             'created_by' => $updatedBy,
                         ]
                     );
@@ -194,6 +197,8 @@ class ContentController extends Controller
             }
             if (!empty($slideIds)) {
                 Banner::whereNotIn('id', $slideIds)->delete();
+            } else {
+                Banner::query()->delete();
             }
         }
 
@@ -205,12 +210,14 @@ class ContentController extends Controller
         if (isset($body['programs']['items']) && is_array($body['programs']['items'])) {
             $progIds = [];
             foreach ($body['programs']['items'] as $index => $item) {
-                if (!empty($item['id']) && !empty($item['title'])) {
-                    $progIds[] = $item['id'];
+                $hasContent = !empty($item['title']) || !empty($item['image']);
+                if ($hasContent) {
+                    $id = !empty($item['id']) ? $item['id'] : 'prog-' . time() . '-' . $index;
+                    $progIds[] = $id;
                     Program::updateOrCreate(
-                        ['id' => $item['id']],
+                        ['id' => $id],
                         [
-                            'title' => $item['title'],
+                            'title' => !empty($item['title']) ? $item['title'] : 'Program ' . ($index + 1),
                             'description' => $item['description'] ?? '',
                             'image' => $item['image'] ?? '',
                             'icon' => $item['icon'] ?? 'Heart',
@@ -218,6 +225,7 @@ class ContentController extends Controller
                             'badge_text_color' => $item['badgeTextColor'] ?? 'text-[#8b590b]',
                             'grid_span' => $item['gridSpan'] ?? null,
                             'order' => $index,
+                            'is_active' => true,
                             'created_by' => $updatedBy,
                         ]
                     );
@@ -225,14 +233,16 @@ class ContentController extends Controller
             }
             if (!empty($progIds)) {
                 Program::whereNotIn('id', $progIds)->delete();
+            } else {
+                Program::query()->delete();
             }
         }
 
         if (isset($body['programs'])) {
             Setting::set('programs_meta', [
-                'eyebrow' => $body['programs']['eyebrow'] ?? 'What We Do',
-                'title' => $body['programs']['title'] ?? 'Comprehensive Programs Designed For Real Change',
-                'copy' => $body['programs']['copy'] ?? 'We focus on four foundational pillars of human development to create lasting generational change.',
+                'eyebrow' => $body['programs']['eyebrow'] ?? '',
+                'title' => $body['programs']['title'] ?? '',
+                'copy' => $body['programs']['copy'] ?? '',
             ], $updatedBy);
         }
 
@@ -240,16 +250,19 @@ class ContentController extends Controller
         if (isset($body['gallery']['items']) && is_array($body['gallery']['items'])) {
             $galIds = [];
             foreach ($body['gallery']['items'] as $index => $item) {
-                if (!empty($item['id']) && !empty($item['title'])) {
-                    $galIds[] = $item['id'];
+                $hasContent = !empty($item['title']) || !empty($item['image']);
+                if ($hasContent) {
+                    $id = !empty($item['id']) ? $item['id'] : 'gal-' . time() . '-' . $index;
+                    $galIds[] = $id;
                     GalleryItem::updateOrCreate(
-                        ['id' => $item['id']],
+                        ['id' => $id],
                         [
-                            'title' => $item['title'],
+                            'title' => !empty($item['title']) ? $item['title'] : 'Gallery ' . ($index + 1),
                             'caption' => $item['caption'] ?? '',
                             'image' => $item['image'] ?? '',
                             'grid_span' => $item['gridSpan'] ?? null,
                             'order' => $index,
+                            'is_active' => true,
                             'created_by' => $updatedBy,
                         ]
                     );
@@ -257,14 +270,16 @@ class ContentController extends Controller
             }
             if (!empty($galIds)) {
                 GalleryItem::whereNotIn('id', $galIds)->delete();
+            } else {
+                GalleryItem::query()->delete();
             }
         }
 
         if (isset($body['gallery'])) {
             Setting::set('gallery_meta', [
-                'eyebrow' => $body['gallery']['eyebrow'] ?? 'Moments Of Hope',
-                'title' => $body['gallery']['title'] ?? 'Witness Our Impact In Action',
-                'copy' => $body['gallery']['copy'] ?? 'Real stories, real faces, and vibrant moments of change captured across our centers.',
+                'eyebrow' => $body['gallery']['eyebrow'] ?? '',
+                'title' => $body['gallery']['title'] ?? '',
+                'copy' => $body['gallery']['copy'] ?? '',
             ], $updatedBy);
         }
 

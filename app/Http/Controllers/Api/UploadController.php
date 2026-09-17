@@ -10,9 +10,7 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         $destinationPath = public_path('uploads');
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0777, true);
-        }
+        $canWriteDisk = is_dir($destinationPath) ? is_writable($destinationPath) : @mkdir($destinationPath, 0777, true);
 
         $uploadedUrls = [];
         $uploadedFilenames = [];
@@ -32,9 +30,25 @@ class UploadController extends Controller
                 $ext = $file->getClientOriginalExtension() ?: 'jpg';
                 $cleanOriginal = preg_replace('/[^a-zA-Z0-9_-]/', '', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
                 $filename = 'up_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . ($cleanOriginal ? '_' . substr($cleanOriginal, 0, 20) : '') . '.' . strtolower($ext);
-                $file->move($destinationPath, $filename);
-                $uploadedUrls[] = '/uploads/' . $filename;
-                $uploadedFilenames[] = $filename;
+
+                $savedOnDisk = false;
+                if ($canWriteDisk) {
+                    try {
+                        $file->move($destinationPath, $filename);
+                        $uploadedUrls[] = '/uploads/' . $filename;
+                        $uploadedFilenames[] = $filename;
+                        $savedOnDisk = true;
+                    } catch (\Throwable $e) {
+                        $savedOnDisk = false;
+                    }
+                }
+
+                if (!$savedOnDisk) {
+                    $mime = $file->getMimeType() ?: 'image/jpeg';
+                    $dataUrl = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+                    $uploadedUrls[] = $dataUrl;
+                    $uploadedFilenames[] = $filename;
+                }
             }
         }
 
@@ -49,11 +63,21 @@ class UploadController extends Controller
                 if (is_string($imageData) && preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
                     $typeExt = strtolower($type[1]);
                     $pureBase64 = substr($imageData, strpos($imageData, ',') + 1);
-                    $decoded = base64_decode($pureBase64);
-                    if ($decoded !== false) {
-                        $filename = 'b64_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '.' . ($typeExt === 'jpeg' ? 'jpg' : $typeExt);
-                        file_put_contents($destinationPath . '/' . $filename, $decoded);
-                        $uploadedUrls[] = '/uploads/' . $filename;
+                    $filename = 'b64_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '.' . ($typeExt === 'jpeg' ? 'jpg' : $typeExt);
+
+                    $savedOnDisk = false;
+                    if ($canWriteDisk) {
+                        $decoded = base64_decode($pureBase64);
+                        if ($decoded !== false && @file_put_contents($destinationPath . '/' . $filename, $decoded)) {
+                            $uploadedUrls[] = '/uploads/' . $filename;
+                            $uploadedFilenames[] = $filename;
+                            $savedOnDisk = true;
+                        }
+                    }
+
+                    if (!$savedOnDisk) {
+                        // Store the base64 URL directly in DB
+                        $uploadedUrls[] = $imageData;
                         $uploadedFilenames[] = $filename;
                     }
                 }

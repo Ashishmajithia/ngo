@@ -570,7 +570,38 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="mt-6 space-y-6">
-                {content.hero.slides.map((slide, idx) => (
+                {(!content.hero.slides || content.hero.slides.length === 0) ? (
+                  <div className="p-12 text-center rounded-2xl bg-white border border-dashed border-[#dce7dc]">
+                    <p className="text-sm font-bold text-[#183a35]">No banner slides configured yet.</p>
+                    <p className="text-xs text-[#58706a] mt-1">Upload a background image and title using the button above to add your first hero banner.</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSlide = {
+                          id: `slide-${Date.now()}`,
+                          title: '',
+                          eyebrow: '',
+                          copy: '',
+                          image: '',
+                          ctaText: 'Donate & Support',
+                          ctaLink: '#programs',
+                        };
+                        setContent((prev) => ({
+                          ...prev,
+                          hero: {
+                            ...prev.hero,
+                            slides: [...(prev.hero.slides || []), newSlide],
+                          },
+                        }));
+                      }}
+                      className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#123f38] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#28745e] transition"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add First Banner Slide</span>
+                    </button>
+                  </div>
+                ) : (
+                  content.hero.slides.map((slide, idx) => (
                   <div key={slide.id || idx} className="p-5 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -583,28 +614,26 @@ export default function AdminDashboardPage() {
                         <span className="text-[10px] font-mono bg-white border border-[#dce7dc] px-2 py-0.5 rounded text-[#58706a]">
                           1920 × 850 px
                         </span>
-                        {content.hero.slides.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (confirm(`Are you sure you want to delete banner slide #${idx + 1}?`)) {
-                                setContent((prev) => ({
-                                  ...prev,
-                                  hero: {
-                                    ...prev.hero,
-                                    slides: prev.hero.slides.filter((_, i) => i !== idx),
-                                  },
-                                }));
-                                showToastMsg(`Banner slide #${idx + 1} deleted.`);
-                              }
-                            }}
-                            className="flex items-center gap-1 text-[11px] font-bold text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition"
-                            title="Delete this banner slide"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Delete Slide</span>
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete banner slide #${idx + 1}?`)) {
+                              setContent((prev) => ({
+                                ...prev,
+                                hero: {
+                                  ...prev.hero,
+                                  slides: prev.hero.slides.filter((_, i) => i !== idx),
+                                },
+                              }));
+                              showToastMsg(`Banner slide #${idx + 1} deleted. Click "Save Banners" to update database.`);
+                            }
+                          }}
+                          className="flex items-center gap-1 text-[11px] font-bold text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1 rounded-lg transition"
+                          title="Delete this banner slide"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete Slide</span>
+                        </button>
                       </div>
                     </div>
 
@@ -683,18 +712,20 @@ export default function AdminDashboardPage() {
                       />
                     </div>
                   </div>
-                ))}
+                ))
+              )}
 
-                {/* Add Another Banner Slide Button */}
+              {/* Add Another Banner Slide Button */}
+              {content.hero.slides && content.hero.slides.length > 0 && (
                 <button
                   type="button"
                   onClick={() => {
                     const newSlide: HeroSlide = {
                       id: 'slide-' + Date.now(),
-                      image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1920&auto=format&fit=crop',
-                      eyebrow: 'New Initiative • Community Support',
-                      title: 'Empowering Communities & Changing Lives',
-                      copy: 'Dedicated to providing grassroots support, high quality education, and healthcare access to all.',
+                      image: '',
+                      eyebrow: '',
+                      title: '',
+                      copy: '',
                     };
                     setContent((prev) => ({
                       ...prev,
@@ -703,14 +734,15 @@ export default function AdminDashboardPage() {
                         slides: [...prev.hero.slides, newSlide],
                       },
                     }));
-                    showToastMsg('New banner slide added!');
+                    showToastMsg('New banner slide added. Upload your image and enter details!');
                   }}
                   className="w-full py-4 rounded-2xl border-2 border-dashed border-[#28745e]/40 bg-[#f8f4e9]/50 hover:bg-[#e8f0e8] text-[#28745e] font-bold text-xs flex items-center justify-center gap-2 transition"
                 >
                   <Plus className="w-4 h-4" />
                   <span>+ Add Another Banner Slide</span>
                 </button>
-              </div>
+              )}
+            </div>
             </div>
           )}
 

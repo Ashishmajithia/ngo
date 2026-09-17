@@ -117,35 +117,39 @@ export const Hero: React.FC = () => {
       <div className="relative z-20 mx-auto flex min-h-[620px] max-w-7xl items-center px-5 py-24 lg:px-8 lg:py-32">
         <div className="max-w-3xl">
           {/* Eyebrow */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#f59e0b]/80 bg-[#002244]/80 backdrop-blur px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-[.16em] text-[#fbbf24] shadow-md">
-            <Sparkles className="w-4 h-4 text-[#fbbf24]" />
-            <span>{current?.eyebrow || 'REG.NO.220 • Rising Hope for Children'}</span>
-          </div>
+          {(current?.eyebrow || content?.brand?.regNo) && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#f59e0b]/80 bg-[#002244]/80 backdrop-blur px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-[.16em] text-[#fbbf24] shadow-md">
+              <Sparkles className="w-4 h-4 text-[#fbbf24]" />
+              <span>{current?.eyebrow || `${content.brand.regNo} • ${content.brand.tagline || 'Rising Hope for Children'}`}</span>
+            </div>
+          )}
 
           {/* Dynamic Title */}
           <h1 className="display-font mt-6 font-extrabold leading-[1.08] tracking-tight text-4xl sm:text-5xl md:text-6xl text-white">
-            {current?.title || 'Rising Hope for Children Across Every Community'}
+            {current?.title || content.brand.name || 'ACT Charitable Trust'}
           </h1>
 
           {/* Dynamic Copy */}
-          <p className="mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-blue-100/90 font-medium">
-            {current?.copy || 'ACT Charitable Trust (REG.NO.220) empowers children through quality education, wholesome nutrition, healthcare, and loving care.'}
-          </p>
+          {(current?.copy || content?.brand?.tagline) && (
+            <p className="mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-blue-100/90 font-medium">
+              {current?.copy || content.brand.tagline}
+            </p>
+          )}
 
           {/* CTA Link */}
           <div className="mt-8 flex flex-wrap gap-4 items-center">
-            <a
-              href={current?.cta_link || current?.ctaLink || '#programs'}
-              className="focusable inline-flex items-center gap-2 rounded-full bg-[#f59e0b] hover:bg-[#fbbf24] px-7 py-4 font-bold text-[#002b54] shadow-xl transition hover:-translate-y-0.5"
+            <button
+              onClick={() => setIsDonateOpen(true)}
+              className="focusable inline-flex items-center gap-2 rounded-full bg-[#d81b60] hover:bg-[#c2185b] px-7 py-4 font-extrabold text-white shadow-xl shadow-[#d81b60]/25 transition hover:-translate-y-0.5"
             >
-              <span>{hero?.ctaText || 'Explore Our Programs'}</span>
+              <span>{current?.cta_text || current?.ctaText || content?.brand?.primaryCtaText || 'Donate & Support'}</span>
               <ArrowDownRight className="w-5 h-5" />
-            </a>
+            </button>
             <a
-              href="#stories"
+              href="/#about"
               className="focusable inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur px-6 py-4 font-bold text-white hover:bg-white/20 transition"
             >
-              <span>Read Stories of Hope</span>
+              <span>Learn More</span>
             </a>
           </div>
         </div>
