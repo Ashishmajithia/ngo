@@ -10,17 +10,6 @@ $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
 $_SERVER['PHP_SELF'] = '/index.php';
 
-if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/debug_test')) {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? null,
-        'SCRIPT_NAME' => $_SERVER['SCRIPT_NAME'] ?? null,
-        'PHP_SELF' => $_SERVER['PHP_SELF'] ?? null,
-        'PATH_INFO' => $_SERVER['PATH_INFO'] ?? null,
-        'QUERY_STRING' => $_SERVER['QUERY_STRING'] ?? null,
-    ], JSON_PRETTY_PRINT);
-    exit;
-}
 
 // Ensure /tmp writable paths exist on Vercel serverless environment
 $storageDirs = [
