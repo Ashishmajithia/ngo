@@ -100,24 +100,38 @@ export const Footer: React.FC = () => {
           {/* Contact Details */}
           <div>
             <h4 className="font-bold text-sm text-[#123f38] uppercase tracking-wider mb-3">
-              Contact Info
+              Trust Details
             </h4>
-            <ul className="space-y-2.5 text-xs text-[#58706a]">
-              <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-[#28745e] shrink-0 mt-0.5" />
-                <span>{brand.location}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#28745e] shrink-0" />
-                <a href={`mailto:${brand.email}`} className="hover:underline text-[#183a35]">
-                  {brand.email}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-[#28745e] shrink-0" />
-                <span className="text-[#183a35] font-semibold">{brand.phone}</span>
-              </li>
-            </ul>
+            {(brand.location || brand.email || brand.phone) ? (
+              <ul className="space-y-2.5 text-xs text-[#58706a]">
+                {brand.location && (
+                  <li className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-[#28745e] shrink-0 mt-0.5" />
+                    <span>{brand.location}</span>
+                  </li>
+                )}
+                {brand.email && (
+                  <li className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-[#28745e] shrink-0" />
+                    <a href={`mailto:${brand.email}`} className="hover:underline text-[#183a35]">
+                      {brand.email}
+                    </a>
+                  </li>
+                )}
+                {brand.phone && (
+                  <li className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-[#28745e] shrink-0" />
+                    <span className="text-[#183a35] font-semibold">{brand.phone}</span>
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <div className="space-y-2 text-xs text-[#58706a]">
+                <p className="font-bold text-[#1b8744] uppercase tracking-wider">{brand.regNo || 'REG.NO.220'}</p>
+                <p className="text-[#183a35] font-semibold">{brand.tagline || 'Rising Hope for Children'}</p>
+                <p className="text-[11px] text-[#58706a]">Official Registered Charitable Trust</p>
+              </div>
+            )}
           </div>
 
           {/* UPI Scan & Pay QR Card */}

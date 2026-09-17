@@ -20,10 +20,18 @@ export const ImpactStats: React.FC = () => {
 
   if (stats.length === 0) return null;
 
+  const layoutClass = stats.length === 1
+    ? 'flex justify-center items-center'
+    : stats.length === 2
+      ? 'grid grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto divide-y-2 sm:divide-y-0 sm:divide-x divide-white/20'
+      : stats.length === 3
+        ? 'grid grid-cols-1 sm:grid-cols-3 max-w-4xl mx-auto divide-y-2 sm:divide-y-0 sm:divide-x divide-white/20'
+        : 'grid grid-cols-2 gap-y-8 gap-x-4 md:grid-cols-4 divide-y-2 md:divide-y-0 md:divide-x divide-white/20';
+
   return (
     <section id="impact" className="bg-[#28745e] text-[#fffdf8] py-12 relative overflow-hidden">
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
-        <div className="grid grid-cols-2 gap-y-8 gap-x-4 md:grid-cols-4 divide-y-2 md:divide-y-0 md:divide-x divide-white/20">
+        <div className={layoutClass}>
           {stats.map((item) => {
             const IconComp = item.iconName ? iconMap[item.iconName] || Users : Users;
             return (

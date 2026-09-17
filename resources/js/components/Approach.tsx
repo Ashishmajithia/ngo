@@ -16,32 +16,39 @@ export const Approach: React.FC = () => {
   const approach = content?.approach;
   const principles = Array.isArray(approach?.principles) ? approach.principles : [];
 
-  if (principles.length === 0 && !approach?.title && !approach?.image) return null;
+  if (principles.length === 0 && !approach?.title && !approach?.image && !approach?.copy) return null;
 
   return (
     <section id="approach" className="px-5 py-20 lg:px-8 lg:py-28 bg-[#fffdf8]">
       <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-20">
         {/* Photo Frame Left */}
-        <div className="photo-frame relative order-2 lg:order-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={approach?.image}
-            alt={approach?.title || 'Our Approach'}
-            className="h-[380px] sm:h-[480px] w-full rounded-[2rem] object-cover shadow-2xl"
-          />
-        </div>
+        {approach?.image && (
+          <div className="photo-frame relative order-2 lg:order-1">
+            <img
+              src={approach.image}
+              alt={approach.title || 'Our Approach'}
+              className="h-[380px] sm:h-[480px] w-full rounded-[2rem] object-cover shadow-2xl"
+            />
+          </div>
+        )}
 
         {/* Content Right */}
-        <div className="order-1 lg:order-2">
-          <p className="text-sm font-bold uppercase tracking-[.16em] text-[#28745e]">
-            {approach?.eyebrow || 'Our Principles'}
-          </p>
-          <h2 className="display-font mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-[#183a35]">
-            {approach?.title || 'How We Ensure Ethical & Long-Term Impact'}
-          </h2>
-          <p className="mt-5 text-lg leading-relaxed text-[#58706a]">
-            {approach?.copy || 'We collaborate with local elders, teachers, and youth leaders to craft tailored interventions that endure.'}
-          </p>
+        <div className={`order-1 ${approach?.image ? 'lg:order-2' : 'lg:col-span-2 max-w-3xl'}`}>
+          {approach?.eyebrow && (
+            <p className="text-sm font-bold uppercase tracking-[.16em] text-[#28745e]">
+              {approach.eyebrow}
+            </p>
+          )}
+          {approach?.title && (
+            <h2 className="display-font mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-[#183a35]">
+              {approach.title}
+            </h2>
+          )}
+          {approach?.copy && (
+            <p className="mt-5 text-lg leading-relaxed text-[#58706a]">
+              {approach.copy}
+            </p>
+          )}
 
           {/* Principles Cards */}
           <div className="mt-9 grid gap-4">

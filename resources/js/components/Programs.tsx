@@ -28,17 +28,25 @@ export const Programs: React.FC = () => {
     <section id="programs" className="bg-[#e8f0e8] px-5 py-20 lg:px-8 lg:py-28">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="max-w-2xl">
-          <p className="text-sm font-bold uppercase tracking-[.16em] text-[#28745e]">
-            {programs?.eyebrow || 'What We Do'}
-          </p>
-          <h2 className="display-font mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-[#183a35]">
-            {programs?.title || 'Comprehensive Programs Designed For Real Change'}
-          </h2>
-          <p className="mt-5 text-lg leading-relaxed text-[#58706a]">
-            {programs?.copy || 'We focus on key pillars of human development to create lasting generational change.'}
-          </p>
-        </div>
+        {(programs?.title || programs?.eyebrow || programs?.copy) && (
+          <div className="max-w-2xl">
+            {programs.eyebrow && (
+              <p className="text-sm font-bold uppercase tracking-[.16em] text-[#28745e]">
+                {programs.eyebrow}
+              </p>
+            )}
+            {programs.title && (
+              <h2 className="display-font mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-[#183a35]">
+                {programs.title}
+              </h2>
+            )}
+            {programs.copy && (
+              <p className="mt-5 text-lg leading-relaxed text-[#58706a]">
+                {programs.copy}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Program Cards Grid */}
         <div className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">

@@ -40,7 +40,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
 
   const categories = ['All', 'Child Education', 'Health & Nutrition', 'Youth Empowerment', 'Child Protection'];
 
-  if (blogs.length === 0 && !loading) return null;
+  if (loading || blogs.length === 0) return null;
 
   const filteredBlogs = selectedCategory === 'All'
     ? blogs

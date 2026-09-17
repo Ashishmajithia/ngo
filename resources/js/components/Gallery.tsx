@@ -19,17 +19,25 @@ export const Gallery: React.FC = () => {
     <section id="gallery" className="bg-[#123f38] px-5 py-20 lg:px-8 lg:py-28 text-[#fffdf8]">
       <div className="mx-auto max-w-7xl">
         {/* Section Header */}
-        <div className="max-w-2xl">
-          <p className="text-sm font-bold uppercase tracking-[.16em] text-[#f2ad3b]">
-            {gallery?.eyebrow || 'Moments Of Hope'}
-          </p>
-          <h2 className="display-font mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
-            {gallery?.title || 'Witness Our Impact In Action'}
-          </h2>
-          <p className="mt-5 text-lg leading-relaxed text-[#f8f4e9]/80">
-            {gallery?.copy || 'Real stories, real faces, and vibrant moments of change.'}
-          </p>
-        </div>
+        {(gallery?.title || gallery?.eyebrow || gallery?.copy) && (
+          <div className="max-w-2xl">
+            {gallery.eyebrow && (
+              <p className="text-sm font-bold uppercase tracking-[.16em] text-[#f2ad3b]">
+                {gallery.eyebrow}
+              </p>
+            )}
+            {gallery.title && (
+              <h2 className="display-font mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
+                {gallery.title}
+              </h2>
+            )}
+            {gallery.copy && (
+              <p className="mt-5 text-lg leading-relaxed text-[#f8f4e9]/80">
+                {gallery.copy}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Gallery Grid */}
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
