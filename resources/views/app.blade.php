@@ -27,7 +27,11 @@
             }
         }
     @endphp
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="preload" href="{{ $cssFile }}" as="style">
     <link rel="stylesheet" href="{{ $cssFile }}">
+    <link rel="modulepreload" href="{{ $jsFile }}">
     @if(!empty($initialContent))
     <script id="server-initial-content" type="application/json">{!! json_encode($initialContent, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES) !!}</script>
     @endif

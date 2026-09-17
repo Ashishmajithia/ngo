@@ -1,10 +1,11 @@
-import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useState, useEffect, Component, ErrorInfo, ReactNode, Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { ContentProvider } from './context/ContentContext';
 import HomePage from './pages/HomePage';
-import AdminLoginPage from './pages/AdminLoginPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import BlogDetailPage from './pages/BlogDetailPage';
+
+const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
+const BlogDetailPage = lazy(() => import('./pages/BlogDetailPage'));
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -69,17 +70,29 @@ function AppRouter() {
 
   // Determine current view based on URL route
   if (currentPath.startsWith('/admin/login')) {
-    return <AdminLoginPage />;
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-[#123f38]" />}>
+        <AdminLoginPage />
+      </Suspense>
+    );
   }
 
   if (currentPath.startsWith('/admin')) {
-    return <AdminDashboardPage />;
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-[#123f38]" />}>
+        <AdminDashboardPage />
+      </Suspense>
+    );
   }
 
   // Blog / Story Detail Page
   const blogMatch = currentPath.match(/^\/(?:blog|blogs)\/([^/]+)/);
   if (blogMatch && blogMatch[1]) {
-    return <BlogDetailPage slugOrId={blogMatch[1]} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-[#002244]" />}>
+        <BlogDetailPage slugOrId={blogMatch[1]} />
+      </Suspense>
+    );
   }
 
   return <HomePage />;
