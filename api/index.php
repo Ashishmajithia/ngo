@@ -5,6 +5,11 @@ putenv('VERCEL=1');
 $_ENV['VERCEL'] = '1';
 $_SERVER['VERCEL'] = '1';
 
+// Prevent Symfony from treating /api as the base subfolder
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+$_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
+$_SERVER['PHP_SELF'] = '/index.php';
+
 // Ensure /tmp writable paths exist on Vercel serverless environment
 $storageDirs = [
     '/tmp/views',
