@@ -4,6 +4,7 @@ import { ContentProvider } from './context/ContentContext';
 import HomePage from './pages/HomePage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import BlogDetailPage from './pages/BlogDetailPage';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -73,6 +74,12 @@ function AppRouter() {
 
   if (currentPath.startsWith('/admin')) {
     return <AdminDashboardPage />;
+  }
+
+  // Blog / Story Detail Page
+  const blogMatch = currentPath.match(/^\/(?:blog|blogs)\/([^/]+)/);
+  if (blogMatch && blogMatch[1]) {
+    return <BlogDetailPage slugOrId={blogMatch[1]} />;
   }
 
   return <HomePage />;

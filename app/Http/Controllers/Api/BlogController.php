@@ -43,6 +43,60 @@ class BlogController extends Controller
         ]);
     }
 
+    public function show($idOrSlug)
+    {
+        $blog = Blog::where('id', $idOrSlug)
+            ->orWhere('slug', $idOrSlug)
+            ->first();
+
+        if (!$blog) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Blog story not found',
+            ], 404);
+        }
+
+        $formatted = [
+            'id' => $blog->id,
+            'title' => $blog->title,
+            'slug' => $blog->slug,
+            'excerpt' => $blog->excerpt ?? '',
+            'content' => $blog->content ?? '',
+            'coverImage' => $blog->cover_image ?? '',
+            'images' => $blog->images ?? [],
+            'author' => $blog->author ?? 'ACT Trust Team',
+            'category' => $blog->category ?? 'Child Education',
+            'published' => (bool)$blog->published,
+            'date' => $blog->date ?? $blog->created_at->format('F d, Y'),
+            'created_by' => $blog->created_by ?? 'admin@actcharitabletrust.org',
+        ];
+
+        // Also fetch related stories
+        $related = Blog::where('id', '!=', $blog->id)
+            ->where('published', true)
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get()
+            ->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'title' => $b->title,
+                    'slug' => $b->slug,
+                    'excerpt' => $b->excerpt ?? '',
+                    'coverImage' => $b->cover_image ?? '',
+                    'category' => $b->category ?? 'Child Education',
+                    'date' => $b->date ?? $b->created_at->format('F d, Y'),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'blog' => $formatted,
+            'related' => $related,
+            'source' => 'supabase_pgsql_db',
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

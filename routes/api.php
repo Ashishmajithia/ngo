@@ -55,6 +55,7 @@ Route::post('/content', [ContentController::class, 'update']);
 
 // Blogs CRUD
 Route::get('/blogs', [BlogController::class, 'index']);
+Route::get('/blogs/{idOrSlug}', [BlogController::class, 'show']);
 Route::post('/blogs', [BlogController::class, 'store']);
 Route::put('/blogs/{id}', [BlogController::class, 'update']);
 Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);

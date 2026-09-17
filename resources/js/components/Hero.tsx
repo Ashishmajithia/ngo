@@ -72,8 +72,8 @@ export const Hero: React.FC = () => {
               alt={slide.title || 'Hero Banner'}
               className="h-full w-full object-cover object-center scale-100 transition-transform duration-[10000ms] ease-out"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#123f38]/95 via-[#123f38]/60 to-black/25" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#123f38]/70 via-transparent to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#002244]/95 via-[#003366]/70 to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#002244]/70 via-transparent to-black/20" />
           </div>
         ))}
 
@@ -82,7 +82,7 @@ export const Hero: React.FC = () => {
           <>
             <button
               onClick={handlePrev}
-              className="focusable absolute left-4 md:left-8 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffdf8]/20 backdrop-blur text-white shadow-xl transition hover:bg-[#f2ad3b] hover:text-[#183a35] hover:scale-110"
+              className="focusable absolute left-4 md:left-8 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 backdrop-blur text-white shadow-xl transition hover:bg-[#f59e0b] hover:text-[#002b54] hover:scale-110"
               aria-label="Previous Slide"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -90,7 +90,7 @@ export const Hero: React.FC = () => {
 
             <button
               onClick={handleNext}
-              className="focusable absolute right-4 md:right-8 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffdf8]/20 backdrop-blur text-white shadow-xl transition hover:bg-[#f2ad3b] hover:text-[#183a35] hover:scale-110"
+              className="focusable absolute right-4 md:right-8 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 backdrop-blur text-white shadow-xl transition hover:bg-[#f59e0b] hover:text-[#002b54] hover:scale-110"
               aria-label="Next Slide"
             >
               <ChevronRight className="w-6 h-6" />
@@ -103,7 +103,7 @@ export const Hero: React.FC = () => {
                   key={idx}
                   onClick={() => setActiveSlide(idx)}
                   className={`h-2.5 rounded-full transition-all duration-300 ${
-                    idx === activeSlide ? 'w-8 bg-[#f2ad3b]' : 'w-2.5 bg-white/50 hover:bg-white/80'
+                    idx === activeSlide ? 'w-8 bg-[#f59e0b]' : 'w-2.5 bg-white/50 hover:bg-white/80'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
@@ -117,35 +117,35 @@ export const Hero: React.FC = () => {
       <div className="relative z-20 mx-auto flex min-h-[620px] max-w-7xl items-center px-5 py-24 lg:px-8 lg:py-32">
         <div className="max-w-3xl">
           {/* Eyebrow */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#f2ad3b]/80 bg-[#123f38]/60 backdrop-blur px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-[.14em] text-[#f2ad3b] shadow-md">
-            <Sparkles className="w-4 h-4 text-[#f2ad3b]" />
-            <span>{current?.eyebrow || 'Empower Communities • Transform Lives'}</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#f59e0b]/80 bg-[#002244]/80 backdrop-blur px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-[.16em] text-[#fbbf24] shadow-md">
+            <Sparkles className="w-4 h-4 text-[#fbbf24]" />
+            <span>{current?.eyebrow || 'REG.NO.220 • Rising Hope for Children'}</span>
           </div>
 
           {/* Dynamic Title */}
-          <h1 className="display-font mt-6 font-bold leading-[1.08] tracking-tight text-4xl sm:text-5xl md:text-6xl text-[#fffdf8]">
-            {current?.title || 'Building Hope & Resilient Futures Together'}
+          <h1 className="display-font mt-6 font-extrabold leading-[1.08] tracking-tight text-4xl sm:text-5xl md:text-6xl text-white">
+            {current?.title || 'Rising Hope for Children Across Every Community'}
           </h1>
 
           {/* Dynamic Copy */}
-          <p className="mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-[#f8f4e9]/90 font-medium">
-            {current?.copy || 'ACT Charitable Trust works closely at the grassroots level to unlock opportunities.'}
+          <p className="mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-blue-100/90 font-medium">
+            {current?.copy || 'ACT Charitable Trust (REG.NO.220) empowers children through quality education, wholesome nutrition, healthcare, and loving care.'}
           </p>
 
           {/* CTA Link */}
           <div className="mt-8 flex flex-wrap gap-4 items-center">
             <a
               href={current?.cta_link || current?.ctaLink || '#programs'}
-              className="focusable inline-flex items-center gap-2 rounded-full bg-[#f2ad3b] px-7 py-4 font-bold text-[#183a35] shadow-xl transition hover:bg-[#f5bf63] hover:-translate-y-0.5"
+              className="focusable inline-flex items-center gap-2 rounded-full bg-[#f59e0b] hover:bg-[#fbbf24] px-7 py-4 font-bold text-[#002b54] shadow-xl transition hover:-translate-y-0.5"
             >
               <span>{hero?.ctaText || 'Explore Our Programs'}</span>
               <ArrowDownRight className="w-5 h-5" />
             </a>
             <a
-              href="#about"
-              className="focusable inline-flex items-center gap-2 rounded-full border border-[#fffdf8]/40 bg-[#123f38]/40 backdrop-blur px-6 py-4 font-bold text-[#fffdf8] hover:bg-[#fffdf8]/10 transition"
+              href="#stories"
+              className="focusable inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur px-6 py-4 font-bold text-white hover:bg-white/20 transition"
             >
-              <span>Our Story</span>
+              <span>Read Stories of Hope</span>
             </a>
           </div>
         </div>
