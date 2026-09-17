@@ -17,6 +17,14 @@ class ContentController extends Controller
      */
     public static function getContentArray()
     {
+        $cacheFile = '/tmp/site_content_cache.json';
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 180)) {
+            $cached = @json_decode(@file_get_contents($cacheFile), true);
+            if (!empty($cached) && is_array($cached)) {
+                return $cached;
+            }
+        }
+
         $settings = Setting::all()->pluck('value', 'key');
 
         $banners = Banner::active()->ordered()->get()->map(function ($b) {
@@ -154,6 +162,9 @@ class ContentController extends Controller
             'impactStats' => $settings['impactStats'] ?? $defaultImpactStats,
             'updatedAt' => now()->toISOString(),
         ];
+
+        @file_put_contents($cacheFile, json_encode($content));
+        return $content;
     }
 
     public function index()
@@ -305,6 +316,8 @@ class ContentController extends Controller
                 ['data' => $body]
             );
         } catch (\Throwable $e) {}
+
+        @unlink('/tmp/site_content_cache.json');
 
         return $this->index();
     }
