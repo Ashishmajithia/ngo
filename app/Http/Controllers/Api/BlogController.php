@@ -71,6 +71,7 @@ class BlogController extends Controller
         }
 
         $blogs = Blog::where('published', true)
+            ->select(['id', 'title', 'slug', 'excerpt', 'content', 'cover_image', 'author', 'category', 'published', 'date', 'created_at', 'created_by'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -149,9 +150,10 @@ class BlogController extends Controller
             'created_by' => $blog->created_by ?? 'admin@actcharitabletrust.org',
         ];
 
-        // Also fetch related stories
+        // Also fetch related stories (lightweight select without heavy images column)
         $related = Blog::where('id', '!=', $blog->id)
             ->where('published', true)
+            ->select(['id', 'title', 'slug', 'excerpt', 'cover_image', 'category', 'date', 'created_at'])
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get()
