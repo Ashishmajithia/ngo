@@ -481,9 +481,20 @@ export default function AdminDashboardPage() {
 
                     <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           setEditingBlog(b);
                           setIsBlogModalOpen(true);
+                          try {
+                            const res = await fetch(`/api/blogs/${encodeURIComponent(b.id)}`);
+                            if (res.ok) {
+                              const json = await res.json();
+                              if (json.blog) {
+                                setEditingBlog((current) => current ? { ...current, ...json.blog } : json.blog);
+                              }
+                            }
+                          } catch (err) {
+                            console.warn('Failed to load full blog details:', err);
+                          }
                         }}
                         className="p-2.5 rounded-xl border border-[#28745e] text-[#28745e] hover:bg-[#28745e] hover:text-white transition"
                         title="Edit Story"

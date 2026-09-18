@@ -9,6 +9,47 @@ use App\Models\Blog;
 
 class BlogController extends Controller
 {
+    private static function optimizeBase64Image($dataUrl, $maxWidth = 1200, $maxHeight = 800, $quality = 80)
+    {
+        if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
+            return $dataUrl;
+        }
+        if (strlen($dataUrl) < 150000) {
+            return $dataUrl;
+        }
+        try {
+            $commaPos = strpos($dataUrl, ',');
+            if ($commaPos === false) return $dataUrl;
+            $binary = base64_decode(substr($dataUrl, $commaPos + 1));
+            if (!$binary) return $dataUrl;
+
+            if (function_exists('imagecreatefromstring')) {
+                $img = @imagecreatefromstring($binary);
+                if ($img !== false) {
+                    $origW = imagesx($img);
+                    $origH = imagesy($img);
+                    $scale = min(1.0, $maxWidth / max($origW, 1), $maxHeight / max($origH, 1));
+                    $newW = max(1, (int)($origW * $scale));
+                    $newH = max(1, (int)($origH * $scale));
+
+                    $resized = imagecreatetruecolor($newW, $newH);
+                    imagecopyresampled($resized, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+                    ob_start();
+                    imagejpeg($resized, null, $quality);
+                    $compressedBinary = ob_get_clean();
+                    imagedestroy($img);
+                    imagedestroy($resized);
+
+                    if ($compressedBinary && strlen($compressedBinary) < strlen($binary)) {
+                        return 'data:image/jpeg;base64,' . base64_encode($compressedBinary);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
+        return $dataUrl;
+    }
+
     public function index()
     {
         $blogs = Blog::orderBy('created_at', 'desc')->get();
@@ -21,7 +62,7 @@ class BlogController extends Controller
                 'excerpt' => $b->excerpt ?? '',
                 'content' => $b->content ?? '',
                 'coverImage' => $b->cover_image ?? '',
-                'images' => $b->images ?? [],
+                'images' => [],
                 'author' => $b->author ?? 'ACT Trust Team',
                 'category' => $b->category ?? 'Education',
                 'published' => (bool)$b->published,
@@ -108,14 +149,24 @@ class BlogController extends Controller
         $slug = $request->slug ?: Str::slug($title);
         $createdBy = $request->created_by ?: (auth()->user()?->email ?? env('ADMIN_EMAIL', 'admin@actcharitabletrust.org'));
 
+        $coverImage = $request->coverImage ?? 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop';
+        $coverImage = self::optimizeBase64Image($coverImage);
+
+        $images = $request->images ?? [];
+        if (is_array($images)) {
+            $images = array_map(function ($img) {
+                return self::optimizeBase64Image($img);
+            }, $images);
+        }
+
         $blog = Blog::create([
             'id' => $id,
             'title' => $title,
             'slug' => $slug,
             'excerpt' => $request->excerpt ?? '',
             'content' => $request->content ?? '',
-            'cover_image' => $request->coverImage ?? 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop',
-            'images' => $request->images ?? [],
+            'cover_image' => $coverImage,
+            'images' => $images,
             'author' => $request->author ?? 'ACT Trust Team',
             'category' => $request->category ?? 'Education',
             'published' => $request->has('published') ? (bool)$request->published : true,
@@ -153,7 +204,12 @@ class BlogController extends Controller
             $data['slug'] = !empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['title']);
         }
         if (isset($data['coverImage'])) {
-            $data['cover_image'] = $data['coverImage'];
+            $data['cover_image'] = self::optimizeBase64Image($data['coverImage']);
+        }
+        if (isset($data['images']) && is_array($data['images'])) {
+            $data['images'] = array_map(function ($img) {
+                return self::optimizeBase64Image($img);
+            }, $data['images']);
         }
         if (isset($data['published'])) {
             $data['published'] = (bool)$data['published'];
