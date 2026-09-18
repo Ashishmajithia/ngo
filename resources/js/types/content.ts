@@ -41,6 +41,22 @@ export interface GalleryItem {
   gridSpan?: string;
 }
 
+export interface FieldCenterItem {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  childrenCount: string;
+  programs: string[];
+  coordinator?: string;
+  phone?: string;
+  address?: string;
+  image?: string;
+  mapX: number; // percentage 0-100 on map
+  mapY: number; // percentage 0-100 on map
+  isActive?: boolean;
+}
+
 export interface BrandConfig {
   name: string;
   tagline: string;
@@ -51,6 +67,10 @@ export interface BrandConfig {
   logo?: string;
   logoStyle?: 'full' | 'icon_text';
   logoHeight?: number;
+  regNo?: string;
+  whatsappNumber?: string;
+  whatsappGreeting?: string;
+  enableWhatsappButton?: boolean;
 }
 
 export interface AboutSectionData {
@@ -112,6 +132,7 @@ export interface SiteContent {
     copy: string;
     items: GalleryItem[];
   };
+  fieldCenters?: FieldCenterItem[];
   support: SupportSectionData;
   payment?: PaymentConfig;
   updatedAt?: string;

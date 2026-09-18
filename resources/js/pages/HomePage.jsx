@@ -5,6 +5,7 @@ import { ImpactStats } from '../components/ImpactStats';
 import { About } from '../components/About';
 import { Programs } from '../components/Programs';
 import { Approach } from '../components/Approach';
+import { FieldCentersSection } from '../components/FieldCentersSection';
 import { Gallery } from '../components/Gallery';
 import { BlogSection } from '../components/BlogSection';
 import { SupportSection } from '../components/SupportSection';
@@ -12,6 +13,7 @@ import { Footer } from '../components/Footer';
 import { DonateModal } from '../components/DonateModal';
 import { GalleryModal } from '../components/GalleryModal';
 import { ToastNotification } from '../components/ToastNotification';
+import { WhatsAppFloatingButton } from '../components/WhatsAppFloatingButton';
 
 export default function HomePage() {
   return (
@@ -22,6 +24,7 @@ export default function HomePage() {
       <About />
       <Programs />
       <Approach />
+      <FieldCentersSection />
       <Gallery />
       <BlogSection />
       <SupportSection />
@@ -29,6 +32,7 @@ export default function HomePage() {
       <DonateModal />
       <GalleryModal />
       <ToastNotification />
+      <WhatsAppFloatingButton />
     </main>
   );
 }

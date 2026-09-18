@@ -93,6 +93,7 @@ export const Footer: React.FC = () => {
               <li><a href="/#programs" className="hover:text-[#28745e] transition py-0.5 inline-block">Grassroots Programs</a></li>
               <li><a href="/#approach" className="hover:text-[#28745e] transition py-0.5 inline-block">Core Principles</a></li>
               <li><a href="/#stories" className="hover:text-[#28745e] transition py-0.5 inline-block">Impact Stories & Blogs</a></li>
+              <li><a href="/#centers" className="hover:text-[#28745e] transition py-0.5 inline-block">Field Centers & Reach</a></li>
               <li><a href="/#gallery" className="hover:text-[#28745e] transition py-0.5 inline-block">Moments Gallery</a></li>
               <li><a href="/#impact" className="hover:text-[#28745e] transition py-0.5 inline-block">Impact Reports & Metrics</a></li>
             </ul>

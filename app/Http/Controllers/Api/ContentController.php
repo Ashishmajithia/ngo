@@ -160,6 +160,69 @@ class ContentController extends Controller
             'enableQrDonation' => false,
         ];
 
+        $defaultFieldCenters = [
+            [
+                'id' => 'center-1',
+                'name' => 'Delhi NCR Main Care & Education Center',
+                'city' => 'New Delhi',
+                'state' => 'Delhi NCR',
+                'childrenCount' => '450+ Children',
+                'programs' => ['Primary Education', 'Daily Nutrition Meal', 'Health Screening'],
+                'coordinator' => 'Anjali Sharma',
+                'phone' => '+91 98765 43210',
+                'address' => 'Plot 14, Sector 7, Dwarka / South Delhi Border',
+                'image' => 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=800&auto=format&fit=crop',
+                'mapX' => 42,
+                'mapY' => 34,
+                'isActive' => true,
+            ],
+            [
+                'id' => 'center-2',
+                'name' => 'Mewat Rural Child Learning Unit',
+                'city' => 'Nuh / Mewat',
+                'state' => 'Haryana',
+                'childrenCount' => '320+ Children',
+                'programs' => ['Bridge Schooling', 'Girl Child Literacy', 'Clean Water Access'],
+                'coordinator' => 'Mohd. Imran',
+                'phone' => '+91 98123 45678',
+                'address' => 'Near Govt High School, Taoru Road, Nuh',
+                'image' => 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop',
+                'mapX' => 38,
+                'mapY' => 40,
+                'isActive' => true,
+            ],
+            [
+                'id' => 'center-3',
+                'name' => 'Jaipur Community Learning Hub',
+                'city' => 'Jaipur',
+                'state' => 'Rajasthan',
+                'childrenCount' => '280+ Children',
+                'programs' => ['Remedial Tutoring', 'Nutrition Supplement', 'Art & Sports'],
+                'coordinator' => 'Pooja Verma',
+                'phone' => '+91 94140 12345',
+                'address' => 'Basti Colony, Sanganer, Jaipur',
+                'image' => 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=800&auto=format&fit=crop',
+                'mapX' => 28,
+                'mapY' => 44,
+                'isActive' => true,
+            ],
+            [
+                'id' => 'center-4',
+                'name' => 'Lucknow Rural Health & Education Wing',
+                'city' => 'Lucknow',
+                'state' => 'Uttar Pradesh',
+                'childrenCount' => '210+ Children',
+                'programs' => ['Health Camps', 'Vocational Training', 'Midday Snacks'],
+                'coordinator' => 'Rajesh Kumar',
+                'phone' => '+91 94500 67890',
+                'address' => 'Village Malihabad Rural Outreach, Lucknow',
+                'image' => 'https://images.unsplash.com/photo-1524069290683-0457abfe42c3?q=80&w=800&auto=format&fit=crop',
+                'mapX' => 55,
+                'mapY' => 42,
+                'isActive' => true,
+            ],
+        ];
+
         $defaultImpactStats = [];
 
         $programsMeta = $settings['programs_meta'] ?? [
@@ -193,6 +256,13 @@ class ContentController extends Controller
         $support = $settings['support'] ?? $defaultSupport;
         if (!empty($support['image'])) $support['image'] = self::optimizeBase64Image($support['image']);
 
+        $fieldCenters = $settings['fieldCenters'] ?? $defaultFieldCenters;
+        if (is_array($fieldCenters)) {
+            foreach ($fieldCenters as &$fc) {
+                if (!empty($fc['image'])) $fc['image'] = self::optimizeBase64Image($fc['image']);
+            }
+        }
+
         $content = [
             'brand' => $settings['brand'] ?? $defaultBrand,
             'hero' => [
@@ -216,6 +286,7 @@ class ContentController extends Controller
             'support' => $support,
             'payment' => $settings['payment'] ?? $defaultPayment,
             'impactStats' => $settings['impactStats'] ?? $defaultImpactStats,
+            'fieldCenters' => $fieldCenters,
             'updatedAt' => now()->toISOString(),
         ];
 
@@ -358,7 +429,7 @@ class ContentController extends Controller
         }
 
         // 4. Sync Settings (brand, about, approach, support, payment, impactStats)
-        $settingKeys = ['brand', 'about', 'approach', 'support', 'payment', 'impactStats'];
+        $settingKeys = ['brand', 'about', 'approach', 'support', 'payment', 'impactStats', 'fieldCenters'];
         foreach ($settingKeys as $k) {
             if (isset($body[$k])) {
                 Setting::set($k, $body[$k], $updatedBy);
