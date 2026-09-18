@@ -15,6 +15,47 @@ class ContentController extends Controller
     /**
      * Build unified site content from dedicated relational tables.
      */
+    private static function optimizeBase64Image($dataUrl, $maxWidth = 1200, $maxHeight = 800, $quality = 75)
+    {
+        if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
+            return $dataUrl;
+        }
+        if (strlen($dataUrl) < 150000) {
+            return $dataUrl;
+        }
+        try {
+            $commaPos = strpos($dataUrl, ',');
+            if ($commaPos === false) return $dataUrl;
+            $binary = base64_decode(substr($dataUrl, $commaPos + 1));
+            if (!$binary) return $dataUrl;
+
+            if (function_exists('imagecreatefromstring')) {
+                $img = @imagecreatefromstring($binary);
+                if ($img !== false) {
+                    $origW = imagesx($img);
+                    $origH = imagesy($img);
+                    $scale = min(1.0, $maxWidth / max($origW, 1), $maxHeight / max($origH, 1));
+                    $newW = max(1, (int)($origW * $scale));
+                    $newH = max(1, (int)($origH * $scale));
+
+                    $resized = imagecreatetruecolor($newW, $newH);
+                    imagecopyresampled($resized, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+                    ob_start();
+                    imagejpeg($resized, null, $quality);
+                    $compressedBinary = ob_get_clean();
+                    imagedestroy($img);
+                    imagedestroy($resized);
+
+                    if ($compressedBinary && strlen($compressedBinary) < strlen($binary)) {
+                        return 'data:image/jpeg;base64,' . base64_encode($compressedBinary);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
+        return $dataUrl;
+    }
+
     public static function getContentArray()
     {
         $cacheFile = '/tmp/site_content_cache.json';
@@ -137,7 +178,22 @@ class ContentController extends Controller
             'ctaText' => '',
         ];
 
-        return [
+        foreach ($banners as &$b) {
+            if (!empty($b['image'])) $b['image'] = self::optimizeBase64Image($b['image']);
+        }
+        foreach ($programs as &$p) {
+            if (!empty($p['image'])) $p['image'] = self::optimizeBase64Image($p['image']);
+        }
+        foreach ($gallery as &$g) {
+            if (!empty($g['image'])) $g['image'] = self::optimizeBase64Image($g['image']);
+        }
+        $about = $settings['about'] ?? $defaultAbout;
+        if (!empty($about['image'])) $about['image'] = self::optimizeBase64Image($about['image']);
+
+        $support = $settings['support'] ?? $defaultSupport;
+        if (!empty($support['image'])) $support['image'] = self::optimizeBase64Image($support['image']);
+
+        $content = [
             'brand' => $settings['brand'] ?? $defaultBrand,
             'hero' => [
                 'slides' => $banners,
@@ -155,9 +211,9 @@ class ContentController extends Controller
                 'copy' => $galleryMeta['copy'] ?? '',
                 'items' => $gallery,
             ],
-            'about' => $settings['about'] ?? $defaultAbout,
+            'about' => $about,
             'approach' => $settings['approach'] ?? $defaultApproach,
-            'support' => $settings['support'] ?? $defaultSupport,
+            'support' => $support,
             'payment' => $settings['payment'] ?? $defaultPayment,
             'impactStats' => $settings['impactStats'] ?? $defaultImpactStats,
             'updatedAt' => now()->toISOString(),
@@ -181,7 +237,7 @@ class ContentController extends Controller
                 'database' => 'PostgreSQL (Supabase Cloud)',
                 'host' => config('database.connections.pgsql.host'),
             ],
-        ]);
+        ])->header('Cache-Control', 'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400');
     }
 
     public function update(Request $request)

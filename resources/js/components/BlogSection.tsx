@@ -9,10 +9,28 @@ interface BlogSectionProps {
   onOpenCreateBlog?: () => void;
 }
 
+function getInitialBlogs(): BlogPost[] {
+  try {
+    const el = typeof document !== 'undefined' ? document.getElementById('server-initial-blogs') : null;
+    if (el && el.textContent) {
+      const data = JSON.parse(el.textContent);
+      if (Array.isArray(data) && data.length > 0) return data;
+    }
+    if (typeof localStorage !== 'undefined') {
+      const cached = localStorage.getItem('act_trust_blogs_cache');
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    }
+  } catch {}
+  return [];
+}
+
 export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCreateBlog }) => {
-  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [blogs, setBlogs] = useState<BlogPost[]>(getInitialBlogs);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => blogs.length === 0);
 
   useEffect(() => {
     async function fetchBlogs() {
@@ -22,15 +40,13 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
           const json = await res.json();
           if (json.success && Array.isArray(json.blogs)) {
             setBlogs(json.blogs);
-          } else {
-            setBlogs([]);
+            try {
+              localStorage.setItem('act_trust_blogs_cache', JSON.stringify(json.blogs));
+            } catch {}
           }
-        } else {
-          setBlogs([]);
         }
       } catch (err) {
         console.warn('Failed to fetch blogs from API:', err);
-        setBlogs([]);
       } finally {
         setLoading(false);
       }

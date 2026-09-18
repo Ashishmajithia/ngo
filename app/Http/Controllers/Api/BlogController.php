@@ -9,6 +9,16 @@ use App\Models\Blog;
 
 class BlogController extends Controller
 {
+    public static function clearBlogCache()
+    {
+        @unlink('/tmp/blogs_cache.json');
+        @unlink('/tmp/site_content_cache.json');
+        $files = @glob('/tmp/blog_show_*.json');
+        if ($files) {
+            foreach ($files as $f) @unlink($f);
+        }
+    }
+
     private static function optimizeBase64Image($dataUrl, $maxWidth = 1200, $maxHeight = 800, $quality = 80)
     {
         if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
@@ -50,9 +60,19 @@ class BlogController extends Controller
         return $dataUrl;
     }
 
-    public function index()
+    public static function getBlogsArray()
     {
-        $blogs = Blog::orderBy('created_at', 'desc')->get();
+        $cacheFile = '/tmp/blogs_cache.json';
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 300)) {
+            $cached = @json_decode(@file_get_contents($cacheFile), true);
+            if (!empty($cached) && is_array($cached)) {
+                return $cached;
+            }
+        }
+
+        $blogs = Blog::where('published', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $formatted = $blogs->map(function ($b) {
             return [
@@ -69,7 +89,15 @@ class BlogController extends Controller
                 'date' => $b->date ?? ($b->created_at ? $b->created_at->format('F d, Y') : now()->format('F d, Y')),
                 'created_by' => $b->created_by ?? 'admin@actcharitabletrust.org',
             ];
-        });
+        })->values()->toArray();
+
+        @file_put_contents($cacheFile, json_encode($formatted));
+        return $formatted;
+    }
+
+    public function index()
+    {
+        $formatted = self::getBlogsArray();
 
         return response()->json([
             'success' => true,
@@ -81,11 +109,20 @@ class BlogController extends Controller
                 'database' => 'PostgreSQL (Supabase Cloud)',
                 'host' => config('database.connections.pgsql.host'),
             ],
-        ]);
+        ])->header('Cache-Control', 'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400');
     }
 
     public function show($idOrSlug)
     {
+        $cacheKey = '/tmp/blog_show_' . md5($idOrSlug) . '.json';
+        if (file_exists($cacheKey) && (time() - filemtime($cacheKey) < 300)) {
+            $cached = @json_decode(@file_get_contents($cacheKey), true);
+            if (!empty($cached) && is_array($cached)) {
+                return response()->json($cached)
+                    ->header('Cache-Control', 'public, max-age=120, s-maxage=3600, stale-while-revalidate=86400');
+            }
+        }
+
         $blog = Blog::where('id', $idOrSlug)
             ->orWhere('slug', $idOrSlug)
             ->first();
@@ -130,12 +167,17 @@ class BlogController extends Controller
                 ];
             });
 
-        return response()->json([
+        $payload = [
             'success' => true,
             'blog' => $formatted,
             'related' => $related,
             'source' => 'supabase_pgsql_db',
-        ]);
+        ];
+
+        @file_put_contents($cacheKey, json_encode($payload));
+
+        return response()->json($payload)
+            ->header('Cache-Control', 'public, max-age=120, s-maxage=3600, stale-while-revalidate=86400');
     }
 
     public function store(Request $request)
@@ -173,6 +215,8 @@ class BlogController extends Controller
             'date' => $request->date ?? now()->format('F d, Y'),
             'created_by' => $createdBy,
         ]);
+
+        self::clearBlogCache();
 
         return response()->json([
             'success' => true,
@@ -217,6 +261,8 @@ class BlogController extends Controller
 
         $blog->update($data);
 
+        self::clearBlogCache();
+
         return response()->json([
             'success' => true,
             'message' => 'Blog post updated successfully!',
@@ -238,6 +284,8 @@ class BlogController extends Controller
         if ($blog) {
             $blog->delete();
         }
+
+        self::clearBlogCache();
 
         return response()->json([
             'success' => true,

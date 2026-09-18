@@ -25,17 +25,44 @@ interface BlogDetailPageProps {
   slugOrId: string;
 }
 
+function getCachedStory(slugOrId: string): { blog: BlogPost | null; related: any[] } {
+  try {
+    // 1. Check sessionStorage for fully loaded story
+    if (typeof sessionStorage !== 'undefined') {
+      const cached = sessionStorage.getItem('act_story_' + slugOrId);
+      if (cached) {
+        const json = JSON.parse(cached);
+        if (json && json.blog) {
+          return { blog: json.blog, related: json.related || [] };
+        }
+      }
+    }
+    // 2. Check localStorage blog listing for instant summary display
+    if (typeof localStorage !== 'undefined') {
+      const listCached = localStorage.getItem('act_trust_blogs_cache');
+      if (listCached) {
+        const list: BlogPost[] = JSON.parse(listCached);
+        const found = list.find((b) => b.id === slugOrId || b.slug === slugOrId);
+        if (found) {
+          return { blog: found, related: [] };
+        }
+      }
+    }
+  } catch {}
+  return { blog: null, related: [] };
+}
+
 export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
   const { content, isDonateOpen, setIsDonateOpen } = useContent();
-  const [blog, setBlog] = useState<BlogPost | null>(null);
-  const [related, setRelated] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialCache = getCachedStory(slugOrId);
+  const [blog, setBlog] = useState<BlogPost | null>(initialCache.blog);
+  const [related, setRelated] = useState<any[]>(initialCache.related);
+  const [loading, setLoading] = useState(() => !initialCache.blog || !initialCache.blog.content);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     async function loadStory() {
-      setLoading(true);
       try {
         const res = await fetch(`/api/blogs/${encodeURIComponent(slugOrId)}`);
         if (res.ok) {
@@ -43,6 +70,9 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
           if (json.success && json.blog) {
             setBlog(json.blog);
             setRelated(json.related || []);
+            try {
+              sessionStorage.setItem('act_story_' + slugOrId, JSON.stringify(json));
+            } catch {}
           }
         }
       } catch (err) {

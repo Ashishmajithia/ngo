@@ -29,4 +29,9 @@ class Blog extends Model
         'images' => 'array',
         'published' => 'boolean',
     ];
+
+    public function authorUser()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'email');
+    }
 }
