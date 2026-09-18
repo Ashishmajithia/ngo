@@ -6,7 +6,7 @@ import { useContent } from '@/context/ContentContext';
 import { defaultContent } from '@/data/initialContent';
 
 export const Hero: React.FC = () => {
-  const { content } = useContent();
+  const { content, setIsDonateOpen } = useContent();
   const hero = (content && content.hero && typeof content.hero === 'object')
     ? content.hero
     : defaultContent.hero;
@@ -139,8 +139,9 @@ export const Hero: React.FC = () => {
           {/* CTA Link */}
           <div className="mt-8 flex flex-wrap gap-4 items-center">
             <button
+              type="button"
               onClick={() => setIsDonateOpen(true)}
-              className="focusable inline-flex items-center gap-2 rounded-full bg-[#d81b60] hover:bg-[#c2185b] px-7 py-4 font-extrabold text-white shadow-xl shadow-[#d81b60]/25 transition hover:-translate-y-0.5"
+              className="focusable inline-flex items-center gap-2 rounded-full bg-[#d81b60] hover:bg-[#c2185b] px-7 py-4 font-extrabold text-white shadow-xl shadow-[#d81b60]/25 transition hover:-translate-y-0.5 cursor-pointer z-10"
             >
               <span>{current?.cta_text || current?.ctaText || content?.brand?.primaryCtaText || 'Donate & Support'}</span>
               <ArrowDownRight className="w-5 h-5" />
