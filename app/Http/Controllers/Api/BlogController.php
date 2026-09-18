@@ -25,7 +25,7 @@ class BlogController extends Controller
                 'author' => $b->author ?? 'ACT Trust Team',
                 'category' => $b->category ?? 'Education',
                 'published' => (bool)$b->published,
-                'date' => $b->date ?? $b->created_at->format('F d, Y'),
+                'date' => $b->date ?? ($b->created_at ? $b->created_at->format('F d, Y') : now()->format('F d, Y')),
                 'created_by' => $b->created_by ?? 'admin@actcharitabletrust.org',
             ];
         });
@@ -67,7 +67,7 @@ class BlogController extends Controller
             'author' => $blog->author ?? 'ACT Trust Team',
             'category' => $blog->category ?? 'Child Education',
             'published' => (bool)$blog->published,
-            'date' => $blog->date ?? $blog->created_at->format('F d, Y'),
+            'date' => $blog->date ?? ($blog->created_at ? $blog->created_at->format('F d, Y') : now()->format('F d, Y')),
             'created_by' => $blog->created_by ?? 'admin@actcharitabletrust.org',
         ];
 
@@ -85,7 +85,7 @@ class BlogController extends Controller
                     'excerpt' => $b->excerpt ?? '',
                     'coverImage' => $b->cover_image ?? '',
                     'category' => $b->category ?? 'Child Education',
-                    'date' => $b->date ?? $b->created_at->format('F d, Y'),
+                    'date' => $b->date ?? ($b->created_at ? $b->created_at->format('F d, Y') : now()->format('F d, Y')),
                 ];
             });
 
@@ -130,16 +130,33 @@ class BlogController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id = null)
     {
-        $blog = Blog::findOrFail($id);
+        $targetId = $id ?: $request->input('id');
+        if (!$targetId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Blog ID is required for update',
+            ], 400);
+        }
+
+        $blog = Blog::find($targetId);
+        if (!$blog) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Blog story not found',
+            ], 404);
+        }
 
         $data = $request->all();
-        if (!empty($data['title']) && empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['title']);
+        if (!empty($data['title'])) {
+            $data['slug'] = !empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['title']);
         }
         if (isset($data['coverImage'])) {
             $data['cover_image'] = $data['coverImage'];
+        }
+        if (isset($data['published'])) {
+            $data['published'] = (bool)$data['published'];
         }
 
         $blog->update($data);
@@ -151,9 +168,17 @@ class BlogController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id = null)
     {
-        $blog = Blog::find($id);
+        $targetId = $id ?: $request->query('id') ?: $request->input('id');
+        if (!$targetId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Blog ID is required for deletion',
+            ], 400);
+        }
+
+        $blog = Blog::find($targetId);
         if ($blog) {
             $blog->delete();
         }

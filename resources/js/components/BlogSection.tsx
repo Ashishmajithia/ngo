@@ -38,7 +38,8 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
     fetchBlogs();
   }, []);
 
-  const categories = ['All', 'Child Education', 'Health & Nutrition', 'Youth Empowerment', 'Child Protection'];
+  const dynamicCats = Array.from(new Set(blogs.map((b) => b.category).filter(Boolean)));
+  const categories = ['All', ...(dynamicCats.length > 0 ? dynamicCats : ['Education', 'Healthcare', 'Women Empowerment', 'Nutrition', 'Community Event'])];
 
   if (loading || blogs.length === 0) return null;
 

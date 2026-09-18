@@ -238,24 +238,9 @@ export default function AdminDashboardPage() {
       published: editingBlog.published !== undefined ? editingBlog.published : true,
     } as BlogPost;
 
-    // Update state immediately & cache in localStorage
-    setBlogs((prev) => {
-      let updated: BlogPost[];
-      if (isEdit) {
-        updated = prev.map((b) => (b.id === blogToSave.id ? blogToSave : b));
-      } else {
-        updated = [blogToSave, ...prev];
-      }
-      return updated;
-    });
-
-    setIsBlogModalOpen(false);
-    setEditingBlog(null);
-    showToastMsg(isEdit ? 'Impact Story updated!' : 'New Impact Story published live!');
-
     // Sync to API
     try {
-      const url = '/api/blogs';
+      const url = isEdit ? `/api/blogs/${encodeURIComponent(blogToSave.id)}` : '/api/blogs';
       const method = isEdit ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
@@ -263,24 +248,42 @@ export default function AdminDashboardPage() {
         body: JSON.stringify(blogToSave),
       });
       if (res.ok) {
+        setBlogs((prev) => {
+          if (isEdit) {
+            return prev.map((b) => (b.id === blogToSave.id ? blogToSave : b));
+          } else {
+            return [blogToSave, ...prev];
+          }
+        });
+        setIsBlogModalOpen(false);
+        setEditingBlog(null);
+        showToastMsg(isEdit ? 'Impact Story updated successfully!' : 'New Impact Story published live!');
         fetchData();
+      } else {
+        const errorData = await res.json().catch(() => null);
+        showToastMsg('Failed to save story: ' + (errorData?.message || res.statusText));
       }
     } catch (err) {
-      console.warn('API sync warning:', err);
+      console.error('API sync error:', err);
+      showToastMsg('Network error while saving story');
     }
   };
 
   const handleDeleteBlog = async (id: string) => {
     if (!confirm('Are you sure you want to delete this story?')) return;
-    setBlogs((prev) => prev.filter((b) => b.id !== id));
-    showToastMsg('Story deleted successfully.');
     try {
-      const res = await fetch(`/api/blogs?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/blogs/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (res.ok) {
+        setBlogs((prev) => prev.filter((b) => b.id !== id));
+        showToastMsg('Story deleted successfully.');
         fetchData();
+      } else {
+        const err = await res.json().catch(() => null);
+        showToastMsg('Failed to delete story: ' + (err?.message || res.statusText));
       }
     } catch {
-      console.warn('API delete warning');
+      console.error('API delete error');
+      showToastMsg('Network error while deleting story');
     }
   };
 

@@ -57,8 +57,8 @@ Route::post('/content', [ContentController::class, 'update']);
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/blogs/{idOrSlug}', [BlogController::class, 'show']);
 Route::post('/blogs', [BlogController::class, 'store']);
-Route::put('/blogs/{id}', [BlogController::class, 'update']);
-Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
+Route::match(['put', 'patch'], '/blogs/{id?}', [BlogController::class, 'update']);
+Route::delete('/blogs/{id?}', [BlogController::class, 'destroy']);
 
 // Donations
 Route::get('/donations', [DonationController::class, 'index']);
