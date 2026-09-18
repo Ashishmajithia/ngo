@@ -220,7 +220,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
         </div>
       </div>
 
-      <main className="mx-auto max-w-5xl px-5 py-10 sm:py-16">
+      <main className="mx-auto max-w-5xl px-4 sm:px-5 py-8 sm:py-14">
         {loading ? (
           <div className="py-24 text-center">
             <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-[#004b87] border-t-transparent"></div>
@@ -254,13 +254,13 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                 </span>
               </div>
 
-              <h1 className="display-font text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-[#003b73] tracking-tight">
+              <h1 className="display-font text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-[#003b73] tracking-tight">
                 {blog.title}
               </h1>
 
               {/* Story Excerpt / Subheading */}
               {blog.excerpt && (
-                <p className="mt-5 text-lg sm:text-xl font-medium leading-relaxed text-[#4a635d] border-l-2 border-[#f59e0b] pl-4">
+                <p className="mt-4 sm:mt-5 text-base sm:text-lg md:text-xl font-medium leading-relaxed text-[#4a635d] border-l-2 border-[#f59e0b] pl-3.5 sm:pl-4">
                   {blog.excerpt}
                 </p>
               )}
@@ -325,9 +325,9 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                 <img
                   src={blog.coverImage}
                   alt={blog.title}
-                  className="h-[320px] sm:h-[460px] md:h-[520px] w-full object-cover"
+                  className="h-[220px] xs:h-[300px] sm:h-[460px] md:h-[520px] w-full object-cover"
                 />
-                <div className="bg-[#f8fafc] px-6 py-3 text-xs text-[#718096] italic border-t border-[#e2e8f0] flex items-center justify-between">
+                <div className="bg-[#f8fafc] px-4 sm:px-6 py-2.5 sm:py-3 text-xs text-[#718096] italic border-t border-[#e2e8f0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-0">
                   <span>Photo from ACT Charitable Trust field initiatives across rural & community centers.</span>
                   <span className="font-semibold text-[#004b87]">ACT Charitable Trust</span>
                 </div>
@@ -364,7 +364,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                 )}
 
                 {/* Action Card: Sponsor A Child */}
-                <div className="mt-12 rounded-3xl bg-gradient-to-br from-[#003b73] via-[#004b87] to-[#0d5ca8] p-8 text-white shadow-2xl relative overflow-hidden">
+                <div className="mt-10 sm:mt-12 rounded-3xl bg-gradient-to-br from-[#003b73] via-[#004b87] to-[#0d5ca8] p-5 sm:p-8 text-white shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 -mt-8 -mr-8 h-40 w-40 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
                   <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                     <div>
@@ -382,7 +382,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
 
                     <button
                       onClick={() => setIsDonateOpen(true)}
-                      className="shrink-0 flex items-center gap-2 rounded-full bg-[#d81b60] px-8 py-4 font-bold text-white shadow-xl hover:bg-[#c2185b] transition transform hover:-translate-y-0.5 text-base"
+                      className="shrink-0 flex items-center justify-center gap-2 rounded-full bg-[#d81b60] px-7 sm:px-8 py-3.5 sm:py-4 font-bold text-white shadow-xl hover:bg-[#c2185b] transition transform hover:-translate-y-0.5 text-sm sm:text-base w-full sm:w-auto active:scale-98"
                     >
                       <Heart className="w-5 h-5 fill-white" />
                       <span>Donate & Support</span>
@@ -394,7 +394,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
               {/* Sidebar Column */}
               <aside className="lg:col-span-4 space-y-8">
                 {/* Official Trust Card */}
-                <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 shadow-md">
+                <div className="rounded-3xl border border-[#e2e8f0] bg-white p-5 sm:p-6 shadow-md">
                   <div className="flex items-center gap-3 pb-4 border-b border-[#f1f5f9]">
                     <img
                       src={content.brand.logo || '/uploads/act_official_logo.jpg'}
@@ -441,7 +441,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
 
                 {/* Related Stories */}
                 {related.length > 0 && (
-                  <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 shadow-md">
+                  <div className="rounded-3xl border border-[#e2e8f0] bg-white p-5 sm:p-6 shadow-md">
                     <h4 className="display-font text-lg font-bold text-[#003b73] mb-4 flex items-center gap-2">
                       <BookOpen className="w-4 h-4 text-[#f59e0b]" />
                       <span>More Stories of Hope</span>

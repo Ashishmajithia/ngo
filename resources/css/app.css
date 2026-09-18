@@ -3,13 +3,30 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    max-width: 100vw;
+  }
   body {
     background-color: #fffdf8;
     color: #183a35;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    overflow-x: hidden;
+    max-width: 100vw;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
 .display-font {
   font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Custom scrollbar utility for mobile horizontal swipeable elements */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

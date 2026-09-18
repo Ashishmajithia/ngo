@@ -72,17 +72,17 @@ export const Hero: React.FC = () => {
               alt={slide.title || 'Hero Banner'}
               className="h-full w-full object-cover object-center scale-100 transition-transform duration-[10000ms] ease-out"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#002244]/95 via-[#003366]/70 to-black/30" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#002244]/70 via-transparent to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#002244]/95 via-[#003366]/75 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#002244]/80 via-transparent to-black/30" />
           </div>
         ))}
 
-        {/* Carousel Controls */}
+        {/* Carousel Controls - Arrows shown on tablet/desktop, swipe on mobile */}
         {slides.length > 1 && (
           <>
             <button
               onClick={handlePrev}
-              className="focusable absolute left-4 md:left-8 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 backdrop-blur text-white shadow-xl transition hover:bg-[#f59e0b] hover:text-[#002b54] hover:scale-110"
+              className="focusable absolute left-4 md:left-8 top-1/2 z-30 hidden sm:flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 backdrop-blur text-white shadow-xl transition hover:bg-[#f59e0b] hover:text-[#002b54] hover:scale-110"
               aria-label="Previous Slide"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -90,14 +90,14 @@ export const Hero: React.FC = () => {
 
             <button
               onClick={handleNext}
-              className="focusable absolute right-4 md:right-8 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 backdrop-blur text-white shadow-xl transition hover:bg-[#f59e0b] hover:text-[#002b54] hover:scale-110"
+              className="focusable absolute right-4 md:right-8 top-1/2 z-30 hidden sm:flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 backdrop-blur text-white shadow-xl transition hover:bg-[#f59e0b] hover:text-[#002b54] hover:scale-110"
               aria-label="Next Slide"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
 
             {/* Slide Indicators / Dots */}
-            <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+            <div className="absolute bottom-4 sm:bottom-6 left-1/2 z-30 flex -translate-x-1/2 gap-2">
               {slides.map((_, idx) => (
                 <button
                   key={idx}
@@ -114,41 +114,41 @@ export const Hero: React.FC = () => {
       </div>
 
       {/* Hero Content Panel */}
-      <div className="relative z-20 mx-auto flex min-h-[620px] max-w-7xl items-center px-5 py-24 lg:px-8 lg:py-32">
+      <div className="relative z-20 mx-auto flex min-h-[480px] xs:min-h-[540px] sm:min-h-[580px] md:min-h-[620px] max-w-7xl items-center px-4 xs:px-5 py-14 xs:py-16 sm:py-24 lg:px-8 lg:py-32">
         <div className="max-w-3xl">
           {/* Eyebrow */}
           {(current?.eyebrow || content?.brand?.regNo) && (
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#f59e0b]/80 bg-[#002244]/80 backdrop-blur px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-[.16em] text-[#fbbf24] shadow-md">
-              <Sparkles className="w-4 h-4 text-[#fbbf24]" />
-              <span>{current?.eyebrow || `${content.brand.regNo} • ${content.brand.tagline || 'Rising Hope for Children'}`}</span>
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-[#f59e0b]/80 bg-[#002244]/80 backdrop-blur px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs md:text-sm font-bold uppercase tracking-[.14em] sm:tracking-[.16em] text-[#fbbf24] shadow-md">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#fbbf24] shrink-0" />
+              <span className="truncate">{current?.eyebrow || `${content.brand.regNo} • ${content.brand.tagline || 'Rising Hope for Children'}`}</span>
             </div>
           )}
 
           {/* Dynamic Title */}
-          <h1 className="display-font mt-6 font-extrabold leading-[1.08] tracking-tight text-4xl sm:text-5xl md:text-6xl text-white">
+          <h1 className="display-font mt-4 sm:mt-6 font-extrabold leading-[1.12] sm:leading-[1.08] tracking-tight text-3xl xs:text-4xl sm:text-5xl md:text-6xl text-white">
             {current?.title || content.brand.name || 'ACT Charitable Trust'}
           </h1>
 
           {/* Dynamic Copy */}
           {(current?.copy || content?.brand?.tagline) && (
-            <p className="mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-blue-100/90 font-medium">
+            <p className="mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-blue-100/90 font-medium">
               {current?.copy || content.brand.tagline}
             </p>
           )}
 
-          {/* CTA Link */}
-          <div className="mt-8 flex flex-wrap gap-4 items-center">
+          {/* CTA Link Buttons */}
+          <div className="mt-6 sm:mt-8 flex flex-col xs:flex-row gap-3 sm:gap-4 items-stretch xs:items-center">
             <button
               type="button"
               onClick={() => setIsDonateOpen(true)}
-              className="focusable inline-flex items-center gap-2 rounded-full bg-[#d81b60] hover:bg-[#c2185b] px-7 py-4 font-extrabold text-white shadow-xl shadow-[#d81b60]/25 transition hover:-translate-y-0.5 cursor-pointer z-10"
+              className="focusable inline-flex items-center justify-center gap-2 rounded-full bg-[#d81b60] hover:bg-[#c2185b] px-6 sm:px-7 py-3.5 sm:py-4 font-extrabold text-white shadow-xl shadow-[#d81b60]/25 transition hover:-translate-y-0.5 active:scale-98 cursor-pointer z-10 text-sm sm:text-base"
             >
               <span>{current?.cta_text || current?.ctaText || content?.brand?.primaryCtaText || 'Donate & Support'}</span>
-              <ArrowDownRight className="w-5 h-5" />
+              <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <a
               href="/#about"
-              className="focusable inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur px-6 py-4 font-bold text-white hover:bg-white/20 transition"
+              className="focusable inline-flex items-center justify-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur px-6 py-3.5 sm:py-4 font-bold text-white hover:bg-white/20 transition active:scale-98 text-sm sm:text-base"
             >
               <span>Learn More</span>
             </a>

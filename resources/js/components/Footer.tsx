@@ -36,28 +36,28 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="border-t border-[#d9e1d7] bg-[#f8f4e9] text-[#183a35]">
-      <div className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-5 py-10 sm:py-12 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 pb-10 border-b border-[#d9e1d7]">
           {/* Brand Info */}
-          <div className="flex flex-col gap-3">
+          <div className="space-y-3.5 sm:space-y-4">
             <div className="flex items-center gap-3">
               {brand.logo ? (
                 brand.logoStyle === 'full' ? (
                   <img
                     src={brand.logo}
                     alt={brand.name}
-                    className="h-12 sm:h-16 w-auto max-w-[240px] sm:max-w-[320px] object-contain"
+                    className="h-11 xs:h-12 sm:h-16 w-auto max-w-[190px] xs:max-w-[240px] sm:max-w-[320px] object-contain"
                   />
                 ) : (
                   <>
-                    <span className="relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center overflow-hidden rounded-xl border border-[#d9e1d7] bg-white shadow-sm shrink-0">
+                    <span className="relative flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center overflow-hidden rounded-xl border border-[#d9e1d7] bg-white shadow-sm shrink-0">
                       <img
                         src={brand.logo}
                         alt={brand.name}
                         className="h-full w-full object-contain p-1"
                       />
                     </span>
-                    <span className="display-font font-bold text-lg">{brand.name}</span>
+                    <span className="display-font font-bold text-base sm:text-lg">{brand.name}</span>
                   </>
                 )
               ) : (
@@ -65,17 +65,17 @@ export const Footer: React.FC = () => {
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#123f38] text-white shrink-0">
                     <HeartHandshake className="w-5 h-5 text-[#f2ad3b]" />
                   </span>
-                  <span className="display-font font-bold text-lg">{brand.name}</span>
+                  <span className="display-font font-bold text-base sm:text-lg">{brand.name}</span>
                 </>
               )}
             </div>
             <p className="text-xs text-[#58706a] leading-relaxed">
               Empowering grassroots communities through quality education, rural healthcare drives, and sustainable livelihoods.
             </p>
-            <div className="pt-2">
+            <div className="pt-1">
               <Link
                 href="/admin/login"
-                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#58706a] hover:text-[#123f38] transition"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#58706a] hover:text-[#123f38] transition py-1"
               >
                 <Lock className="w-3 h-3 text-[#28745e]" />
                 <span>Admin Login Portal</span>
@@ -89,11 +89,12 @@ export const Footer: React.FC = () => {
               Quick Links
             </h4>
             <ul className="space-y-2 text-xs font-semibold text-[#58706a]">
-              <li><a href="#about" className="hover:text-[#28745e] transition">About Our Mission</a></li>
-              <li><a href="#programs" className="hover:text-[#28745e] transition">Grassroots Programs</a></li>
-              <li><a href="#approach" className="hover:text-[#28745e] transition">Core Principles</a></li>
-              <li><a href="#gallery" className="hover:text-[#28745e] transition">Impact Stories & Blogs</a></li>
-              <li><a href="#impact" className="hover:text-[#28745e] transition">Impact Reports & Metrics</a></li>
+              <li><a href="/#about" className="hover:text-[#28745e] transition py-0.5 inline-block">About Our Mission</a></li>
+              <li><a href="/#programs" className="hover:text-[#28745e] transition py-0.5 inline-block">Grassroots Programs</a></li>
+              <li><a href="/#approach" className="hover:text-[#28745e] transition py-0.5 inline-block">Core Principles</a></li>
+              <li><a href="/#stories" className="hover:text-[#28745e] transition py-0.5 inline-block">Impact Stories & Blogs</a></li>
+              <li><a href="/#gallery" className="hover:text-[#28745e] transition py-0.5 inline-block">Moments Gallery</a></li>
+              <li><a href="/#impact" className="hover:text-[#28745e] transition py-0.5 inline-block">Impact Reports & Metrics</a></li>
             </ul>
           </div>
 
@@ -113,7 +114,7 @@ export const Footer: React.FC = () => {
                 {brand.email && (
                   <li className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-[#28745e] shrink-0" />
-                    <a href={`mailto:${brand.email}`} className="hover:underline text-[#183a35]">
+                    <a href={`mailto:${brand.email}`} className="hover:underline text-[#183a35] truncate">
                       {brand.email}
                     </a>
                   </li>
@@ -148,7 +149,7 @@ export const Footer: React.FC = () => {
               >
                 <div className="flex items-center gap-3">
                   {/* QR Image Box */}
-                  <div className="h-20 w-20 shrink-0 rounded-xl bg-white p-1 border border-[#123f38]/30 shadow-inner flex items-center justify-center overflow-hidden">
+                  <div className="h-18 w-18 xs:h-20 xs:w-20 shrink-0 rounded-xl bg-white p-1 border border-[#123f38]/30 shadow-inner flex items-center justify-center overflow-hidden">
                     <img
                       src={qrImage}
                       alt="UPI Payment QR Code"
@@ -173,14 +174,14 @@ export const Footer: React.FC = () => {
                 {/* UPI ID One-Click Copy */}
                 {upiId && (
                   <div className="flex items-center justify-between gap-1 bg-[#f8f4e9] px-2.5 py-1.5 rounded-lg border border-[#dce7dc] text-[11px]">
-                    <span className="font-mono text-[#183a35] font-bold truncate">{upiId}</span>
+                    <span className="font-mono text-[#183a35] font-bold truncate text-[10px] xs:text-[11px]">{upiId}</span>
                     <button
                       type="button"
                       onClick={handleCopyUpi}
-                      className="inline-flex items-center gap-1 text-[#28745e] hover:text-[#123f38] font-bold shrink-0 ml-1"
+                      className="inline-flex items-center gap-1 text-[#28745e] hover:text-[#123f38] font-bold shrink-0 ml-1 py-0.5"
                       title="Copy UPI ID"
                     >
-                      {copiedUpi ? <Check className="w-3 h-3 text-[#28745e]" /> : <Copy className="w-3 h-3" />}
+                      {copiedUpi ? <Check className="w-3.5 h-3.5 text-[#28745e]" /> : <Copy className="w-3.5 h-3.5" />}
                       <span className="text-[10px]">{copiedUpi ? 'Copied' : 'Copy'}</span>
                     </button>
                   </div>
@@ -199,9 +200,9 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#58706a] gap-2">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#58706a] gap-2 text-center sm:text-left">
           <p>© {new Date().getFullYear()} {brand.name}. All rights reserved.</p>
-          <p className="flex items-center gap-1">
+          <p className="flex items-center justify-center gap-1">
             Built with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline" /> for maximum performance on Vercel.
           </p>
         </div>
@@ -209,4 +210,3 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
-

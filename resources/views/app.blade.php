@@ -15,8 +15,8 @@
 
     @php
         $manifestPath = public_path('build/manifest.json');
-        $cssFile = '/build/assets/app-QjScb-c6.css';
-        $jsFile = '/build/assets/app-DfNsOg4d.js';
+        $cssFile = '/build/assets/app-CaTWRwQN.css';
+        $jsFile = '/build/assets/app-BmfJFWA1.js';
         $preloadChunks = [];
         if (file_exists($manifestPath)) {
             $manifest = json_decode(file_get_contents($manifestPath), true);

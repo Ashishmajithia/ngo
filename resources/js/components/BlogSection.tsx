@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Calendar, User, ArrowRight, PlusCircle, BookOpen, Heart, ShieldCheck } from 'lucide-react';
+import { Sparkles, Calendar, User, ArrowRight, PlusCircle, BookOpen, ShieldCheck } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 
 interface BlogSectionProps {
@@ -72,23 +72,23 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
   };
 
   return (
-    <section id="stories" className="bg-gradient-to-b from-[#002244] via-[#003366] to-[#004080] text-white px-5 py-20 lg:px-8 lg:py-28 relative overflow-hidden">
+    <section id="stories" className="bg-gradient-to-b from-[#002244] via-[#003366] to-[#004080] text-white px-4 sm:px-5 py-14 sm:py-20 lg:px-8 lg:py-28 relative overflow-hidden">
       {/* Subtle Background Glows */}
       <div className="absolute top-0 right-1/4 -mt-24 h-96 w-96 rounded-full bg-[#f59e0b]/10 blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-0 left-10 -mb-24 h-96 w-96 rounded-full bg-[#d81b60]/10 blur-3xl pointer-events-none"></div>
 
       <div className="mx-auto max-w-7xl relative z-10">
         {/* Section Header */}
-        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#f59e0b]/40 bg-white/10 px-4 py-1.5 text-xs font-extrabold uppercase tracking-[.18em] text-[#fbbf24] mb-3 backdrop-blur shadow-sm">
-              <Sparkles className="w-4 h-4 text-[#fbbf24]" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#f59e0b]/40 bg-white/10 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[.18em] text-[#fbbf24] mb-3 backdrop-blur shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-[#fbbf24] shrink-0" />
               <span>Stories of Transformation • Rising Hope</span>
             </div>
-            <h2 className="display-font text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-white">
+            <h2 className="display-font text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-white">
               Witness Our Impact In Action
             </h2>
-            <p className="mt-3 text-base sm:text-lg text-blue-100/80 leading-relaxed max-w-xl font-normal">
+            <p className="mt-2.5 sm:mt-3 text-sm sm:text-base md:text-lg text-blue-100/85 leading-relaxed max-w-xl font-normal">
               Real children, transformed lives, and daily milestones from ACT Charitable Trust field centers (REG.NO.220).
             </p>
           </div>
@@ -97,7 +97,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
             {onOpenCreateBlog && (
               <button
                 onClick={onOpenCreateBlog}
-                className="focusable flex items-center gap-2 rounded-full bg-[#f59e0b] px-5 py-3 text-xs font-bold text-[#002b54] shadow-lg hover:bg-[#fbbf24] transition"
+                className="focusable flex items-center justify-center gap-2 rounded-full bg-[#f59e0b] px-5 py-3 text-xs font-bold text-[#002b54] shadow-lg hover:bg-[#fbbf24] transition w-full sm:w-auto"
               >
                 <PlusCircle className="w-4 h-4" />
                 <span>+ Write New Story</span>
@@ -106,13 +106,13 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
           </div>
         </div>
 
-        {/* Category Filters */}
-        <div className="mt-8 flex flex-wrap gap-2 border-b border-white/15 pb-5">
+        {/* Category Filters - Horizontal swipe on mobile, wrap on tablet/desktop */}
+        <div className="mt-6 sm:mt-8 flex items-center gap-2 border-b border-white/15 pb-4 overflow-x-auto no-scrollbar sm:flex-wrap">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`rounded-full px-5 py-2 text-xs font-bold transition shadow-sm ${
+              className={`whitespace-nowrap shrink-0 rounded-full px-4 sm:px-5 py-2 text-xs font-bold transition shadow-sm ${
                 selectedCategory === cat
                   ? 'bg-[#d81b60] text-white shadow-md shadow-[#d81b60]/30 ring-2 ring-white/30'
                   : 'bg-white/10 text-white/85 hover:bg-white/20'
@@ -133,7 +133,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
             No stories published under this category yet.
           </div>
         ) : (
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 sm:mt-10 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {filteredBlogs.map((blog) => (
               <article
                 key={blog.id}
@@ -141,43 +141,43 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
                 className="group cursor-pointer overflow-hidden rounded-3xl bg-white text-[#183a35] shadow-xl flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 border border-white/10"
               >
                 <div>
-                  <div className="overflow-hidden h-60 relative">
+                  <div className="overflow-hidden h-48 sm:h-60 relative">
                     <img
                       src={blog.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'}
                       alt={blog.title}
                       className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
                     />
-                    <div className="absolute top-4 left-4 rounded-full bg-[#003b73]/95 backdrop-blur px-3.5 py-1 text-[11px] font-extrabold text-white shadow-md">
+                    <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 rounded-full bg-[#003b73]/95 backdrop-blur px-3 py-1 text-[11px] font-extrabold text-white shadow-md">
                       {blog.category || 'Child Welfare'}
                     </div>
-                    <div className="absolute top-4 right-4 rounded-full bg-[#1b8744]/90 backdrop-blur px-2.5 py-1 text-[10px] font-bold text-white shadow-md flex items-center gap-1">
+                    <div className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 rounded-full bg-[#1b8744]/90 backdrop-blur px-2.5 py-1 text-[10px] font-bold text-white shadow-md flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3" />
                       <span>REG.220</span>
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <div className="flex items-center gap-4 text-xs text-[#64748b] mb-3">
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-center gap-3 sm:gap-4 text-xs text-[#64748b] mb-2.5 sm:mb-3">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5 text-[#1b8744]" />
                         {blog.date}
                       </span>
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-1 truncate max-w-[140px]">
                         <User className="w-3.5 h-3.5 text-[#004b87]" />
-                        {blog.author}
+                        <span className="truncate">{blog.author}</span>
                       </span>
                     </div>
 
-                    <h3 className="display-font text-xl font-bold leading-snug text-[#003b73] group-hover:text-[#d81b60] transition line-clamp-2">
+                    <h3 className="display-font text-lg sm:text-xl font-bold leading-snug text-[#003b73] group-hover:text-[#d81b60] transition line-clamp-2">
                       {blog.title}
                     </h3>
-                    <p className="mt-3 text-xs leading-relaxed text-[#475569] line-clamp-3 font-normal">
+                    <p className="mt-2.5 sm:mt-3 text-xs sm:text-sm leading-relaxed text-[#475569] line-clamp-3 font-normal">
                       {blog.excerpt}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-6 pt-0 flex items-center justify-between border-t border-[#f1f5f9] mt-4">
+                <div className="p-5 sm:p-6 pt-0 flex items-center justify-between border-t border-[#f1f5f9] mt-4">
                   <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d81b60] group-hover:underline">
                     <BookOpen className="w-3.5 h-3.5" />
                     Read Full Story

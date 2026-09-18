@@ -16,23 +16,23 @@ export const Gallery: React.FC = () => {
   if (items.length === 0) return null;
 
   return (
-    <section id="gallery" className="bg-[#123f38] px-5 py-20 lg:px-8 lg:py-28 text-[#fffdf8]">
+    <section id="gallery" className="bg-[#123f38] px-4 sm:px-5 py-12 sm:py-20 lg:px-8 lg:py-28 text-[#fffdf8]">
       <div className="mx-auto max-w-7xl">
         {/* Section Header */}
         {(gallery?.title || gallery?.eyebrow || gallery?.copy) && (
           <div className="max-w-2xl">
             {gallery.eyebrow && (
-              <p className="text-sm font-bold uppercase tracking-[.16em] text-[#f2ad3b]">
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-[.16em] text-[#f2ad3b]">
                 {gallery.eyebrow}
               </p>
             )}
             {gallery.title && (
-              <h2 className="display-font mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
+              <h2 className="display-font mt-3 sm:mt-4 text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
                 {gallery.title}
               </h2>
             )}
             {gallery.copy && (
-              <p className="mt-5 text-lg leading-relaxed text-[#f8f4e9]/80">
+              <p className="mt-3 sm:mt-5 text-base sm:text-lg leading-relaxed text-[#f8f4e9]/80">
                 {gallery.copy}
               </p>
             )}
@@ -40,7 +40,7 @@ export const Gallery: React.FC = () => {
         )}
 
         {/* Gallery Grid */}
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 sm:mt-12 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <figure
               key={item.id}
@@ -49,7 +49,7 @@ export const Gallery: React.FC = () => {
                 item.gridSpan || ''
               }`}
             >
-              <div className="overflow-hidden h-72 sm:h-80 relative">
+              <div className="overflow-hidden h-64 sm:h-80 relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.image}
@@ -58,14 +58,14 @@ export const Gallery: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#123f38] via-transparent to-transparent opacity-80" />
 
-                {/* Hover overlay button */}
-                <div className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#123f38]/70 backdrop-blur text-white opacity-0 group-hover:opacity-100 transition duration-300">
-                  <Maximize2 className="w-5 h-5 text-[#f2ad3b]" />
+                {/* Tap to expand overlay button: visible on mobile, hover on desktop */}
+                <div className="absolute top-3.5 right-3.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#123f38]/80 backdrop-blur text-white opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300 shadow-md">
+                  <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#f2ad3b]" />
                 </div>
               </div>
 
-              <figcaption className="p-5">
-                <p className="display-font font-bold text-lg text-[#fffdf8]">
+              <figcaption className="p-4 sm:p-5">
+                <p className="display-font font-bold text-base sm:text-lg text-[#fffdf8]">
                   {item.title}
                 </p>
                 <p className="mt-1 text-xs text-[#f8f4e9]/70 leading-snug">

@@ -384,11 +384,13 @@ export default function AdminDashboardPage() {
       {/* Main Container */}
       <div className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Sidebar Nav */}
-        <aside className="md:col-span-1 bg-[#fffdf8] rounded-3xl p-5 border border-[#d9e1d7] shadow-sm h-fit space-y-2">
-          <div className="flex items-center gap-2 pb-3 mb-2 border-b border-[#dce7dc]">
+        <aside className="md:col-span-1 bg-[#fffdf8] rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-[#d9e1d7] shadow-sm h-fit">
+          <div className="flex items-center gap-2 pb-2 sm:pb-3 mb-2 border-b border-[#dce7dc]">
             <ShieldCheck className="w-4 h-4 text-[#28745e]" />
             <p className="text-xs font-bold uppercase tracking-wider text-[#123f38]">Control Menu</p>
           </div>
+          <div className="flex md:flex-col overflow-x-auto no-scrollbar gap-1.5 sm:gap-2 pb-1 md:pb-0">
+          
           {[
             { id: 'blogs' as const, label: 'Impact Stories (Blogs)', icon: FileText, count: blogs.length },
             { id: 'banners' as const, label: 'Hero Banners', icon: ImageIcon, count: content.hero?.slides?.length ?? 0 },
@@ -407,7 +409,7 @@ export default function AdminDashboardPage() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between rounded-2xl px-4 py-3 text-xs font-bold transition ${
+                className={`shrink-0 md:w-full flex items-center justify-between rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2 sm:py-3 text-xs font-bold transition whitespace-nowrap ${
                   activeTab === item.id
                     ? 'bg-[#123f38] text-white shadow-md'
                     : 'text-[#58706a] hover:bg-[#f8f4e9] hover:text-[#183a35]'
@@ -425,6 +427,7 @@ export default function AdminDashboardPage() {
               </button>
             );
           })}
+        </div>
         </aside>
 
         {/* Dynamic Main Panel */}

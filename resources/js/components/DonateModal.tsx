@@ -128,12 +128,12 @@ export const DonateModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-      <div className="relative w-full max-w-xl my-6 rounded-3xl bg-[#fffdf8] p-5 sm:p-7 shadow-2xl border border-[#d9e1d7] text-[#183a35] max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-xl my-4 sm:my-6 rounded-2xl sm:rounded-3xl bg-[#fffdf8] p-4 sm:p-7 shadow-2xl border border-[#d9e1d7] text-[#183a35] max-h-[92vh] overflow-y-auto">
         {/* Close Button */}
         <button
           type="button"
           onClick={() => setIsDonateOpen(false)}
-          className="absolute top-4 right-4 rounded-full p-2 text-[#58706a] hover:bg-[#e8f0e8] hover:text-[#183a35] transition z-10"
+          className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 rounded-full p-2 text-[#58706a] hover:bg-[#e8f0e8] hover:text-[#183a35] transition z-10"
         >
           <X className="w-5 h-5" />
         </button>
@@ -145,7 +145,7 @@ export const DonateModal: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="display-font text-xl font-bold text-[#183a35]">
+              <h3 className="display-font text-lg sm:text-xl font-bold text-[#183a35]">
                 Support {content.brand.name}
               </h3>
               <span className="inline-flex items-center gap-1 rounded-full bg-[#e8f0e8] px-2 py-0.5 text-[10px] font-bold text-[#28745e]">
@@ -199,7 +199,7 @@ export const DonateModal: React.FC = () => {
               <label className="block text-xs font-bold uppercase tracking-wider text-[#123f38] mb-2">
                 1. Select Amount (INR ₹)
               </label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                 {presetAmounts.map((amt) => (
                   <button
                     key={amt}
@@ -208,7 +208,7 @@ export const DonateModal: React.FC = () => {
                       setAmount(amt);
                       setCustomAmount('');
                     }}
-                    className={`rounded-xl py-2.5 text-sm font-bold border transition ${
+                    className={`rounded-xl py-2 sm:py-2.5 text-xs sm:text-sm font-bold border transition ${
                       amount === amt
                         ? 'bg-[#28745e] text-white border-[#28745e] shadow-md'
                         : 'bg-white border-[#dce7dc] text-[#183a35] hover:border-[#28745e]'
@@ -251,7 +251,7 @@ export const DonateModal: React.FC = () => {
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-2xl border border-[#dce7dc]">
                   {/* QR Image Box */}
-                  <div className="w-36 h-36 shrink-0 bg-white p-2 rounded-xl border-2 border-[#123f38] shadow-md flex items-center justify-center">
+                  <div className="w-32 h-32 sm:w-36 sm:h-36 shrink-0 bg-white p-2 rounded-xl border-2 border-[#123f38] shadow-md flex items-center justify-center">
                     <img
                       src={qrImage}
                       alt="UPI Payment Barcode QR"
