@@ -64,7 +64,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     async function loadStory() {
       try {
-        const res = await fetch(`/api/blogs/${encodeURIComponent(slugOrId)}`);
+        const res = await fetch(`/api/blogs/${encodeURIComponent(slugOrId)}?t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();
           if (json.success && json.blog) {

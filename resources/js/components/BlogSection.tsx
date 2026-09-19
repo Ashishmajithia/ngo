@@ -35,7 +35,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
   useEffect(() => {
     async function fetchBlogs() {
       try {
-        const res = await fetch('/api/blogs');
+        const res = await fetch(`/api/blogs?t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();
           if (json.success && Array.isArray(json.blogs)) {

@@ -308,7 +308,7 @@ class ContentController extends Controller
                 'database' => 'PostgreSQL (Supabase Cloud)',
                 'host' => config('database.connections.pgsql.host'),
             ],
-        ])->header('Cache-Control', 'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400');
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     public function update(Request $request)

@@ -71,7 +71,7 @@ export const ContentProvider = ({ children }) => {
     // Fetch live content from database API to ensure freshest data
     async function syncWithServer() {
       try {
-        const res = await fetch(`/api/content?t=${Date.now()}`);
+        const res = await fetch(`/api/content?t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();
           let serverData = json.data;

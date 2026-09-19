@@ -10,12 +10,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/{any?}', function () {
     $initialContent = null;
+    $initialBlogs = null;
     try {
         $initialContent = \App\Http\Controllers\Api\ContentController::getContentArray();
     } catch (\Throwable $e) {
         // Fallback gracefully if database connection is temporarily slow
     }
+    try {
+        $initialBlogs = \App\Http\Controllers\Api\BlogController::getBlogsArray();
+    } catch (\Throwable $e) {
+        // Fallback gracefully
+    }
     return response()
-        ->view('app', compact('initialContent'))
-        ->header('Cache-Control', 'public, max-age=0, s-maxage=120, stale-while-revalidate=86400');
+        ->view('app', compact('initialContent', 'initialBlogs'))
+        ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
 })->where('any', '^(?!api|uploads).*$');

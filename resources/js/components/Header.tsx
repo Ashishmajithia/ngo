@@ -90,9 +90,6 @@ export const Header: React.FC = () => {
             <span>Stories & Blog</span>
             <span className="h-2 w-2 rounded-full bg-[#d81b60] animate-pulse"></span>
           </a>
-          <a href="/#centers" className="focusable rounded text-sm font-bold text-[#183a35] hover:text-[#004b87] transition">
-            Centers
-          </a>
           <a href="/#gallery" className="focusable rounded text-sm font-bold text-[#183a35] hover:text-[#004b87] transition">
             Gallery
           </a>
@@ -157,13 +154,6 @@ export const Header: React.FC = () => {
             >
               <span>Stories & Blog</span>
               <span className="text-xs bg-[#d81b60]/15 text-[#d81b60] px-2.5 py-0.5 rounded-full font-bold">New Stories</span>
-            </a>
-            <a
-              href="/#centers"
-              onClick={() => setMobileMenuOpen(false)}
-              className="focusable rounded-xl py-2 px-3 text-base font-bold text-[#003b73] hover:bg-black/5 active:bg-black/10 transition"
-            >
-              Field Centers & Reach
             </a>
             <a
               href="/#gallery"

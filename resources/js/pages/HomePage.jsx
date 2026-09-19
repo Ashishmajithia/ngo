@@ -5,7 +5,6 @@ import { ImpactStats } from '../components/ImpactStats';
 import { About } from '../components/About';
 import { Programs } from '../components/Programs';
 import { Approach } from '../components/Approach';
-import { FieldCentersSection } from '../components/FieldCentersSection';
 import { Gallery } from '../components/Gallery';
 import { BlogSection } from '../components/BlogSection';
 import { SupportSection } from '../components/SupportSection';
@@ -24,7 +23,6 @@ export default function HomePage() {
       <About />
       <Programs />
       <Approach />
-      <FieldCentersSection />
       <Gallery />
       <BlogSection />
       <SupportSection />

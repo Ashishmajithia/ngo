@@ -253,11 +253,17 @@ export default function AdminDashboardPage() {
       });
       if (res.ok) {
         setBlogs((prev) => {
-          if (isEdit) {
-            return prev.map((b) => (b.id === blogToSave.id ? blogToSave : b));
-          } else {
-            return [blogToSave, ...prev];
-          }
+          const updated = isEdit
+            ? prev.map((b) => (b.id === blogToSave.id ? blogToSave : b))
+            : [blogToSave, ...prev];
+          try {
+            localStorage.setItem('act_trust_blogs_cache', JSON.stringify(updated));
+            sessionStorage.removeItem('act_story_' + blogToSave.id);
+            if (blogToSave.slug) {
+              sessionStorage.removeItem('act_story_' + blogToSave.slug);
+            }
+          } catch {}
+          return updated;
         });
         setIsBlogModalOpen(false);
         setEditingBlog(null);
@@ -278,7 +284,14 @@ export default function AdminDashboardPage() {
     try {
       const res = await fetch(`/api/blogs/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (res.ok) {
-        setBlogs((prev) => prev.filter((b) => b.id !== id));
+        setBlogs((prev) => {
+          const updated = prev.filter((b) => b.id !== id);
+          try {
+            localStorage.setItem('act_trust_blogs_cache', JSON.stringify(updated));
+            sessionStorage.removeItem('act_story_' + id);
+          } catch {}
+          return updated;
+        });
         showToastMsg('Story deleted successfully.');
         fetchData();
       } else {
