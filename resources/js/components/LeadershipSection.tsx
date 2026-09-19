@@ -99,8 +99,8 @@ export const LeadershipSection: React.FC = () => {
                 />
 
                 {/* 2-Column Responsive Card: Left is Portrait, Right is Complete Details */}
-                <div className="flex flex-col sm:flex-row gap-6 lg:gap-7 items-stretch flex-1">
-                  {/* Left: Large Executive Portrait Photo (Clickable) */}
+                <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 lg:gap-7 items-center sm:items-stretch flex-1">
+                  {/* Left: Large Executive Portrait Photo (Properly sized on mobile & desktop) */}
                   <div
                     onClick={() => setPreviewLeader(leader)}
                     role="button"
@@ -112,28 +112,28 @@ export const LeadershipSection: React.FC = () => {
                       }
                     }}
                     title={`Click to preview full photo of ${leader.name}`}
-                    className="group/photo relative w-full sm:w-48 md:w-52 lg:w-56 h-72 sm:h-auto min-h-[290px] rounded-2xl overflow-hidden shadow-md border-2 border-white ring-1 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
+                    className="group/photo relative w-36 h-44 xs:w-40 xs:h-48 sm:w-44 sm:h-52 md:w-48 md:h-56 lg:w-52 lg:h-60 rounded-2xl overflow-hidden shadow-md border-2 border-white ring-1 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
                   >
                     <SafeImage
                       src={leader.photo}
                       alt={leader.name}
                       fallbackSrc="/uploads/act_official_logo.jpg"
-                      className="w-full h-full object-cover object-top group-hover/photo:scale-105 transition-transform duration-500 ease-out"
+                      className="w-full h-full object-cover object-center group-hover/photo:scale-105 transition-transform duration-500 ease-out"
                     />
 
                     {/* Subtle Zoom Hover Scrim */}
                     <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 flex items-center justify-center text-white backdrop-blur-[2px]">
-                      <div className="p-3 rounded-full bg-black/60 text-white shadow-lg">
-                        <Maximize2 className="w-5 h-5 drop-shadow" />
+                      <div className="p-2.5 sm:p-3 rounded-full bg-black/60 text-white shadow-lg">
+                        <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow" />
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: Rich Content Column (No empty gaps, beautifully balanced) */}
-                  <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
+                  {/* Right: Rich Content Column (No empty gaps, beautifully balanced on all screens) */}
+                  <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5 w-full">
                     <div>
                       {/* Top Badges */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2 mb-3">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                             isFounder
@@ -157,20 +157,22 @@ export const LeadershipSection: React.FC = () => {
                       </div>
 
                       {/* Name & Role */}
-                      <h3 className="display-font text-2xl sm:text-3xl font-extrabold text-[#143d35] tracking-tight leading-snug">
-                        {leader.name}
-                      </h3>
+                      <div className="text-center sm:text-left">
+                        <h3 className="display-font text-2xl sm:text-3xl font-extrabold text-[#143d35] tracking-tight leading-snug">
+                          {leader.name}
+                        </h3>
 
-                      <p className="mt-1 text-sm sm:text-base font-bold text-[#28745e]">
-                        {leader.role}
-                      </p>
+                        <p className="mt-1 text-sm sm:text-base font-bold text-[#28745e]">
+                          {leader.role}
+                        </p>
+                      </div>
 
                       {/* Inspiring Vision / Quote Box */}
                       {leader.message && (
                         <div className="relative mt-4 rounded-2xl bg-gradient-to-br from-[#faf7f0] to-[#f4ede0] p-4 border border-[#ede3d0] shadow-xs">
                           <div className="flex items-start gap-2.5">
                             <Quote className="w-4 h-4 text-[#f2ad3b] shrink-0 mt-0.5" />
-                            <p className="text-xs sm:text-[13px] leading-relaxed italic text-[#395049] font-medium">
+                            <p className="text-xs sm:text-[13px] leading-relaxed italic text-[#395049] font-medium text-left">
                               "{leader.message}"
                             </p>
                           </div>
@@ -180,7 +182,7 @@ export const LeadershipSection: React.FC = () => {
 
                     {/* Direct Action Contacts */}
                     {(leader.phone || leader.email) && (
-                      <div className="mt-4 pt-3.5 border-t border-[#f0eae0] flex flex-wrap items-center gap-2">
+                      <div className="mt-4 pt-3.5 border-t border-[#f0eae0] flex flex-wrap items-center justify-center sm:justify-start gap-2">
                         {leader.phone && (
                           <a
                             href={`tel:${leader.phone.replace(/[^\d+]/g, '')}`}
