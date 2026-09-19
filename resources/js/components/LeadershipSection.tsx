@@ -65,7 +65,7 @@ export const LeadershipSection: React.FC = () => {
           )}
         </div>
 
-        {/* Executive Cards Showcase (Balanced, High-End & Fully Adjustable Grid) */}
+        {/* Executive Cards Showcase (Rich, Cohesive Editorial Layout) */}
         <div
           className={`grid gap-8 lg:gap-10 items-stretch ${
             leaders.length === 1
@@ -87,7 +87,7 @@ export const LeadershipSection: React.FC = () => {
             return (
               <div
                 key={leader.id || `leader-${index}`}
-                className="group relative rounded-3xl bg-white p-7 sm:p-9 shadow-lg hover:shadow-2xl transition-all duration-300 border border-[#e8e1d3] flex flex-col justify-between overflow-hidden"
+                className="group relative rounded-3xl bg-gradient-to-br from-white via-[#fefdfb] to-[#fbf8f2] p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 border border-[#e8dfce] flex flex-col justify-between overflow-hidden"
               >
                 {/* Subtle Top Gradient Accent Bar */}
                 <div
@@ -98,115 +98,114 @@ export const LeadershipSection: React.FC = () => {
                   }`}
                 />
 
-                <div className="flex-1 flex flex-col">
-                  {/* Top Status Badges */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-6 sm:mb-8">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                        isFounder
-                          ? 'bg-[#fef7ec] text-[#b36b00] border border-[#f5d99f]'
-                          : 'bg-[#edf6f2] text-[#1b6b55] border border-[#b8dfd1]'
-                      }`}
-                    >
-                      {isFounder ? (
-                        <Sparkles className="w-3.5 h-3.5 text-[#f2ad3b]" />
-                      ) : (
-                        <ShieldCheck className="w-3.5 h-3.5 text-[#28745e]" />
-                      )}
-                      <span>{badgeText}</span>
-                    </span>
+                {/* 2-Column Responsive Card: Left is Portrait, Right is Complete Details */}
+                <div className="flex flex-col sm:flex-row gap-6 lg:gap-7 items-stretch flex-1">
+                  {/* Left: Large Executive Portrait Photo (Clickable) */}
+                  <div
+                    onClick={() => setPreviewLeader(leader)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setPreviewLeader(leader);
+                      }
+                    }}
+                    title={`Click to preview full photo of ${leader.name}`}
+                    className="group/photo relative w-full sm:w-48 md:w-52 lg:w-56 h-72 sm:h-auto min-h-[290px] rounded-2xl overflow-hidden shadow-md border-2 border-white ring-1 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
+                  >
+                    <SafeImage
+                      src={leader.photo}
+                      alt={leader.name}
+                      fallbackSrc="/uploads/act_official_logo.jpg"
+                      className="w-full h-full object-cover object-top group-hover/photo:scale-105 transition-transform duration-500 ease-out"
+                    />
 
-                    {leader.tenure && (
-                      <span className="text-xs font-semibold text-[#6d6352] bg-[#f7f4ec] px-3.5 py-1 rounded-full border border-[#e5dfd0]">
-                        {leader.tenure}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Leader Profile Header: Large Prominent Portrait + Clean Distinguished Title */}
-                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-6 sm:gap-7">
-                    {/* Enlarged Portrait Photo Container (Clickable for Full HD Lightbox) */}
-                    <div
-                      onClick={() => setPreviewLeader(leader)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setPreviewLeader(leader);
-                        }
-                      }}
-                      title={`Click to preview full photo of ${leader.name}`}
-                      className="group/photo relative w-40 h-48 sm:w-44 sm:h-52 md:w-48 md:h-56 rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
-                    >
-                      <SafeImage
-                        src={leader.photo}
-                        alt={leader.name}
-                        fallbackSrc="/uploads/act_official_logo.jpg"
-                        className="w-full h-full object-cover object-top group-hover/photo:scale-105 transition-transform duration-500 ease-out"
-                      />
-
-                      {/* Minimalist Hover Scrim with Preview Icon */}
-                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 flex items-center justify-center text-white backdrop-blur-[2px]">
-                        <div className="p-3 rounded-full bg-black/50 text-white shadow-lg">
-                          <Maximize2 className="w-5 h-5 drop-shadow" />
-                        </div>
+                    {/* Subtle Zoom Hover Scrim */}
+                    <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 flex items-center justify-center text-white backdrop-blur-[2px]">
+                      <div className="p-3 rounded-full bg-black/60 text-white shadow-lg">
+                        <Maximize2 className="w-5 h-5 drop-shadow" />
                       </div>
                     </div>
+                  </div>
 
-                    {/* Name & Role (Clean, distinguished typography with zero clutter) */}
-                    <div className="flex-1 text-center sm:text-left min-w-0 flex flex-col justify-center">
-                      <h3 className="display-font text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#143d35] tracking-tight leading-tight">
+                  {/* Right: Rich Content Column (No empty gaps, beautifully balanced) */}
+                  <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
+                    <div>
+                      {/* Top Badges */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                            isFounder
+                              ? 'bg-[#fef7ec] text-[#b36b00] border border-[#f5d99f]'
+                              : 'bg-[#edf6f2] text-[#1b6b55] border border-[#b8dfd1]'
+                          }`}
+                        >
+                          {isFounder ? (
+                            <Sparkles className="w-3 h-3 text-[#f2ad3b]" />
+                          ) : (
+                            <ShieldCheck className="w-3 h-3 text-[#28745e]" />
+                          )}
+                          <span>{badgeText}</span>
+                        </span>
+
+                        {leader.tenure && (
+                          <span className="text-[11px] font-semibold text-[#6d6352] bg-[#f7f4ec] px-2.5 py-0.5 rounded-full border border-[#e5dfd0]">
+                            {leader.tenure}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Name & Role */}
+                      <h3 className="display-font text-2xl sm:text-3xl font-extrabold text-[#143d35] tracking-tight leading-snug">
                         {leader.name}
                       </h3>
 
-                      <p className="mt-2 text-base sm:text-lg font-bold text-[#28745e] tracking-wide">
+                      <p className="mt-1 text-sm sm:text-base font-bold text-[#28745e]">
                         {leader.role}
                       </p>
-                    </div>
-                  </div>
 
-                  {/* Inspiring Vision / Message Quote (Full Width, Balanced & Dignified) */}
-                  {leader.message && (
-                    <div className="relative mt-6 sm:mt-7 rounded-2xl bg-gradient-to-br from-[#faf7f0] via-[#f8f4ec] to-[#f4ede0] p-5 sm:p-6 border border-[#ede3d0] shadow-xs flex-1 flex flex-col justify-center">
-                      <div className="flex items-start gap-3.5">
-                        <div className="p-2 rounded-xl bg-[#f2ad3b]/15 text-[#b36b00] shrink-0 mt-0.5">
-                          <Quote className="w-4 h-4" />
+                      {/* Inspiring Vision / Quote Box */}
+                      {leader.message && (
+                        <div className="relative mt-4 rounded-2xl bg-gradient-to-br from-[#faf7f0] to-[#f4ede0] p-4 border border-[#ede3d0] shadow-xs">
+                          <div className="flex items-start gap-2.5">
+                            <Quote className="w-4 h-4 text-[#f2ad3b] shrink-0 mt-0.5" />
+                            <p className="text-xs sm:text-[13px] leading-relaxed italic text-[#395049] font-medium">
+                              "{leader.message}"
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-sm sm:text-[15px] leading-relaxed italic text-[#334d46] font-medium">
-                          "{leader.message}"
-                        </p>
-                      </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                {/* Direct Action Contacts (if phone or email configured) */}
-                {(leader.phone || leader.email) && (
-                  <div className="mt-6 pt-5 border-t border-[#f0eae0] flex flex-wrap items-center gap-3">
-                    {leader.phone && (
-                      <a
-                        href={`tel:${leader.phone.replace(/[^\d+]/g, '')}`}
-                        className="inline-flex items-center gap-2 text-xs font-bold text-[#143d35] bg-[#edf6f2] hover:bg-[#28745e] hover:text-white px-3.5 py-2 rounded-xl transition duration-200 cursor-pointer border border-[#cbe4da] shadow-xs hover:shadow"
-                        title={`Call ${leader.name}`}
-                      >
-                        <Phone className="w-3.5 h-3.5 text-[#28745e] group-hover:text-white" />
-                        <span>{leader.phone}</span>
-                      </a>
-                    )}
+                    {/* Direct Action Contacts */}
+                    {(leader.phone || leader.email) && (
+                      <div className="mt-4 pt-3.5 border-t border-[#f0eae0] flex flex-wrap items-center gap-2">
+                        {leader.phone && (
+                          <a
+                            href={`tel:${leader.phone.replace(/[^\d+]/g, '')}`}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#143d35] bg-[#edf6f2] hover:bg-[#28745e] hover:text-white px-3 py-1.5 rounded-xl transition duration-200 cursor-pointer border border-[#cbe4da]"
+                            title={`Call ${leader.name}`}
+                          >
+                            <Phone className="w-3 h-3 text-[#28745e] group-hover:text-white" />
+                            <span>{leader.phone}</span>
+                          </a>
+                        )}
 
-                    {leader.email && (
-                      <a
-                        href={`mailto:${leader.email}`}
-                        className="inline-flex items-center gap-2 text-xs font-semibold text-[#58706a] hover:text-[#28745e] hover:bg-[#faf7f0] px-3 py-2 rounded-xl transition duration-200 cursor-pointer border border-[#ede7d8] shadow-xs"
-                        title={`Email ${leader.name}`}
-                      >
-                        <Mail className="w-3.5 h-3.5 text-[#28745e]" />
-                        <span className="truncate max-w-[200px]">{leader.email}</span>
-                      </a>
+                        {leader.email && (
+                          <a
+                            href={`mailto:${leader.email}`}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#58706a] hover:text-[#28745e] hover:bg-[#faf7f0] px-3 py-1.5 rounded-xl transition duration-200 cursor-pointer border border-[#ede7d8]"
+                            title={`Email ${leader.name}`}
+                          >
+                            <Mail className="w-3 h-3 text-[#28745e]" />
+                            <span className="truncate max-w-[170px]">{leader.email}</span>
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                </div>
               </div>
             );
           })}
