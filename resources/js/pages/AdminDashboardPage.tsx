@@ -36,7 +36,7 @@ import {
 import { BlogPost } from '@/types/blog';
 import { defaultContent } from '@/data/initialContent';
 import { SiteContent, HeroSlide, ProgramItem, PrincipleItem, GalleryItem } from '@/types/content';
-import { ImageUploadInput } from '@/components/ImageUploadInput';
+import { ImageUploadInput, SafeImage } from '@/components/ImageUploadInput';
 
 interface DonationItem {
   id: string;
@@ -381,7 +381,7 @@ export default function AdminDashboardPage() {
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#28745e] text-[#f2ad3b] shadow-inner overflow-hidden">
             {content.brand.logo ? (
-              <img src={content.brand.logo} alt="Logo" className="w-full h-full object-contain p-1" />
+              <SafeImage src={content.brand.logo} alt="Logo" className="w-full h-full object-contain p-1" />
             ) : (
               <LayoutDashboard className="w-6 h-6" />
             )}
@@ -511,18 +511,13 @@ export default function AdminDashboardPage() {
                     className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-[#f8f4e9]/70 border border-[#dce7dc] gap-4 hover:border-[#28745e] transition"
                   >
                     <div className="flex items-center gap-4">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={b.coverImage || b.thumbnail || '/uploads/act_official_logo.jpg'}
-                        alt={b.title}
-                        className="w-16 h-16 rounded-2xl object-cover shrink-0 border border-black/10 bg-white"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          if (!target.src.includes('act_official_logo')) {
-                            target.src = '/uploads/act_official_logo.jpg';
-                          }
-                        }}
-                      />
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 border border-black/10 bg-white">
+                        <SafeImage
+                          src={b.coverImage || b.thumbnail || '/uploads/act_official_logo.jpg'}
+                          alt={b.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <div>
                         <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#123f38] text-[10px] font-bold text-[#f2ad3b] mb-1">
                           {b.category}
@@ -2064,7 +2059,7 @@ export default function AdminDashboardPage() {
                       {/* QR Image Box */}
                       <div className="mx-auto w-56 h-56 bg-white p-3 rounded-2xl border-2 border-[#123f38] shadow-lg flex items-center justify-center relative overflow-hidden">
                         {content.payment?.qrCodeImage ? (
-                          <img
+                          <SafeImage
                             src={content.payment.qrCodeImage}
                             alt="Payment QR Code"
                             className="w-full h-full object-contain"
@@ -2226,11 +2221,13 @@ export default function AdminDashboardPage() {
                                       className="group inline-flex items-center gap-1.5 p-1 rounded-lg border border-[#dce7dc] hover:border-[#28745e] bg-white shadow-xs transition"
                                       title="Click to view payment proof screenshot"
                                     >
-                                      <img
-                                        src={d.screenshot}
-                                        alt="Screenshot receipt"
-                                        className="w-8 h-8 object-cover rounded"
-                                      />
+                                      <div className="w-8 h-8 rounded overflow-hidden shrink-0">
+                                        <SafeImage
+                                          src={d.screenshot}
+                                          alt="Screenshot receipt"
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
                                       <span className="text-[11px] font-bold text-[#28745e] pr-1 flex items-center gap-1">
                                         <Eye className="w-3.5 h-3.5" />
                                         <span>View</span>

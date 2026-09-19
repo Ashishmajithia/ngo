@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { UploadCloud, X, Loader2, Plus, Check, Link as LinkIcon } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { UploadCloud, X, Loader2, Plus, Check, Link as LinkIcon, Eye, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface ImageUploadInputProps {
   label?: string;
@@ -12,6 +12,21 @@ interface ImageUploadInputProps {
   onChangeMultiple?: (urls: string[]) => void;
   helperText?: string;
 }
+
+// Ensure URL is clean, valid, and has leading slash if relative
+export const normalizeImageUrl = (raw?: string): string => {
+  if (!raw) return '';
+  const trimmed = raw.trim();
+  if (
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://')
+  ) {
+    return trimmed;
+  }
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+};
 
 // Convert image file to heavily compressed, lightweight web image (<80KB)
 const compressImageFile = (file: File, maxDim = 1280): Promise<string> => {
@@ -61,6 +76,89 @@ const compressImageFile = (file: File, maxDim = 1280): Promise<string> => {
   });
 };
 
+// Resilient image renderer with automatic cache-buster retry on 404/error
+export const SafeImage: React.FC<{
+  src: string;
+  alt: string;
+  className?: string;
+  onStatusChange?: (status: 'loading' | 'loaded' | 'error') => void;
+}> = ({ src, alt, className = '', onStatusChange }) => {
+  const cleanSrc = useMemo(() => normalizeImageUrl(src), [src]);
+  const [activeSrc, setActiveSrc] = useState(cleanSrc);
+  const [hasRetried, setHasRetried] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+
+  useEffect(() => {
+    const nextSrc = normalizeImageUrl(src);
+    setActiveSrc(nextSrc);
+    setHasRetried(false);
+    setStatus('loading');
+    onStatusChange?.('loading');
+  }, [src]);
+
+  const handleError = () => {
+    // If not already retried and not a data URI, auto-retry with cache buster to break stale 404 cache
+    if (!hasRetried && activeSrc && !activeSrc.startsWith('data:') && !activeSrc.startsWith('blob:')) {
+      setHasRetried(true);
+      const sep = activeSrc.includes('?') ? '&' : '?';
+      setActiveSrc(`${activeSrc}${sep}cb=${Date.now()}`);
+    } else {
+      setStatus('error');
+      onStatusChange?.('error');
+    }
+  };
+
+  const handleLoad = () => {
+    setStatus('loaded');
+    onStatusChange?.('loaded');
+  };
+
+  if (!cleanSrc) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-[#eef3ee] text-[#58706a] text-[10px]">
+        No Image
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center bg-[#eef3ee]">
+      {status === 'loading' && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/5 z-10">
+          <Loader2 className="w-4 h-4 animate-spin text-[#28745e]" />
+        </div>
+      )}
+      {status === 'error' ? (
+        <div className="flex flex-col items-center justify-center p-2 text-center text-red-500 w-full h-full">
+          <AlertCircle className="w-5 h-5 mb-0.5 text-red-500" />
+          <span className="text-[9px] font-bold text-red-700 leading-tight">Image Error</span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setStatus('loading');
+              const sep = cleanSrc.includes('?') ? '&' : '?';
+              setActiveSrc(`${cleanSrc}${sep}retry=${Date.now()}`);
+            }}
+            className="mt-1 text-[8px] px-1.5 py-0.5 bg-red-100 hover:bg-red-200 text-red-800 rounded font-bold transition flex items-center gap-0.5"
+          >
+            <RefreshCw className="w-2.5 h-2.5" /> Retry
+          </button>
+        </div>
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={activeSrc}
+          alt={alt}
+          onLoad={handleLoad}
+          onError={handleError}
+          className={`${className} ${status === 'loading' ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+        />
+      )}
+    </div>
+  );
+};
+
 export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
   label,
   value = '',
@@ -75,6 +173,8 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [directUrl, setDirectUrl] = useState('');
+  const [previewModalUrl, setPreviewModalUrl] = useState<string | null>(null);
+  const [singleImgStatus, setSingleImgStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFilesUpload = async (files: FileList | File[]) => {
@@ -165,10 +265,11 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
   const handleApplyDirectUrl = (e: React.FormEvent) => {
     e.preventDefault();
     if (!directUrl.trim()) return;
+    const clean = normalizeImageUrl(directUrl.trim());
     if (multiple && onChangeMultiple) {
-      onChangeMultiple([...values, directUrl.trim()]);
+      onChangeMultiple([...values, clean]);
     } else if (!multiple && onChangeSingle) {
-      onChangeSingle(directUrl.trim());
+      onChangeSingle(clean);
     }
     setDirectUrl('');
     setShowUrlInput(false);
@@ -191,10 +292,10 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
       {showUrlInput && (
         <form onSubmit={handleApplyDirectUrl} className="flex gap-2 p-2 rounded-xl bg-[#f8f4e9] border border-[#dce7dc]">
           <input
-            type="url"
+            type="text"
             value={directUrl}
             onChange={(e) => setDirectUrl(e.target.value)}
-            placeholder="https://images.unsplash.com/... or image web address"
+            placeholder="https://images.unsplash.com/... or /uploads/..."
             className="flex-1 text-xs p-2 rounded-lg border bg-white"
           />
           <button
@@ -224,23 +325,33 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
           {/* Thumbnails Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {values.map((url, idx) => (
-              <div key={idx} className="relative group rounded-2xl overflow-hidden border border-[#dce7dc] bg-[#eef3ee] h-28 shadow-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              <div
+                key={idx}
+                className="relative group rounded-2xl overflow-hidden border border-[#dce7dc] bg-[#eef3ee] h-28 shadow-sm cursor-pointer"
+                onClick={() => setPreviewModalUrl(normalizeImageUrl(url))}
+                title="Click to view full image"
+              >
+                <SafeImage
                   src={url}
                   alt={`Gallery ${idx + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <button
                   type="button"
-                  onClick={() => removeImageAt(idx)}
-                  className="absolute top-1.5 right-1.5 rounded-full bg-red-600 p-1 text-white opacity-90 group-hover:opacity-100 hover:bg-red-700 transition shadow-md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeImageAt(idx);
+                  }}
+                  className="absolute top-1.5 right-1.5 rounded-full bg-red-600 p-1 text-white opacity-90 group-hover:opacity-100 hover:bg-red-700 transition shadow-md z-20"
                   title="Remove Image"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
-                <div className="absolute bottom-1 left-1.5 px-2 py-0.5 rounded-md bg-black/60 text-[9px] text-white font-mono">
+                <div className="absolute bottom-1 left-1.5 px-2 py-0.5 rounded-md bg-black/60 text-[9px] text-white font-mono z-10">
                   #{idx + 1}
+                </div>
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white pointer-events-none z-10">
+                  <Eye className="w-5 h-5 drop-shadow" />
                 </div>
               </div>
             ))}
@@ -276,7 +387,7 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
           {values.length > 0 && (
             <p className="text-[10px] font-medium text-[#28745e]">
               <Check className="w-3 h-3 inline mr-1" />
-              {values.length} blog gallery images attached
+              {values.length} images attached
             </p>
           )}
         </div>
@@ -285,19 +396,53 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
         <div className="space-y-2">
           {value ? (
             <div className="flex items-center gap-4 p-3 rounded-2xl bg-white border border-[#dce7dc] shadow-sm">
-              <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-black/10 relative bg-[#eef3ee]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              <div
+                onClick={() => setPreviewModalUrl(normalizeImageUrl(value))}
+                className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-black/10 relative bg-[#eef3ee] cursor-pointer group shadow-xs"
+                title="Click to expand high-resolution preview"
+              >
+                <SafeImage
                   src={value}
                   alt="Uploaded preview"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onStatusChange={setSingleImgStatus}
                 />
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white z-10">
+                  <Eye className="w-4 h-4" />
+                </div>
               </div>
+
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-[#183a35] truncate">{value.substring(0, 45)}...</p>
-                <p className="text-[10px] text-green-700 font-semibold mt-0.5">✓ Image Loaded Successfully</p>
+                {singleImgStatus === 'loaded' && (
+                  <p className="text-[10px] text-green-700 font-semibold mt-0.5 flex items-center gap-1">
+                    <Check className="w-3 h-3 text-green-600" />
+                    <span>✓ Image Ready & Displaying</span>
+                  </p>
+                )}
+                {singleImgStatus === 'loading' && (
+                  <p className="text-[10px] text-amber-700 font-medium mt-0.5 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin text-amber-600" />
+                    <span>Loading image preview...</span>
+                  </p>
+                )}
+                {singleImgStatus === 'error' && (
+                  <p className="text-[10px] text-red-600 font-semibold mt-0.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 text-red-500" />
+                    <span>Image preview failed to load</span>
+                  </p>
+                )}
               </div>
+
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPreviewModalUrl(normalizeImageUrl(value))}
+                  className="p-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-100 transition"
+                  title="View HD Image"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -350,6 +495,38 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
 
       {errorMsg && <p className="text-[10px] font-bold text-red-600 mt-1">{errorMsg}</p>}
       {helperText && <p className="text-[10px] text-[#58706a]">{helperText}</p>}
+
+      {/* Lightbox Modal for HD preview inspection */}
+      {previewModalUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4"
+          onClick={() => setPreviewModalUrl(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] bg-[#123f38] p-3 rounded-2xl shadow-2xl border border-white/20 flex flex-col items-center overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex items-center justify-between px-3 py-2 text-white border-b border-white/10 mb-2">
+              <span className="text-xs font-bold text-[#f2ad3b] truncate max-w-md">HD Image Preview</span>
+              <button
+                type="button"
+                onClick={() => setPreviewModalUrl(null)}
+                className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="max-h-[75vh] overflow-auto rounded-xl flex items-center justify-center bg-black/40 p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewModalUrl}
+                alt="Full Preview"
+                className="max-w-full max-h-[72vh] object-contain rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
