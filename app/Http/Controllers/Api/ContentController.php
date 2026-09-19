@@ -282,7 +282,6 @@ class ContentController extends Controller
             'updatedAt' => now()->toISOString(),
         ];
 
-        @file_put_contents($cacheFile, json_encode($content));
         return $content;
     }
 
