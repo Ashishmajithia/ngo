@@ -33,26 +33,13 @@ export function safeMerge(base, override) {
 }
 
 function getPreloadedContent() {
-  // 1. First priority: Server-injected state from Blade (0ms instant!)
+  // Server-injected state from Blade (0ms instant!) if available
   try {
     const el = typeof document !== 'undefined' ? document.getElementById('server-initial-content') : null;
     if (el && el.textContent) {
       const data = JSON.parse(el.textContent);
       if (data && typeof data === 'object') {
         return safeMerge(emptyContent, data);
-      }
-    }
-  } catch (e) {}
-
-  // 2. Second priority: localStorage cache for instant render on repeat visits
-  try {
-    if (typeof localStorage !== 'undefined') {
-      const cached = localStorage.getItem('act_trust_content_cache');
-      if (cached) {
-        const data = JSON.parse(cached);
-        if (data && typeof data === 'object') {
-          return safeMerge(emptyContent, data);
-        }
       }
     }
   } catch (e) {}
@@ -68,6 +55,12 @@ export const ContentProvider = ({ children }) => {
   const [toastMessage, setToastMessage] = useState(null);
 
   useEffect(() => {
+    // Purge any legacy stale 4MB localStorage cache from user browsers
+    try {
+      localStorage.removeItem('act_trust_content_cache');
+      localStorage.removeItem('act_trust_blogs_cache');
+    } catch (e) {}
+
     // Fetch live content from database API to ensure freshest data
     async function syncWithServer() {
       try {
@@ -80,9 +73,6 @@ export const ContentProvider = ({ children }) => {
           }
           if (serverData && typeof serverData === 'object') {
             setContent(prev => safeMerge(prev, serverData));
-            try {
-              localStorage.setItem('act_trust_content_cache', JSON.stringify(serverData));
-            } catch (e) {}
           }
         }
       } catch (err) {
@@ -91,6 +81,23 @@ export const ContentProvider = ({ children }) => {
     }
 
     syncWithServer();
+
+    // Cross-tab real-time sync: when admin saves, visitor/donor tabs update immediately
+    let bc;
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        bc = new BroadcastChannel('act_content_channel');
+        bc.onmessage = (event) => {
+          if (event.data && event.data.type === 'CONTENT_UPDATED' && event.data.data) {
+            setContent(prev => safeMerge(prev, event.data.data));
+          }
+        };
+      }
+    } catch (e) {}
+
+    return () => {
+      if (bc) bc.close();
+    };
   }, []);
 
   const updateContent = async (newContent) => {
@@ -113,7 +120,11 @@ export const ContentProvider = ({ children }) => {
         if (json.data) {
           setContent(prev => safeMerge(prev, json.data));
           try {
-            localStorage.setItem('act_trust_content_cache', JSON.stringify(json.data));
+            if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+              const bc = new BroadcastChannel('act_content_channel');
+              bc.postMessage({ type: 'CONTENT_UPDATED', data: json.data });
+              bc.close();
+            }
           } catch (e) {}
         }
       }
@@ -169,6 +180,7 @@ export const ContentProvider = ({ children }) => {
     <ContentContext.Provider
       value={{
         content,
+        setContent,
         updateContent,
         resetContent,
         submitDonation,

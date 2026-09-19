@@ -346,7 +346,11 @@ export default function AdminDashboardPage() {
         if (json.data) {
           setContent(json.data);
           try {
-            localStorage.setItem('act_trust_content_cache', JSON.stringify(json.data));
+            if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+              const bc = new BroadcastChannel('act_content_channel');
+              bc.postMessage({ type: 'CONTENT_UPDATED', data: json.data });
+              bc.close();
+            }
           } catch {}
         }
         showToastMsg(`✓ ${secLabel} saved successfully!`);

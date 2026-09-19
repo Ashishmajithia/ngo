@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Heart,
@@ -23,7 +21,24 @@ import {
 import { useContent } from '@/context/ContentContext';
 
 export const DonateModal: React.FC = () => {
-  const { isDonateOpen, setIsDonateOpen, showToast, content, submitDonation } = useContent();
+  const { isDonateOpen, setIsDonateOpen, showToast, content, setContent, submitDonation } = useContent() as any;
+
+  useEffect(() => {
+    if (isDonateOpen) {
+      fetch(`/api/content?t=${Date.now()}`, { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success && json.data?.payment && setContent) {
+            setContent((prev: any) => ({
+              ...prev,
+              payment: json.data.payment,
+              brand: json.data.brand || prev.brand,
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isDonateOpen]);
   const [amount, setAmount] = useState('1000');
   const [customAmount, setCustomAmount] = useState('');
   const [frequency, setFrequency] = useState<'once' | 'monthly'>('once');
@@ -44,8 +59,8 @@ export const DonateModal: React.FC = () => {
   const payment = content.payment || {};
   const isQrEnabled = payment.enableQrDonation !== false;
   const qrImage = payment.qrCodeImage || 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=actcharitabletrust@upi&pn=ACT%20Charitable%20Trust&cu=INR';
-  const upiId = payment.upiId || 'actcharitabletrust@upi';
-  const accountName = payment.accountName || content.brand.name;
+  const upiId = payment.upiId || 'ashishmajithia8-4@okicici';
+  const accountName = payment.accountName || content.brand?.name || '*Act Charitable Trust* *(Rising Hope For Children)*';
 
   const presetAmounts = ['500', '1000', '2500', '5000'];
   const finalSelectedAmount = amount === 'custom' ? (customAmount || '1000') : amount;
