@@ -15,7 +15,7 @@ class GalleryController extends Controller
         return response()->json([
             'success' => true,
             'items' => $items,
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     public function adminIndex()
@@ -25,7 +25,7 @@ class GalleryController extends Controller
         return response()->json([
             'success' => true,
             'items' => $items,
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     public function store(Request $request)
@@ -39,11 +39,13 @@ class GalleryController extends Controller
         $order = $request->has('order') ? (int)$request->order : (GalleryItem::max('order') + 1);
         $createdBy = $request->created_by ?: (auth()->user()?->email ?? env('ADMIN_EMAIL', 'admin@actcharitabletrust.org'));
 
+        $image = UploadController::optimizeImage($request->image, 1000, 750, 75);
+
         $item = GalleryItem::create([
             'id' => $id,
             'title' => $request->title,
             'caption' => $request->caption ?? '',
-            'image' => $request->image,
+            'image' => $image,
             'grid_span' => $request->grid_span,
             'order' => $order,
             'is_active' => $request->has('is_active') ? (bool)$request->is_active : true,
@@ -69,6 +71,10 @@ class GalleryController extends Controller
             'order',
             'is_active',
         ]);
+
+        if (!empty($data['image'])) {
+            $data['image'] = UploadController::optimizeImage($data['image'], 1000, 750, 75);
+        }
 
         $item->update($data);
 

@@ -38,7 +38,7 @@ class DonationController extends Controller
                 'database' => 'PostgreSQL (Supabase Cloud)',
                 'host' => config('database.connections.pgsql.host'),
             ],
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     public function store(Request $request)
@@ -50,8 +50,20 @@ class DonationController extends Controller
             $file = $request->file('screenshot');
             $ext = $file->getClientOriginalExtension() ?: 'jpg';
             $filename = 'pay_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '.' . strtolower($ext);
-            $file->move(public_path('uploads'), $filename);
-            $screenshot = '/uploads/' . $filename;
+            $uploadsDir = public_path('uploads');
+            $saved = false;
+            if (is_dir($uploadsDir) && is_writable($uploadsDir)) {
+                try {
+                    $file->move($uploadsDir, $filename);
+                    $screenshot = '/uploads/' . $filename;
+                    $saved = true;
+                } catch (\Throwable $e) {}
+            }
+            if (!$saved) {
+                $screenshot = UploadController::optimizeImage(file_get_contents($file->getRealPath()), 800, 1000, 75);
+            }
+        } elseif (is_string($screenshot) && str_starts_with($screenshot, 'data:image/')) {
+            $screenshot = UploadController::optimizeImage($screenshot, 800, 1000, 75);
         }
 
         $donation = Donation::create([

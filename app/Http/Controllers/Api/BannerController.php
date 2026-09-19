@@ -15,7 +15,7 @@ class BannerController extends Controller
         return response()->json([
             'success' => true,
             'banners' => $banners,
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     public function adminIndex()
@@ -25,7 +25,7 @@ class BannerController extends Controller
         return response()->json([
             'success' => true,
             'banners' => $banners,
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     public function store(Request $request)
@@ -39,12 +39,14 @@ class BannerController extends Controller
         $order = $request->has('order') ? (int)$request->order : (Banner::max('order') + 1);
         $createdBy = $request->created_by ?: (auth()->user()?->email ?? env('ADMIN_EMAIL', 'admin@actcharitabletrust.org'));
 
+        $image = UploadController::optimizeImage($request->image, 1280, 850, 75);
+
         $banner = Banner::create([
             'id' => $id,
             'title' => $request->title,
             'eyebrow' => $request->eyebrow ?? '',
             'copy' => $request->copy ?? '',
-            'image' => $request->image,
+            'image' => $image,
             'cta_text' => $request->cta_text ?? 'Explore Our Programs',
             'cta_link' => $request->cta_link ?? '#programs',
             'order' => $order,
@@ -73,6 +75,10 @@ class BannerController extends Controller
             'order',
             'is_active',
         ]);
+
+        if (!empty($data['image'])) {
+            $data['image'] = UploadController::optimizeImage($data['image'], 1280, 850, 75);
+        }
 
         $banner->update($data);
 

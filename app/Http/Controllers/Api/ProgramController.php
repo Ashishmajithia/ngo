@@ -15,7 +15,7 @@ class ProgramController extends Controller
         return response()->json([
             'success' => true,
             'programs' => $programs,
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     public function adminIndex()
@@ -25,7 +25,7 @@ class ProgramController extends Controller
         return response()->json([
             'success' => true,
             'programs' => $programs,
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     public function store(Request $request)
@@ -39,11 +39,13 @@ class ProgramController extends Controller
         $order = $request->has('order') ? (int)$request->order : (Program::max('order') + 1);
         $createdBy = $request->created_by ?: (auth()->user()?->email ?? env('ADMIN_EMAIL', 'admin@actcharitabletrust.org'));
 
+        $image = !empty($request->image) ? UploadController::optimizeImage($request->image, 800, 600, 75) : '';
+
         $program = Program::create([
             'id' => $id,
             'title' => $request->title,
             'description' => $request->description,
-            'image' => $request->image,
+            'image' => $image,
             'icon' => $request->icon ?? 'Heart',
             'badge_bg' => $request->badge_bg ?? 'bg-[#f8e6bd]',
             'badge_text_color' => $request->badge_text_color ?? 'text-[#8b590b]',
@@ -75,6 +77,10 @@ class ProgramController extends Controller
             'order',
             'is_active',
         ]);
+
+        if (!empty($data['image'])) {
+            $data['image'] = UploadController::optimizeImage($data['image'], 800, 600, 75);
+        }
 
         $program->update($data);
 
