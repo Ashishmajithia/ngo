@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Mail, Heart } from 'lucide-react';
+import { Mail, Heart, Phone } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { SafeImage } from '@/components/SafeImage';
 
@@ -48,6 +48,17 @@ export const SupportSection: React.FC = () => {
               <Heart className="w-5 h-5 fill-[#183a35]" />
               <span>{support?.ctaText || 'Make A Direct Contribution'}</span>
             </button>
+
+            {brand?.phone && (
+              <a
+                href={`tel:${brand.phone.replace(/[^\d+]/g, '')}`}
+                className="focusable inline-flex items-center justify-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur px-6 sm:px-7 py-3.5 sm:py-4 font-bold text-[#fffdf8] shadow-lg transition hover:bg-white/20 active:scale-98 w-full sm:w-auto text-sm sm:text-base"
+                title={`Call ${brand.phone}`}
+              >
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-[#f2ad3b] shrink-0" />
+                <span>{brand.phone}</span>
+              </a>
+            )}
 
             {brand?.email && (
               <a

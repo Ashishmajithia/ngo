@@ -91,37 +91,61 @@ export const Footer: React.FC = () => {
 
           {/* Contact Details */}
           <div>
-            <h4 className="font-bold text-sm text-[#123f38] uppercase tracking-wider mb-3">
+            <h4 className="font-extrabold text-sm sm:text-base text-[#123f38] uppercase tracking-wider mb-3.5">
               Trust Details
             </h4>
             {(brand.location || brand.email || brand.phone) ? (
-              <ul className="space-y-2.5 text-xs text-[#58706a]">
+              <ul className="space-y-3 text-sm text-[#58706a]">
                 {brand.location && (
-                  <li className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-[#28745e] shrink-0 mt-0.5" />
-                    <span>{brand.location}</span>
+                  <li className="flex items-start gap-2.5">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#28745e]/10 text-[#28745e] shrink-0 mt-0.5">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(brand.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs sm:text-[13px] text-[#4a635d] hover:text-[#183a35] hover:underline leading-relaxed font-medium transition"
+                      title="View on Google Maps"
+                    >
+                      {brand.location}
+                    </a>
                   </li>
                 )}
                 {brand.email && (
-                  <li className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-[#28745e] shrink-0" />
-                    <a href={`mailto:${brand.email}`} className="hover:underline text-[#183a35] truncate">
+                  <li className="flex items-center gap-2.5 group">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#28745e]/10 text-[#28745e] group-hover:bg-[#28745e] group-hover:text-white transition duration-200 shrink-0">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <a
+                      href={`mailto:${brand.email}`}
+                      className="text-sm font-semibold text-[#183a35] hover:text-[#28745e] hover:underline transition truncate"
+                      title={`Email ${brand.email}`}
+                    >
                       {brand.email}
                     </a>
                   </li>
                 )}
                 {brand.phone && (
-                  <li className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-[#28745e] shrink-0" />
-                    <span className="text-[#183a35] font-semibold">{brand.phone}</span>
+                  <li className="flex items-center gap-2.5 group">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#28745e]/10 text-[#28745e] group-hover:bg-[#28745e] group-hover:text-white transition duration-200 shrink-0">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <a
+                      href={`tel:${brand.phone.replace(/[^\d+]/g, '')}`}
+                      className="text-sm sm:text-base font-bold text-[#183a35] hover:text-[#28745e] hover:underline transition tracking-wide"
+                      title={`Call ${brand.phone}`}
+                    >
+                      {brand.phone}
+                    </a>
                   </li>
                 )}
               </ul>
             ) : (
-              <div className="space-y-2 text-xs text-[#58706a]">
+              <div className="space-y-2 text-xs sm:text-sm text-[#58706a]">
                 <p className="font-bold text-[#1b8744] uppercase tracking-wider">{brand.regNo || 'REG.NO.220'}</p>
                 <p className="text-[#183a35] font-semibold">{brand.tagline || 'Rising Hope for Children'}</p>
-                <p className="text-[11px] text-[#58706a]">Official Registered Charitable Trust</p>
+                <p className="text-[11px] sm:text-xs text-[#58706a]">Official Registered Charitable Trust</p>
               </div>
             )}
           </div>
