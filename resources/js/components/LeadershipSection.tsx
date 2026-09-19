@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Award, ShieldCheck, Quote, Phone, Mail, Sparkles, Maximize2, ZoomIn, Eye, X } from 'lucide-react';
+import { Award, ShieldCheck, Quote, Phone, Mail, Sparkles, Maximize2, X } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { SafeImage } from '@/components/SafeImage';
 import { LeaderItem } from '@/types/content';
@@ -65,7 +65,7 @@ export const LeadershipSection: React.FC = () => {
           )}
         </div>
 
-        {/* Executive Cards Showcase (Balanced, Proportional & Fully Adjustable Grid) */}
+        {/* Executive Cards Showcase (Balanced, High-End & Fully Adjustable Grid) */}
         <div
           className={`grid gap-8 lg:gap-10 items-stretch ${
             leaders.length === 1
@@ -87,7 +87,7 @@ export const LeadershipSection: React.FC = () => {
             return (
               <div
                 key={leader.id || `leader-${index}`}
-                className="group relative rounded-3xl bg-white p-6 sm:p-8 shadow-md hover:shadow-2xl transition-all duration-300 border border-[#e8e1d3] flex flex-col justify-between overflow-hidden"
+                className="group relative rounded-3xl bg-white p-7 sm:p-9 shadow-lg hover:shadow-2xl transition-all duration-300 border border-[#e8e1d3] flex flex-col justify-between overflow-hidden"
               >
                 {/* Subtle Top Gradient Accent Bar */}
                 <div
@@ -100,7 +100,7 @@ export const LeadershipSection: React.FC = () => {
 
                 <div className="flex-1 flex flex-col">
                   {/* Top Status Badges */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-6 sm:mb-8">
                     <span
                       className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                         isFounder
@@ -117,15 +117,15 @@ export const LeadershipSection: React.FC = () => {
                     </span>
 
                     {leader.tenure && (
-                      <span className="text-xs font-semibold text-[#6d6352] bg-[#f7f4ec] px-3 py-1 rounded-full border border-[#e5dfd0]">
+                      <span className="text-xs font-semibold text-[#6d6352] bg-[#f7f4ec] px-3.5 py-1 rounded-full border border-[#e5dfd0]">
                         {leader.tenure}
                       </span>
                     )}
                   </div>
 
-                  {/* Leader Profile Header (Balanced side-by-side on sm+, centered on xs) */}
-                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
-                    {/* Portrait Photo Container with Zoom/Preview Trigger */}
+                  {/* Leader Profile Header: Large Prominent Portrait + Clean Distinguished Title */}
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-6 sm:gap-7">
+                    {/* Enlarged Portrait Photo Container (Clickable for Full HD Lightbox) */}
                     <div
                       onClick={() => setPreviewLeader(leader)}
                       role="button"
@@ -137,67 +137,43 @@ export const LeadershipSection: React.FC = () => {
                         }
                       }}
                       title={`Click to preview full photo of ${leader.name}`}
-                      className="group/photo relative w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
+                      className="group/photo relative w-40 h-48 sm:w-44 sm:h-52 md:w-48 md:h-56 rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
                     >
                       <SafeImage
                         src={leader.photo}
                         alt={leader.name}
                         fallbackSrc="/uploads/act_official_logo.jpg"
-                        className="w-full h-full object-cover group-hover/photo:scale-108 transition-transform duration-500 ease-out"
+                        className="w-full h-full object-cover object-top group-hover/photo:scale-105 transition-transform duration-500 ease-out"
                       />
 
-                      {/* Hover Overlay with Preview Icon */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white gap-1 backdrop-blur-[2px]">
-                        <Maximize2 className="w-5 h-5 text-white drop-shadow" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-white drop-shadow">
-                          View Photo
-                        </span>
-                      </div>
-
-                      {/* Floating Badge in Corner (Visually indicates it's clickable) */}
-                      <div className="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-bold flex items-center gap-1 opacity-90 group-hover/photo:opacity-0 transition-opacity pointer-events-none shadow">
-                        <ZoomIn className="w-3 h-3 text-[#f2ad3b]" />
-                        <span>Enlarge</span>
+                      {/* Minimalist Hover Scrim with Preview Icon */}
+                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 flex items-center justify-center text-white backdrop-blur-[2px]">
+                        <div className="p-3 rounded-full bg-black/50 text-white shadow-lg">
+                          <Maximize2 className="w-5 h-5 drop-shadow" />
+                        </div>
                       </div>
                     </div>
 
-                    {/* Name, Role & Trust Credential */}
-                    <div className="flex-1 text-center sm:text-left min-w-0 flex flex-col justify-center py-0.5">
-                      <h3 className="display-font text-2xl sm:text-3xl font-extrabold text-[#143d35] tracking-tight leading-snug">
+                    {/* Name & Role (Clean, distinguished typography with zero clutter) */}
+                    <div className="flex-1 text-center sm:text-left min-w-0 flex flex-col justify-center">
+                      <h3 className="display-font text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#143d35] tracking-tight leading-tight">
                         {leader.name}
                       </h3>
 
-                      <p className="mt-1 text-base sm:text-lg font-bold text-[#28745e]">
+                      <p className="mt-2 text-base sm:text-lg font-bold text-[#28745e] tracking-wide">
                         {leader.role}
                       </p>
-
-                      <div className="mt-2.5 inline-flex items-center gap-2 text-xs text-[#58706a] font-semibold bg-[#fbf9f4] px-3 py-1.5 rounded-xl border border-[#e8e2d4] w-fit mx-auto sm:mx-0 shadow-xs">
-                        <span className="text-[#143d35] font-bold">ACT Charitable Trust</span>
-                        <span>•</span>
-                        <span className="text-[#6d6352]">Reg. No. 220</span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setPreviewLeader(leader)}
-                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#28745e] hover:text-[#143d35] transition duration-150 w-fit mx-auto sm:mx-0 group/btn cursor-pointer"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-[#f2ad3b] group-hover/btn:scale-110 transition-transform" />
-                        <span className="underline underline-offset-4 decoration-[#28745e]/30 group-hover/btn:decoration-[#28745e]">
-                          Click to preview photo
-                        </span>
-                      </button>
                     </div>
                   </div>
 
-                  {/* Inspiring Vision / Message Quote (Full Width to eliminate dead space & adjust harmoniously) */}
+                  {/* Inspiring Vision / Message Quote (Full Width, Balanced & Dignified) */}
                   {leader.message && (
-                    <div className="relative mt-6 rounded-2xl bg-gradient-to-br from-[#faf7f0] via-[#f7f3ea] to-[#f4ede0] p-4 sm:p-5 border border-[#ede3d0] shadow-xs flex-1 flex flex-col justify-center">
-                      <div className="flex items-start gap-3">
-                        <div className="p-1.5 rounded-lg bg-[#f2ad3b]/15 text-[#b36b00] shrink-0 mt-0.5">
+                    <div className="relative mt-6 sm:mt-7 rounded-2xl bg-gradient-to-br from-[#faf7f0] via-[#f8f4ec] to-[#f4ede0] p-5 sm:p-6 border border-[#ede3d0] shadow-xs flex-1 flex flex-col justify-center">
+                      <div className="flex items-start gap-3.5">
+                        <div className="p-2 rounded-xl bg-[#f2ad3b]/15 text-[#b36b00] shrink-0 mt-0.5">
                           <Quote className="w-4 h-4" />
                         </div>
-                        <p className="text-xs sm:text-sm md:text-[14px] leading-relaxed italic text-[#334d46] font-medium">
+                        <p className="text-sm sm:text-[15px] leading-relaxed italic text-[#334d46] font-medium">
                           "{leader.message}"
                         </p>
                       </div>
@@ -207,7 +183,7 @@ export const LeadershipSection: React.FC = () => {
 
                 {/* Direct Action Contacts (if phone or email configured) */}
                 {(leader.phone || leader.email) && (
-                  <div className="mt-6 pt-4 border-t border-[#f0eae0] flex flex-wrap items-center gap-3">
+                  <div className="mt-6 pt-5 border-t border-[#f0eae0] flex flex-wrap items-center gap-3">
                     {leader.phone && (
                       <a
                         href={`tel:${leader.phone.replace(/[^\d+]/g, '')}`}
@@ -280,18 +256,8 @@ export const LeadershipSection: React.FC = () => {
             </div>
 
             {/* Modal Footer Caption */}
-            <div className="px-6 py-3.5 bg-[#143d35] border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-white/80">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-white">ACT Charitable Trust</span>
-                <span className="text-white/40">•</span>
-                <span className="text-[#f2ad3b] font-mono">Reg. No. 220</span>
-                {previewLeader.tenure && (
-                  <>
-                    <span className="text-white/40">•</span>
-                    <span className="text-white/70">{previewLeader.tenure}</span>
-                  </>
-                )}
-              </div>
+            <div className="px-6 py-3.5 bg-[#143d35] border-t border-white/10 flex items-center justify-between text-xs text-white/80">
+              <span className="font-semibold text-white/70">Official Leadership Portrait</span>
               <span className="text-white/50 text-[11px]">Press ESC or click outside to close</span>
             </div>
           </div>
