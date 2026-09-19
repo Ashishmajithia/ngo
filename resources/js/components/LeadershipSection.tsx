@@ -1,13 +1,35 @@
 'use client';
 
-import React from 'react';
-import { Award, ShieldCheck, Quote, Phone, Mail, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Award, ShieldCheck, Quote, Phone, Mail, Sparkles, Maximize2, ZoomIn, Eye, X } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { SafeImage } from '@/components/SafeImage';
+import { LeaderItem } from '@/types/content';
 
 export const LeadershipSection: React.FC = () => {
   const { content } = useContent();
   const leadership = content?.leadership;
+  const [previewLeader, setPreviewLeader] = useState<LeaderItem | null>(null);
+
+  // ESC key listener & body scroll lock when image preview is open
+  useEffect(() => {
+    if (!previewLeader) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPreviewLeader(null);
+      }
+    };
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [previewLeader]);
 
   // Strict check: If disabled or no real leaders exist in database, do not render on homepage
   if (!leadership || leadership.isEnabled === false) return null;
@@ -43,9 +65,9 @@ export const LeadershipSection: React.FC = () => {
           )}
         </div>
 
-        {/* Executive Cards Showcase (Balanced 2-Column Full-Width Grid) */}
+        {/* Executive Cards Showcase (Balanced, Proportional & Fully Adjustable Grid) */}
         <div
-          className={`grid gap-8 lg:gap-10 ${
+          className={`grid gap-8 lg:gap-10 items-stretch ${
             leaders.length === 1
               ? 'max-w-3xl mx-auto grid-cols-1'
               : 'grid-cols-1 lg:grid-cols-2'
@@ -65,7 +87,7 @@ export const LeadershipSection: React.FC = () => {
             return (
               <div
                 key={leader.id || `leader-${index}`}
-                className="group relative rounded-3xl bg-white p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-[#e8e1d3] flex flex-col justify-between overflow-hidden"
+                className="group relative rounded-3xl bg-white p-6 sm:p-8 shadow-md hover:shadow-2xl transition-all duration-300 border border-[#e8e1d3] flex flex-col justify-between overflow-hidden"
               >
                 {/* Subtle Top Gradient Accent Bar */}
                 <div
@@ -76,7 +98,7 @@ export const LeadershipSection: React.FC = () => {
                   }`}
                 />
 
-                <div>
+                <div className="flex-1 flex flex-col">
                   {/* Top Status Badges */}
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
                     <span
@@ -101,45 +123,86 @@ export const LeadershipSection: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Leader Profile: Large Full HD Portrait + Title */}
-                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
-                    {/* Portrait Photo Container */}
-                    <div className="relative w-36 h-44 sm:w-40 sm:h-48 rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-[#e6decb] shrink-0 bg-[#f4efe4]">
+                  {/* Leader Profile Header (Balanced side-by-side on sm+, centered on xs) */}
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
+                    {/* Portrait Photo Container with Zoom/Preview Trigger */}
+                    <div
+                      onClick={() => setPreviewLeader(leader)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setPreviewLeader(leader);
+                        }
+                      }}
+                      title={`Click to preview full photo of ${leader.name}`}
+                      className="group/photo relative w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
+                    >
                       <SafeImage
                         src={leader.photo}
                         alt={leader.name}
                         fallbackSrc="/uploads/act_official_logo.jpg"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover/photo:scale-108 transition-transform duration-500 ease-out"
                       />
+
+                      {/* Hover Overlay with Preview Icon */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white gap-1 backdrop-blur-[2px]">
+                        <Maximize2 className="w-5 h-5 text-white drop-shadow" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-white drop-shadow">
+                          View Photo
+                        </span>
+                      </div>
+
+                      {/* Floating Badge in Corner (Visually indicates it's clickable) */}
+                      <div className="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-bold flex items-center gap-1 opacity-90 group-hover/photo:opacity-0 transition-opacity pointer-events-none shadow">
+                        <ZoomIn className="w-3 h-3 text-[#f2ad3b]" />
+                        <span>Enlarge</span>
+                      </div>
                     </div>
 
                     {/* Name, Role & Trust Credential */}
-                    <div className="flex-1 text-center sm:text-left">
+                    <div className="flex-1 text-center sm:text-left min-w-0 flex flex-col justify-center py-0.5">
                       <h3 className="display-font text-2xl sm:text-3xl font-extrabold text-[#143d35] tracking-tight leading-snug">
                         {leader.name}
                       </h3>
 
-                      <p className="mt-1 text-base font-bold text-[#28745e]">
+                      <p className="mt-1 text-base sm:text-lg font-bold text-[#28745e]">
                         {leader.role}
                       </p>
 
-                      <div className="mt-2 inline-flex items-center gap-1.5 text-xs text-[#6d6352] font-semibold bg-[#f7f4ec] px-2.5 py-1 rounded-md border border-[#e8e2d4]">
-                        <span>ACT Charitable Trust</span>
+                      <div className="mt-2.5 inline-flex items-center gap-2 text-xs text-[#58706a] font-semibold bg-[#fbf9f4] px-3 py-1.5 rounded-xl border border-[#e8e2d4] w-fit mx-auto sm:mx-0 shadow-xs">
+                        <span className="text-[#143d35] font-bold">ACT Charitable Trust</span>
                         <span>•</span>
-                        <span className="text-[#143d35]">Reg. No. 220</span>
+                        <span className="text-[#6d6352]">Reg. No. 220</span>
                       </div>
 
-                      {/* Inspiring Message / Quote */}
-                      {leader.message && (
-                        <div className="relative mt-4 rounded-xl bg-[#faf7f0] p-3.5 sm:p-4 border border-[#eee7d8] text-[#334d46]">
-                          <Quote className="w-5 h-5 text-[#f2ad3b]/70 mb-1" />
-                          <p className="text-xs sm:text-sm leading-relaxed italic text-[#3f5750]">
-                            "{leader.message}"
-                          </p>
-                        </div>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => setPreviewLeader(leader)}
+                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#28745e] hover:text-[#143d35] transition duration-150 w-fit mx-auto sm:mx-0 group/btn cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-[#f2ad3b] group-hover/btn:scale-110 transition-transform" />
+                        <span className="underline underline-offset-4 decoration-[#28745e]/30 group-hover/btn:decoration-[#28745e]">
+                          Click to preview photo
+                        </span>
+                      </button>
                     </div>
                   </div>
+
+                  {/* Inspiring Vision / Message Quote (Full Width to eliminate dead space & adjust harmoniously) */}
+                  {leader.message && (
+                    <div className="relative mt-6 rounded-2xl bg-gradient-to-br from-[#faf7f0] via-[#f7f3ea] to-[#f4ede0] p-4 sm:p-5 border border-[#ede3d0] shadow-xs flex-1 flex flex-col justify-center">
+                      <div className="flex items-start gap-3">
+                        <div className="p-1.5 rounded-lg bg-[#f2ad3b]/15 text-[#b36b00] shrink-0 mt-0.5">
+                          <Quote className="w-4 h-4" />
+                        </div>
+                        <p className="text-xs sm:text-sm md:text-[14px] leading-relaxed italic text-[#334d46] font-medium">
+                          "{leader.message}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Direct Action Contacts (if phone or email configured) */}
@@ -148,7 +211,7 @@ export const LeadershipSection: React.FC = () => {
                     {leader.phone && (
                       <a
                         href={`tel:${leader.phone.replace(/[^\d+]/g, '')}`}
-                        className="inline-flex items-center gap-2 text-xs font-bold text-[#143d35] bg-[#edf6f2] hover:bg-[#28745e] hover:text-white px-3.5 py-2 rounded-xl transition duration-200 cursor-pointer border border-[#cbe4da]"
+                        className="inline-flex items-center gap-2 text-xs font-bold text-[#143d35] bg-[#edf6f2] hover:bg-[#28745e] hover:text-white px-3.5 py-2 rounded-xl transition duration-200 cursor-pointer border border-[#cbe4da] shadow-xs hover:shadow"
                         title={`Call ${leader.name}`}
                       >
                         <Phone className="w-3.5 h-3.5 text-[#28745e] group-hover:text-white" />
@@ -159,7 +222,7 @@ export const LeadershipSection: React.FC = () => {
                     {leader.email && (
                       <a
                         href={`mailto:${leader.email}`}
-                        className="inline-flex items-center gap-2 text-xs font-semibold text-[#58706a] hover:text-[#28745e] hover:bg-[#faf7f0] px-3 py-2 rounded-xl transition duration-200 cursor-pointer border border-[#ede7d8]"
+                        className="inline-flex items-center gap-2 text-xs font-semibold text-[#58706a] hover:text-[#28745e] hover:bg-[#faf7f0] px-3 py-2 rounded-xl transition duration-200 cursor-pointer border border-[#ede7d8] shadow-xs"
                         title={`Email ${leader.name}`}
                       >
                         <Mail className="w-3.5 h-3.5 text-[#28745e]" />
@@ -173,6 +236,67 @@ export const LeadershipSection: React.FC = () => {
           })}
         </div>
       </div>
+
+      {/* Leader Photo Preview Modal / Lightbox */}
+      {previewLeader && (
+        <div
+          onClick={() => setPreviewLeader(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-2xl w-full max-h-[92vh] overflow-hidden rounded-3xl bg-[#0f2e27] shadow-2xl border border-white/20 flex flex-col animate-in zoom-in-95 duration-200"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setPreviewLeader(null)}
+              className="absolute top-4 right-4 z-20 rounded-full bg-black/60 p-2.5 text-white hover:bg-white hover:text-black transition duration-200 shadow-lg cursor-pointer"
+              title="Close Preview (ESC)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header Info */}
+            <div className="px-6 py-4 bg-[#143d35] border-b border-white/10 flex items-center gap-3 pr-16">
+              <div className="p-2 rounded-xl bg-[#28745e]/40 text-[#f2ad3b]">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-white leading-snug">{previewLeader.name}</h4>
+                <p className="text-xs font-medium text-[#f2ad3b]">
+                  {previewLeader.role} • {previewLeader.badge || 'Trust Leadership'}
+                </p>
+              </div>
+            </div>
+
+            {/* Main High-Res Image Display */}
+            <div className="flex items-center justify-center p-4 sm:p-6 bg-black/40 overflow-hidden flex-1 max-h-[68vh]">
+              <SafeImage
+                src={previewLeader.photo}
+                alt={previewLeader.name}
+                fallbackSrc="/uploads/act_official_logo.jpg"
+                className="max-h-[64vh] w-auto max-w-full object-contain rounded-2xl shadow-xl mx-auto border border-white/10"
+              />
+            </div>
+
+            {/* Modal Footer Caption */}
+            <div className="px-6 py-3.5 bg-[#143d35] border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-white/80">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-white">ACT Charitable Trust</span>
+                <span className="text-white/40">•</span>
+                <span className="text-[#f2ad3b] font-mono">Reg. No. 220</span>
+                {previewLeader.tenure && (
+                  <>
+                    <span className="text-white/40">•</span>
+                    <span className="text-white/70">{previewLeader.tenure}</span>
+                  </>
+                )}
+              </div>
+              <span className="text-white/50 text-[11px]">Press ESC or click outside to close</span>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
