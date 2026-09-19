@@ -34,4 +34,14 @@ class Blog extends Model
     {
         return $this->belongsTo(User::class, 'created_by', 'email');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('published', true);
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('created_at', 'desc');
+    }
 }
