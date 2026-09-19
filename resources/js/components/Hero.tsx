@@ -72,8 +72,9 @@ export const Hero: React.FC = () => {
               alt={slide.title || 'Hero Banner'}
               className="h-full w-full object-cover object-center scale-100 transition-transform duration-[10000ms] ease-out"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#002244]/95 via-[#003366]/75 to-black/40" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#002244]/80 via-transparent to-black/30" />
+            {/* Refined directional scrim: ensures text is 100% readable while keeping the background image bright, vivid & clearly visible */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#001628]/85 via-[#002444]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
           </div>
         ))}
 
@@ -125,13 +126,13 @@ export const Hero: React.FC = () => {
           )}
 
           {/* Dynamic Title */}
-          <h1 className="display-font mt-4 sm:mt-6 font-extrabold leading-[1.12] sm:leading-[1.08] tracking-tight text-3xl xs:text-4xl sm:text-5xl md:text-6xl text-white">
+          <h1 className="display-font mt-4 sm:mt-6 font-extrabold leading-[1.12] sm:leading-[1.08] tracking-tight text-3xl xs:text-4xl sm:text-5xl md:text-6xl text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
             {current?.title || content.brand.name || 'ACT Charitable Trust'}
           </h1>
 
           {/* Dynamic Copy */}
           {(current?.copy || content?.brand?.tagline) && (
-            <p className="mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-blue-100/90 font-medium">
+            <p className="mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-white/95 font-medium drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)]">
               {current?.copy || content.brand.tagline}
             </p>
           )}
