@@ -9,30 +9,17 @@ interface BlogSectionProps {
   onOpenCreateBlog?: () => void;
 }
 
-function getInitialBlogs(): BlogPost[] {
-  try {
-    const el = typeof document !== 'undefined' ? document.getElementById('server-initial-blogs') : null;
-    if (el && el.textContent) {
-      const data = JSON.parse(el.textContent);
-      if (Array.isArray(data) && data.length > 0) return data;
-    }
-    if (typeof localStorage !== 'undefined') {
-      const cached = localStorage.getItem('act_trust_blogs_cache');
-      if (cached) {
-        const data = JSON.parse(cached);
-        if (Array.isArray(data) && data.length > 0) return data;
-      }
-    }
-  } catch {}
-  return [];
-}
-
 export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCreateBlog }) => {
-  const [blogs, setBlogs] = useState<BlogPost[]>(getInitialBlogs);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [loading, setLoading] = useState(() => blogs.length === 0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Clear any obsolete stale localStorage cache
+    try {
+      localStorage.removeItem('act_trust_blogs_cache');
+    } catch {}
+
     async function fetchBlogs() {
       try {
         const res = await fetch(`/api/blogs?t=${Date.now()}`, { cache: 'no-store' });
@@ -40,9 +27,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
           const json = await res.json();
           if (json.success && Array.isArray(json.blogs)) {
             setBlogs(json.blogs);
-            try {
-              localStorage.setItem('act_trust_blogs_cache', JSON.stringify(json.blogs));
-            } catch {}
           }
         }
       } catch (err) {
@@ -57,7 +41,32 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
   const dynamicCats = Array.from(new Set(blogs.map((b) => b.category).filter(Boolean)));
   const categories = ['All', ...(dynamicCats.length > 0 ? dynamicCats : ['Education', 'Healthcare', 'Women Empowerment', 'Nutrition', 'Community Event'])];
 
-  if (loading || blogs.length === 0) return null;
+  // While loading initially, display a matching dark-blue shimmer skeleton instead of stale dummy content
+  if (loading && blogs.length === 0) {
+    return (
+      <section id="stories" className="bg-gradient-to-b from-[#002244] via-[#003366] to-[#004080] text-white px-4 sm:px-5 py-14 sm:py-20 lg:px-8 lg:py-28 relative overflow-hidden">
+        <div className="mx-auto max-w-7xl relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-12 animate-pulse">
+            <div className="h-4 w-44 bg-white/20 rounded-full mx-auto mb-3"></div>
+            <div className="h-8 w-80 bg-white/30 rounded-xl mx-auto mb-3"></div>
+            <div className="h-4 w-96 max-w-full bg-white/15 rounded-lg mx-auto"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="rounded-3xl bg-white/10 backdrop-blur-md border border-white/10 p-5 space-y-4 animate-pulse">
+                <div className="w-full h-52 rounded-2xl bg-white/15"></div>
+                <div className="h-4 w-28 bg-white/20 rounded-full"></div>
+                <div className="h-6 w-3/4 bg-white/30 rounded-lg"></div>
+                <div className="h-4 w-full bg-white/15 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!loading && blogs.length === 0) return null;
 
   const filteredBlogs = selectedCategory === 'All'
     ? blogs

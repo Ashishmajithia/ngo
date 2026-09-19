@@ -37,17 +37,6 @@ function getCachedStory(slugOrId: string): { blog: BlogPost | null; related: any
         }
       }
     }
-    // 2. Check localStorage blog listing for instant summary display
-    if (typeof localStorage !== 'undefined') {
-      const listCached = localStorage.getItem('act_trust_blogs_cache');
-      if (listCached) {
-        const list: BlogPost[] = JSON.parse(listCached);
-        const found = list.find((b) => b.id === slugOrId || b.slug === slugOrId);
-        if (found) {
-          return { blog: found, related: [] };
-        }
-      }
-    }
   } catch {}
   return { blog: null, related: [] };
 }

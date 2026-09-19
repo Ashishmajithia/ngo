@@ -255,7 +255,6 @@ export default function AdminDashboardPage() {
             ? prev.map((b) => (b.id === blogToSave.id ? blogToSave : b))
             : [blogToSave, ...prev];
           try {
-            localStorage.setItem('act_trust_blogs_cache', JSON.stringify(updated));
             sessionStorage.removeItem('act_story_' + blogToSave.id);
             if (blogToSave.slug) {
               sessionStorage.removeItem('act_story_' + blogToSave.slug);
@@ -285,7 +284,6 @@ export default function AdminDashboardPage() {
         setBlogs((prev) => {
           const updated = prev.filter((b) => b.id !== id);
           try {
-            localStorage.setItem('act_trust_blogs_cache', JSON.stringify(updated));
             sessionStorage.removeItem('act_story_' + id);
           } catch {}
           return updated;
