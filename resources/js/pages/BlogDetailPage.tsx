@@ -23,7 +23,6 @@ import {
   Maximize2
 } from 'lucide-react';
 import { BlogPost } from '../types/blog';
-import { defaultBlogs } from '../data/initialBlogs';
 
 interface BlogDetailPageProps {
   slugOrId: string;
@@ -42,7 +41,7 @@ function getCachedStory(slugOrId: string): { blog: BlogPost | null; related: any
       }
     }
 
-    // 2. Check server-injected dynamic blogs from Blade (0ms instant!)
+    // 2. Check server-injected dynamic blogs from Blade (0ms instant from database!)
     if (typeof document !== 'undefined') {
       const el = document.getElementById('server-initial-blogs');
       if (el && el.textContent) {
@@ -55,13 +54,6 @@ function getCachedStory(slugOrId: string): { blog: BlogPost | null; related: any
           }
         }
       }
-    }
-
-    // 3. Fallback to defaultBlogs
-    const foundDefault = defaultBlogs.find(b => b.slug === slugOrId || b.id === slugOrId);
-    if (foundDefault) {
-      const rel = defaultBlogs.filter(b => b.id !== foundDefault.id).slice(0, 3);
-      return { blog: foundDefault, related: rel };
     }
   } catch {}
   return { blog: null, related: [] };

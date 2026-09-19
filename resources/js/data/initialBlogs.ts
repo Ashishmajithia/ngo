@@ -1,4 +1,4 @@
 import { BlogPost } from '@/types/blog';
-import rawBlogs from './initialBlogs.json';
 
-export const defaultBlogs: BlogPost[] = rawBlogs as BlogPost[];
+// Zero static default blogs - All stories are 100% dynamic from database
+export const defaultBlogs: BlogPost[] = [];

@@ -3,15 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowDownRight, Sparkles } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
-import { defaultContent } from '@/data/initialContent';
 
 export const Hero: React.FC = () => {
   const { content, setIsDonateOpen } = useContent();
-  const hero = (content && content.hero && typeof content.hero === 'object')
-    ? content.hero
-    : defaultContent.hero;
-
-  const slides = Array.isArray(hero?.slides) ? hero.slides : [];
+  const slides = Array.isArray(content?.hero?.slides) ? content.hero.slides : [];
 
   const [activeSlide, setActiveSlide] = useState(0);
   const touchStartX = useRef<number>(0);

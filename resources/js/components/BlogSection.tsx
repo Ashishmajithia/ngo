@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Calendar, User, ArrowRight, PlusCircle, BookOpen, ShieldCheck } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
-import { defaultBlogs } from '@/data/initialBlogs';
 
 interface BlogSectionProps {
   onSelectBlog?: (slugOrId: string) => void;
@@ -22,7 +21,7 @@ function getInitialBlogs(): BlogPost[] {
       }
     }
   } catch {}
-  return defaultBlogs;
+  return [];
 }
 
 export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCreateBlog }) => {

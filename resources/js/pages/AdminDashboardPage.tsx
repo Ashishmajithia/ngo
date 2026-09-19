@@ -34,7 +34,6 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
-import { defaultBlogs } from '@/data/initialBlogs';
 import { defaultContent } from '@/data/initialContent';
 import { SiteContent, HeroSlide, ProgramItem, PrincipleItem, GalleryItem } from '@/types/content';
 import { ImageUploadInput } from '@/components/ImageUploadInput';
