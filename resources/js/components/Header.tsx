@@ -86,9 +86,8 @@ export const Header: React.FC = () => {
           <a href="/#approach" className="focusable rounded text-sm font-bold text-[#183a35] hover:text-[#004b87] transition">
             Approach
           </a>
-          <a href="/#stories" className="focusable rounded text-sm font-bold text-[#004b87] hover:text-[#d81b60] transition flex items-center gap-1">
-            <span>Stories & Blog</span>
-            <span className="h-2 w-2 rounded-full bg-[#d81b60] animate-pulse"></span>
+          <a href="/#stories" className="focusable rounded text-sm font-bold text-[#183a35] hover:text-[#004b87] transition">
+            Stories & Blog
           </a>
           <a href="/#gallery" className="focusable rounded text-sm font-bold text-[#183a35] hover:text-[#004b87] transition">
             Gallery
@@ -150,10 +149,9 @@ export const Header: React.FC = () => {
             <a
               href="/#stories"
               onClick={() => setMobileMenuOpen(false)}
-              className="focusable rounded-xl py-2 px-3 text-base font-bold text-[#d81b60] flex items-center justify-between hover:bg-[#d81b60]/5 active:bg-[#d81b60]/10 transition"
+              className="focusable rounded-xl py-2 px-3 text-base font-bold text-[#003b73] hover:bg-black/5 active:bg-black/10 transition"
             >
-              <span>Stories & Blog</span>
-              <span className="text-xs bg-[#d81b60]/15 text-[#d81b60] px-2.5 py-0.5 rounded-full font-bold">New Stories</span>
+              Stories & Blog
             </a>
             <a
               href="/#gallery"
