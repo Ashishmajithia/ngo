@@ -36,7 +36,7 @@ import {
 import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
 import { defaultContent } from '@/data/initialContent';
-import { SiteContent, HeroSlide, ProgramItem, PrincipleItem, GalleryItem, FieldCenterItem } from '@/types/content';
+import { SiteContent, HeroSlide, ProgramItem, PrincipleItem, GalleryItem } from '@/types/content';
 import { ImageUploadInput } from '@/components/ImageUploadInput';
 
 interface DonationItem {
@@ -63,7 +63,7 @@ export default function AdminDashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
-    'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'approach' | 'gallery' | 'centers' | 'support' | 'payment' | 'content' | 'donations'
+    'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'approach' | 'gallery' | 'support' | 'payment' | 'content' | 'donations'
   >('blogs');
 
   // Database Connection State
@@ -80,8 +80,6 @@ export default function AdminDashboardPage() {
   // Blog Form State
   const [editingBlog, setEditingBlog] = useState<Partial<BlogPost> | null>(null);
   const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
-  const [editingCenter, setEditingCenter] = useState<Partial<FieldCenterItem> | null>(null);
-  const [isCenterModalOpen, setIsCenterModalOpen] = useState(false);
 
   // Status Toast
   const [toast, setToast] = useState<string | null>(null);
@@ -333,8 +331,6 @@ export default function AdminDashboardPage() {
       payloadToSave = { payment: content.payment };
     } else if (secLabel === 'Impact Metrics') {
       payloadToSave = { impactStats: content.impactStats };
-    } else if (secLabel === 'Field Centers') {
-      payloadToSave = { fieldCenters: content.fieldCenters };
     } else if (secLabel === 'Site Details') {
       payloadToSave = { brand: content.brand };
     } else {
@@ -446,7 +442,6 @@ export default function AdminDashboardPage() {
             { id: 'programs' as const, label: 'Strategic Initiatives', icon: Target, count: content.programs?.items?.length ?? 0 },
             { id: 'approach' as const, label: 'Approach & Principles', icon: Compass, count: content.approach?.principles?.length ?? 0 },
             { id: 'gallery' as const, label: 'Moments of Hope (Gallery)', icon: Images, count: content.gallery?.items?.length ?? 0 },
-            { id: 'centers' as const, label: 'Field Centers & Reach', icon: MapPin, count: content.fieldCenters?.length ?? 0 },
             { id: 'support' as const, label: 'Support & CTA Banner', icon: HeartHandshake },
             { id: 'payment' as const, label: 'Payment QR & Bank Details', icon: QrCode },
             { id: 'content' as const, label: 'Site Contact & Details', icon: Sliders },
@@ -1559,147 +1554,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* TAB 8: SUPPORT & CTA BANNER */}
-          {/* TAB: FIELD CENTERS & GEOGRAPHIC REACH */}
-          {activeTab === 'centers' && (
-            <div>
-              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
-                <div>
-                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Field Centers & Geographic Reach</h2>
-                  <p className="text-xs text-[#58706a]">Manage active field locations, children counts, active programs, and interactive map pins</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingCenter({
-                        id: 'center-' + Date.now(),
-                        name: '',
-                        city: '',
-                        state: '',
-                        childrenCount: '300+ Children',
-                        programs: ['Primary Education', 'Nutrition Meal'],
-                        coordinator: '',
-                        phone: '',
-                        address: '',
-                        image: '',
-                        mapX: 40,
-                        mapY: 40,
-                        isActive: true,
-                      });
-                      setIsCenterModalOpen(true);
-                    }}
-                    className="flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#28745e] hover:bg-[#28745e] hover:text-white transition shadow-sm"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>+ Add Field Center</span>
-                  </button>
-                  <button
-                    onClick={() => handleSaveContent('Field Centers')}
-                    disabled={savingSection === 'Field Centers'}
-                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70"
-                  >
-                    {savingSection === 'Field Centers' ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
-                        <span>Saving Centers...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 text-[#f2ad3b]" />
-                        <span>Save Field Centers</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
 
-              {/* Centers List Cards */}
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-                {(content.fieldCenters || []).map((center, index) => (
-                  <div
-                    key={center.id || index}
-                    className="p-5 rounded-2xl bg-white border border-[#dce7dc] shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition"
-                  >
-                    <div>
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          {center.image ? (
-                            <img
-                              src={center.image}
-                              alt={center.name}
-                              className="h-14 w-14 rounded-xl object-cover border border-[#dce7dc] shadow-inner"
-                            />
-                          ) : (
-                            <div className="h-14 w-14 rounded-xl bg-[#28745e]/15 text-[#28745e] flex items-center justify-center font-bold">
-                              <MapPin className="w-6 h-6" />
-                            </div>
-                          )}
-                          <div>
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#28745e] bg-[#e8f0e8] px-2 py-0.5 rounded">
-                              {center.city}, {center.state}
-                            </span>
-                            <h3 className="display-font text-base font-bold text-[#123f38] mt-1 leading-snug">
-                              {center.name}
-                            </h3>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 flex items-center justify-between text-xs py-2 px-3 rounded-xl bg-[#f8f4e9] border border-[#dce7dc]">
-                        <span className="text-[#58706a]">Children Supported:</span>
-                        <strong className="text-[#123f38] font-extrabold">{center.childrenCount}</strong>
-                      </div>
-
-                      {Array.isArray(center.programs) && center.programs.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-1">
-                          {center.programs.map((p, idx) => (
-                            <span key={idx} className="text-[10px] font-semibold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">
-                              {p}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="mt-3 text-[11px] text-[#58706a] space-y-0.5">
-                        {center.coordinator && <p>Head: <strong className="text-[#183a35]">{center.coordinator}</strong></p>}
-                        <p>Map Pin Position: <span className="font-mono text-xs text-[#28745e]">X: {center.mapX}% | Y: {center.mapY}%</span></p>
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-[#f1f5f9] flex items-center justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingCenter(center);
-                          setIsCenterModalOpen(true);
-                        }}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-[#28745e] hover:text-[#123f38] px-3 py-1.5 rounded-lg border border-[#28745e]/30 hover:bg-[#e8f0e8] transition"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`Are you sure you want to delete "${center.name}"?`)) {
-                            setContent((prev) => ({
-                              ...prev,
-                              fieldCenters: (prev.fieldCenters || []).filter((c) => c.id !== center.id),
-                            }));
-                            showToastMsg('Field center removed. Click "Save Field Centers" to persist.');
-                          }
-                        }}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-red-600 hover:text-red-700 px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 transition"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {activeTab === 'support' && (
             <div>
