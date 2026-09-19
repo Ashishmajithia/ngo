@@ -74,6 +74,27 @@
                     100% { left: 100%; width: 40%; }
                 }
             </style>
+            <script>
+                // Auto-dismiss safety: ensures green loader never spins indefinitely
+                setTimeout(function() {
+                    var loader = document.getElementById('act-initial-loader');
+                    if (loader) {
+                        loader.style.opacity = '0';
+                        loader.style.transition = 'opacity 0.4s ease';
+                        setTimeout(function() { if (loader && loader.parentNode) loader.remove(); }, 400);
+                    }
+                }, 2000);
+
+                // Auto-recover if browser cached stale deployment chunk
+                window.addEventListener('error', function(e) {
+                    if (e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
+                        if (!sessionStorage.getItem('act_chunk_retry')) {
+                            sessionStorage.setItem('act_chunk_retry', '1');
+                            window.location.reload();
+                        }
+                    }
+                }, true);
+            </script>
         </div>
     </div>
 </body>
