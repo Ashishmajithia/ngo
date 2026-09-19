@@ -72,6 +72,8 @@ export const Hero: React.FC = () => {
             <img
               src={slide.image}
               alt={slide.title || 'Hero Banner'}
+              fetchPriority={idx === 0 ? 'high' : 'auto'}
+              loading={idx === 0 ? 'eager' : 'lazy'}
               className="h-full w-full object-cover object-center scale-100 transition-transform duration-[10000ms] ease-out"
             />
             {/* Refined directional scrim: ensures text is 100% readable while keeping the background image bright, vivid & clearly visible */}

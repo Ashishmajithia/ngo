@@ -513,9 +513,15 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center gap-4">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={b.coverImage}
+                        src={b.coverImage || b.thumbnail || '/uploads/act_official_logo.jpg'}
                         alt={b.title}
-                        className="w-16 h-16 rounded-2xl object-cover shrink-0 border border-black/10"
+                        className="w-16 h-16 rounded-2xl object-cover shrink-0 border border-black/10 bg-white"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('act_official_logo')) {
+                            target.src = '/uploads/act_official_logo.jpg';
+                          }
+                        }}
                       />
                       <div>
                         <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#123f38] text-[10px] font-bold text-[#f2ad3b] mb-1">
