@@ -3,16 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Calendar, User, ArrowRight, PlusCircle, BookOpen, ShieldCheck } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
+import { defaultBlogs } from '@/data/initialBlogs';
 
 interface BlogSectionProps {
-  onSelectBlog?: (blog: BlogPost) => void;
+  onSelectBlog?: (slugOrId: string) => void;
   onOpenCreateBlog?: () => void;
 }
 
 export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCreateBlog }) => {
-  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [blogs, setBlogs] = useState<BlogPost[]>(defaultBlogs);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // Clear any obsolete stale localStorage cache
