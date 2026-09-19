@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class UploadController extends Controller
 {
-    public static function optimizeImage($dataUrlOrBinary, $maxWidth = 1280, $maxHeight = 850, $quality = 75)
+    public static function optimizeImage($dataUrlOrBinary, $maxWidth = 900, $maxHeight = 600, $quality = 70)
     {
         try {
             $binary = null;
@@ -129,10 +129,12 @@ class UploadController extends Controller
         }
 
         if (!empty($uploadedUrls)) {
+            $thumbnail = self::optimizeImage($uploadedUrls[0], 420, 280, 60);
             return response()->json([
                 'success' => true,
                 'url' => $uploadedUrls[0],
                 'urls' => $uploadedUrls,
+                'thumbnail' => $thumbnail,
                 'filename' => $uploadedFilenames[0],
                 'filenames' => $uploadedFilenames,
             ]);

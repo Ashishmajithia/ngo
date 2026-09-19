@@ -50,10 +50,11 @@ export const Gallery: React.FC = () => {
               }`}
             >
               <div className="overflow-hidden h-64 sm:h-80 relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.image}
                   alt={item.title}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover group-hover:scale-110 transition duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#123f38] via-transparent to-transparent opacity-80" />

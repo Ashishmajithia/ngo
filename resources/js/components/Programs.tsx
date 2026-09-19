@@ -61,10 +61,11 @@ export const Programs: React.FC = () => {
               >
                 <div>
                   <div className="overflow-hidden h-48 sm:h-56 relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.image}
                       alt={item.title}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />

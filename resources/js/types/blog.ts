@@ -5,6 +5,7 @@ export interface BlogPost {
   excerpt: string;
   content: string;
   coverImage: string;
+  thumbnail?: string;
   images?: string[]; // Multiple gallery images for the blog
   author: string;
   date: string;

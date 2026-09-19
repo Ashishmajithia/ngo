@@ -152,8 +152,10 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
                 <div>
                   <div className="overflow-hidden h-48 sm:h-60 relative">
                     <img
-                      src={blog.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'}
+                      src={blog.thumbnail || blog.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'}
                       alt={blog.title}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
                     />
                     <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 rounded-full bg-[#003b73]/95 backdrop-blur px-3 py-1 text-[11px] font-extrabold text-white shadow-md">

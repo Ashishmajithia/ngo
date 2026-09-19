@@ -449,8 +449,10 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                           className="group flex items-start gap-3 rounded-xl p-2 hover:bg-[#f0f7ff] transition"
                         >
                           <img
-                            src={rel.coverImage}
+                            src={rel.thumbnail || rel.coverImage}
                             alt={rel.title}
+                            loading="lazy"
+                            decoding="async"
                             className="h-16 w-16 rounded-xl object-cover shrink-0 border border-[#e2e8f0]"
                           />
                           <div className="min-w-0">

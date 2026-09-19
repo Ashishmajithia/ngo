@@ -19,12 +19,50 @@ class BlogController extends Controller
         }
     }
 
-    private static function optimizeBase64Image($dataUrl, $maxWidth = 1200, $maxHeight = 800, $quality = 80)
+    public static function generateThumbnail($dataUrl, $maxWidth = 420, $maxHeight = 280, $quality = 60)
     {
         if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
             return $dataUrl;
         }
-        if (strlen($dataUrl) < 150000) {
+        try {
+            $commaPos = strpos($dataUrl, ',');
+            if ($commaPos === false) return $dataUrl;
+            $binary = base64_decode(substr($dataUrl, $commaPos + 1));
+            if (!$binary) return $dataUrl;
+
+            if (function_exists('imagecreatefromstring')) {
+                $img = @imagecreatefromstring($binary);
+                if ($img !== false) {
+                    $origW = imagesx($img);
+                    $origH = imagesy($img);
+                    $scale = min(1.0, $maxWidth / max($origW, 1), $maxHeight / max($origH, 1));
+                    $newW = max(1, (int)($origW * $scale));
+                    $newH = max(1, (int)($origH * $scale));
+
+                    $thumb = imagecreatetruecolor($newW, $newH);
+                    imagecopyresampled($thumb, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+                    ob_start();
+                    imagejpeg($thumb, null, $quality);
+                    $thumbBinary = ob_get_clean();
+                    imagedestroy($img);
+                    imagedestroy($thumb);
+
+                    if ($thumbBinary) {
+                        return 'data:image/jpeg;base64,' . base64_encode($thumbBinary);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
+        return $dataUrl;
+    }
+
+    public static function optimizeBase64Image($dataUrl, $maxWidth = 850, $maxHeight = 550, $quality = 70)
+    {
+        if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
+            return $dataUrl;
+        }
+        if (strlen($dataUrl) < 30000) {
             return $dataUrl;
         }
         try {
@@ -63,7 +101,7 @@ class BlogController extends Controller
     public static function getBlogsArray()
     {
         $blogs = Blog::where('published', true)
-            ->select(['id', 'title', 'slug', 'excerpt', 'content', 'cover_image', 'author', 'category', 'published', 'date', 'created_at', 'created_by'])
+            ->select(['id', 'title', 'slug', 'excerpt', 'cover_image', 'author', 'category', 'published', 'date', 'created_at', 'created_by'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -73,7 +111,7 @@ class BlogController extends Controller
                 'title' => $b->title,
                 'slug' => $b->slug,
                 'excerpt' => $b->excerpt ?? '',
-                'content' => $b->content ?? '',
+                'thumbnail' => self::generateThumbnail($b->cover_image),
                 'coverImage' => $b->cover_image ?? '',
                 'images' => [],
                 'author' => $b->author ?? 'ACT Trust Team',
@@ -121,6 +159,7 @@ class BlogController extends Controller
             'slug' => $blog->slug,
             'excerpt' => $blog->excerpt ?? '',
             'content' => $blog->content ?? '',
+            'thumbnail' => self::generateThumbnail($blog->cover_image),
             'coverImage' => $blog->cover_image ?? '',
             'images' => $blog->images ?? [],
             'author' => $blog->author ?? 'ACT Trust Team',
@@ -143,6 +182,7 @@ class BlogController extends Controller
                     'title' => $b->title,
                     'slug' => $b->slug,
                     'excerpt' => $b->excerpt ?? '',
+                    'thumbnail' => self::generateThumbnail($b->cover_image),
                     'coverImage' => $b->cover_image ?? '',
                     'category' => $b->category ?? 'Child Education',
                     'date' => $b->date ?? ($b->created_at ? $b->created_at->format('F d, Y') : now()->format('F d, Y')),

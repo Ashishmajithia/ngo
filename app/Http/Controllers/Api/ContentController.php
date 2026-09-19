@@ -15,12 +15,12 @@ class ContentController extends Controller
     /**
      * Build unified site content from dedicated relational tables.
      */
-    private static function optimizeBase64Image($dataUrl, $maxWidth = 1200, $maxHeight = 800, $quality = 75)
+    private static function optimizeBase64Image($dataUrl, $maxWidth = 900, $maxHeight = 600, $quality = 70)
     {
         if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
             return $dataUrl;
         }
-        if (strlen($dataUrl) < 150000) {
+        if (strlen($dataUrl) < 30000) {
             return $dataUrl;
         }
         try {
