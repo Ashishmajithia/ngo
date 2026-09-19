@@ -100,7 +100,7 @@ export const LeadershipSection: React.FC = () => {
 
                 {/* 2-Column Responsive Card: Left is Portrait, Right is Complete Details */}
                 <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 lg:gap-7 items-center sm:items-stretch flex-1">
-                  {/* Left: Large Executive Portrait Photo (Properly sized on mobile & desktop) */}
+                  {/* Left: Large Executive Portrait Photo (Stretches smoothly to match content on sm+, natural portrait on mobile) */}
                   <div
                     onClick={() => setPreviewLeader(leader)}
                     role="button"
@@ -112,7 +112,7 @@ export const LeadershipSection: React.FC = () => {
                       }
                     }}
                     title={`Click to preview full photo of ${leader.name}`}
-                    className="group/photo relative w-36 h-44 xs:w-40 xs:h-48 sm:w-44 sm:h-52 md:w-48 md:h-56 lg:w-52 lg:h-60 rounded-2xl overflow-hidden shadow-md border-2 border-white ring-1 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
+                    className="group/photo relative w-36 h-44 xs:w-40 xs:h-48 sm:w-44 md:w-48 lg:w-52 sm:h-auto sm:self-stretch rounded-2xl overflow-hidden shadow-md border-2 border-white ring-1 ring-[#e6decb] shrink-0 bg-[#f4efe4] cursor-pointer transition-all duration-300 hover:ring-[#28745e] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#28745e]/30"
                   >
                     <SafeImage
                       src={leader.photo}
@@ -129,11 +129,11 @@ export const LeadershipSection: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Right: Rich Content Column (No empty gaps, beautifully balanced on all screens) */}
+                  {/* Right: Content Column (Badges, Name, Role & Full Height Quote Box) */}
                   <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5 w-full">
                     <div>
                       {/* Top Badges */}
-                      <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2 mb-3">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2 mb-2.5">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                             isFounder
@@ -157,57 +157,57 @@ export const LeadershipSection: React.FC = () => {
                       </div>
 
                       {/* Name & Role */}
-                      <div className="text-center sm:text-left">
+                      <div className="text-center sm:text-left mb-2.5">
                         <h3 className="display-font text-2xl sm:text-3xl font-extrabold text-[#143d35] tracking-tight leading-snug">
                           {leader.name}
                         </h3>
 
-                        <p className="mt-1 text-sm sm:text-base font-bold text-[#28745e]">
+                        <p className="mt-0.5 text-sm sm:text-base font-bold text-[#28745e]">
                           {leader.role}
                         </p>
                       </div>
-
-                      {/* Inspiring Vision / Quote Box */}
-                      {leader.message && (
-                        <div className="relative mt-4 rounded-2xl bg-gradient-to-br from-[#faf7f0] to-[#f4ede0] p-4 border border-[#ede3d0] shadow-xs">
-                          <div className="flex items-start gap-2.5">
-                            <Quote className="w-4 h-4 text-[#f2ad3b] shrink-0 mt-0.5" />
-                            <p className="text-xs sm:text-[13px] leading-relaxed italic text-[#395049] font-medium text-left">
-                              "{leader.message}"
-                            </p>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
-                    {/* Direct Action Contacts */}
-                    {(leader.phone || leader.email) && (
-                      <div className="mt-4 pt-3.5 border-t border-[#f0eae0] flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                        {leader.phone && (
-                          <a
-                            href={`tel:${leader.phone.replace(/[^\d+]/g, '')}`}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#143d35] bg-[#edf6f2] hover:bg-[#28745e] hover:text-white px-3 py-1.5 rounded-xl transition duration-200 cursor-pointer border border-[#cbe4da]"
-                            title={`Call ${leader.name}`}
-                          >
-                            <Phone className="w-3 h-3 text-[#28745e] group-hover:text-white" />
-                            <span>{leader.phone}</span>
-                          </a>
-                        )}
-
-                        {leader.email && (
-                          <a
-                            href={`mailto:${leader.email}`}
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#58706a] hover:text-[#28745e] hover:bg-[#faf7f0] px-3 py-1.5 rounded-xl transition duration-200 cursor-pointer border border-[#ede7d8]"
-                            title={`Email ${leader.name}`}
-                          >
-                            <Mail className="w-3 h-3 text-[#28745e]" />
-                            <span className="truncate max-w-[170px]">{leader.email}</span>
-                          </a>
-                        )}
+                    {/* Inspiring Vision / Quote Box (flex-1 to match photo height perfectly) */}
+                    {leader.message && (
+                      <div className="relative rounded-2xl bg-gradient-to-br from-[#faf7f0] to-[#f4ede0] p-4 border border-[#ede3d0] shadow-xs flex-1 flex flex-col justify-center">
+                        <div className="flex items-start gap-2.5">
+                          <Quote className="w-4 h-4 text-[#f2ad3b] shrink-0 mt-0.5" />
+                          <p className="text-xs sm:text-[13px] leading-relaxed italic text-[#395049] font-medium text-left">
+                            "{leader.message}"
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
+
+                {/* Direct Action Contacts (Unified Bottom Bar Across Whole Card) */}
+                {(leader.phone || leader.email) && (
+                  <div className="mt-5 pt-4 border-t border-[#f0eae0] flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                    {leader.phone && (
+                      <a
+                        href={`tel:${leader.phone.replace(/[^\d+]/g, '')}`}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#143d35] bg-[#edf6f2] hover:bg-[#28745e] hover:text-white px-3.5 py-1.5 rounded-xl transition duration-200 cursor-pointer border border-[#cbe4da]"
+                        title={`Call ${leader.name}`}
+                      >
+                        <Phone className="w-3 h-3 text-[#28745e] group-hover:text-white" />
+                        <span>{leader.phone}</span>
+                      </a>
+                    )}
+
+                    {leader.email && (
+                      <a
+                        href={`mailto:${leader.email}`}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#58706a] hover:text-[#28745e] hover:bg-[#faf7f0] px-3.5 py-1.5 rounded-xl transition duration-200 cursor-pointer border border-[#ede7d8]"
+                        title={`Email ${leader.name}`}
+                      >
+                        <Mail className="w-3 h-3 text-[#28745e]" />
+                        <span className="truncate max-w-[170px]">{leader.email}</span>
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
