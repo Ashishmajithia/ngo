@@ -58,14 +58,6 @@ class ContentController extends Controller
 
     public static function getContentArray()
     {
-        $cacheFile = '/tmp/site_content_cache.json';
-        if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 180)) {
-            $cached = @json_decode(@file_get_contents($cacheFile), true);
-            if (!empty($cached) && is_array($cached)) {
-                return $cached;
-            }
-        }
-
         $settings = Setting::all()->pluck('value', 'key');
 
         $banners = Banner::active()->ordered()->get()->map(function ($b) {
@@ -324,13 +316,17 @@ class ContentController extends Controller
                 if ($hasContent) {
                     $id = !empty($slide['id']) ? $slide['id'] : 'slide-' . time() . '-' . $index;
                     $slideIds[] = $id;
+                    $img = $slide['image'] ?? '';
+                    if (!empty($img)) {
+                        $img = self::optimizeBase64Image($img, 1280, 720, 75);
+                    }
                     Banner::updateOrCreate(
                         ['id' => $id],
                         [
                             'title' => !empty($slide['title']) ? $slide['title'] : 'Banner ' . ($index + 1),
                             'eyebrow' => $slide['eyebrow'] ?? '',
                             'copy' => $slide['copy'] ?? '',
-                            'image' => $slide['image'] ?? '',
+                            'image' => $img,
                             'cta_text' => $slide['ctaText'] ?? 'Donate & Support',
                             'cta_link' => $slide['ctaLink'] ?? '#programs',
                             'order' => $index,
@@ -359,12 +355,16 @@ class ContentController extends Controller
                 if ($hasContent) {
                     $id = !empty($item['id']) ? $item['id'] : 'prog-' . time() . '-' . $index;
                     $progIds[] = $id;
+                    $progImg = $item['image'] ?? '';
+                    if (!empty($progImg)) {
+                        $progImg = self::optimizeBase64Image($progImg, 800, 600, 75);
+                    }
                     Program::updateOrCreate(
                         ['id' => $id],
                         [
                             'title' => !empty($item['title']) ? $item['title'] : 'Program ' . ($index + 1),
                             'description' => $item['description'] ?? '',
-                            'image' => $item['image'] ?? '',
+                            'image' => $progImg,
                             'icon' => $item['icon'] ?? 'Heart',
                             'badge_bg' => $item['badgeBg'] ?? 'bg-[#f8e6bd]',
                             'badge_text_color' => $item['badgeTextColor'] ?? 'text-[#8b590b]',
@@ -399,12 +399,16 @@ class ContentController extends Controller
                 if ($hasContent) {
                     $id = !empty($item['id']) ? $item['id'] : 'gal-' . time() . '-' . $index;
                     $galIds[] = $id;
+                    $galImg = $item['image'] ?? '';
+                    if (!empty($galImg)) {
+                        $galImg = self::optimizeBase64Image($galImg, 1000, 750, 75);
+                    }
                     GalleryItem::updateOrCreate(
                         ['id' => $id],
                         [
                             'title' => !empty($item['title']) ? $item['title'] : 'Gallery ' . ($index + 1),
                             'caption' => $item['caption'] ?? '',
-                            'image' => $item['image'] ?? '',
+                            'image' => $galImg,
                             'grid_span' => $item['gridSpan'] ?? null,
                             'order' => $index,
                             'is_active' => true,
@@ -438,9 +442,11 @@ class ContentController extends Controller
 
         // 5. Update complete snapshot in site_content table
         try {
+            $existing = SiteContent::find('main');
+            $merged = ($existing && is_array($existing->data)) ? array_merge($existing->data, $body) : $body;
             SiteContent::updateOrCreate(
                 ['id' => 'main'],
-                ['data' => $body]
+                ['data' => $merged]
             );
         } catch (\Throwable $e) {}
 

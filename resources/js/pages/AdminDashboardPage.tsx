@@ -304,7 +304,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Content Handlers
+  // Content Handlers - Focused section payload saves to prevent 4.5MB payload limits
   const handleSaveContent = async (sectionName?: string) => {
     const secLabel = sectionName || 'Content';
     setSavingSection(secLabel);
@@ -315,24 +315,54 @@ export default function AdminDashboardPage() {
     };
     setContent(updatedContent);
 
+    // Send ONLY the active section payload so requests stay ultra-lightweight (<300KB)
+    let payloadToSave: Partial<SiteContent> = {};
+    if (secLabel === 'Hero Banners') {
+      payloadToSave = { hero: content.hero };
+    } else if (secLabel === 'Initiatives') {
+      payloadToSave = { programs: content.programs };
+    } else if (secLabel === 'Moments of Hope Gallery') {
+      payloadToSave = { gallery: content.gallery };
+    } else if (secLabel === 'About Us') {
+      payloadToSave = { about: content.about };
+    } else if (secLabel === 'Approach & Principles') {
+      payloadToSave = { approach: content.approach };
+    } else if (secLabel === 'Support CTA Banner') {
+      payloadToSave = { support: content.support };
+    } else if (secLabel === 'Payment & QR Settings') {
+      payloadToSave = { payment: content.payment };
+    } else if (secLabel === 'Impact Metrics') {
+      payloadToSave = { impactStats: content.impactStats };
+    } else if (secLabel === 'Field Centers') {
+      payloadToSave = { fieldCenters: content.fieldCenters };
+    } else if (secLabel === 'Site Details') {
+      payloadToSave = { brand: content.brand };
+    } else {
+      payloadToSave = updatedContent;
+    }
+
     try {
       const res = await fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedContent),
+        body: JSON.stringify(payloadToSave),
       });
       if (res.ok) {
         const json = await res.json();
         if (json.data) {
           setContent(json.data);
+          try {
+            localStorage.setItem('act_trust_content_cache', JSON.stringify(json.data));
+          } catch {}
         }
-        showToastMsg(`${secLabel} saved to database!`);
+        showToastMsg(`✓ ${secLabel} saved successfully!`);
       } else {
-        showToastMsg(`Failed to save ${secLabel}`);
+        const errorData = await res.json().catch(() => null);
+        showToastMsg(`Failed to save ${secLabel}: ${errorData?.message || res.statusText}`);
       }
     } catch (err) {
       console.error('API save error:', err);
-      showToastMsg(`Failed to save ${secLabel}`);
+      showToastMsg(`Network error while saving ${secLabel}`);
     } finally {
       setTimeout(() => setSavingSection(null), 500);
     }
