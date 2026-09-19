@@ -3,6 +3,7 @@
 import React from 'react';
 import { Mail, Heart } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { SafeImage } from '@/components/SafeImage';
 
 export const SupportSection: React.FC = () => {
   const { content, setIsDonateOpen } = useContent();
@@ -14,10 +15,10 @@ export const SupportSection: React.FC = () => {
   return (
     <section id="support" className="px-4 sm:px-5 py-12 sm:py-20 lg:px-8 lg:py-28 bg-[#fffdf8]">
       <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl sm:rounded-[2.5rem] shadow-2xl">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <SafeImage
           src={support?.image}
           alt={support?.title || 'Support ACT'}
+          fallbackSrc="/uploads/support_image.jpg"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#123f38]/95 via-[#123f38]/85 to-[#123f38]/90" />

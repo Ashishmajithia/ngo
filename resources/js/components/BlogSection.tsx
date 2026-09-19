@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Calendar, User, ArrowRight, PlusCircle, BookOpen, ShieldCheck } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { defaultBlogs } from '@/data/initialBlogs';
+import { SafeImage } from '@/components/SafeImage';
 
 interface BlogSectionProps {
   onSelectBlog?: (slugOrId: string) => void;
@@ -167,9 +168,10 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
               >
                 <div>
                   <div className="overflow-hidden h-48 sm:h-60 relative">
-                    <img
-                      src={blog.thumbnail || blog.coverImage || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'}
+                    <SafeImage
+                      src={blog.thumbnail || blog.coverImage}
                       alt={blog.title}
+                      fallbackSrc="/uploads/act_official_logo.jpg"
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-cover group-hover:scale-105 transition duration-500"

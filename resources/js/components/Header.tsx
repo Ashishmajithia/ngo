@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from './Link';
 import { HeartHandshake, Menu, X, Heart } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { SafeImage } from '@/components/SafeImage';
 
 export const Header: React.FC = () => {
   const { content, setIsDonateOpen } = useContent();
@@ -18,9 +19,10 @@ export const Header: React.FC = () => {
             content.brand.logoStyle === 'full' ? (
               /* Full Logo Image Mode (Entire Brand as Logo Image) */
               <div className="flex items-center gap-2.5 sm:gap-3 py-0.5 min-w-0">
-                <img
+                <SafeImage
                   src={content.brand.logo}
                   alt={content.brand.name}
+                  fallbackSrc="/uploads/act_official_logo.jpg"
                   style={content.brand.logoHeight ? { height: `${content.brand.logoHeight}px`, maxHeight: '80px' } : undefined}
                   className="h-11 xs:h-13 sm:h-16 md:h-20 w-auto max-w-[190px] xs:max-w-[240px] sm:max-w-[360px] md:max-w-[460px] object-contain transition-transform group-hover:scale-105"
                 />
@@ -40,9 +42,10 @@ export const Header: React.FC = () => {
                   style={content.brand.logoHeight ? { height: `${content.brand.logoHeight}px`, width: `${content.brand.logoHeight}px` } : undefined}
                   className="relative flex h-11 w-11 xs:h-13 xs:w-13 sm:h-16 sm:w-16 md:h-20 md:w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[#e2e8f0] bg-white shadow-md transition-transform group-hover:scale-105 shrink-0"
                 >
-                  <img
+                  <SafeImage
                     src={content.brand.logo}
                     alt={content.brand.name}
+                    fallbackSrc="/uploads/act_official_logo.jpg"
                     className="h-full w-full object-contain p-0.5"
                   />
                 </span>

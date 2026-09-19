@@ -19,6 +19,7 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { SafeImage } from '@/components/SafeImage';
 
 export const DonateModal: React.FC = () => {
   const { isDonateOpen, setIsDonateOpen, showToast, content, setContent, submitDonation } = useContent() as any;
@@ -333,9 +334,10 @@ export const DonateModal: React.FC = () => {
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-2xl border border-[#dce7dc]">
                   {/* QR Image Box */}
                   <div className="w-32 h-32 sm:w-36 sm:h-36 shrink-0 bg-white p-2 rounded-xl border-2 border-[#123f38] shadow-md flex items-center justify-center">
-                    <img
+                    <SafeImage
                       src={qrImage}
                       alt="UPI Payment Barcode QR"
+                      fallbackSrc="/uploads/payment_qr_code.jpg"
                       className="w-full h-full object-contain"
                     />
                   </div>
@@ -452,7 +454,7 @@ export const DonateModal: React.FC = () => {
 
                 {screenshot ? (
                   <div className="relative flex items-center gap-3 p-2.5 rounded-xl border border-[#28745e]/40 bg-[#28745e]/5">
-                    <img
+                    <SafeImage
                       src={screenshot}
                       alt="Payment screenshot proof"
                       className="w-14 h-14 object-cover rounded-lg border border-[#28745e]/30 shadow-sm"

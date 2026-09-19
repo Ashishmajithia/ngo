@@ -13,21 +13,27 @@ export function safeMerge(base, override) {
     approach: (override.approach && typeof override.approach === 'object') ? { ...base.approach, ...override.approach } : base.approach,
     support: (override.support && typeof override.support === 'object') ? { ...base.support, ...override.support } : base.support,
     payment: (override.payment && typeof override.payment === 'object') ? { ...base.payment, ...override.payment } : base.payment,
-    impactStats: Array.isArray(override.impactStats) ? override.impactStats : [],
+    impactStats: (Array.isArray(override.impactStats) && override.impactStats.length > 0) ? override.impactStats : (base.impactStats || []),
     hero: {
       ...base.hero,
       ...(override.hero || {}),
-      slides: Array.isArray(override.hero?.slides) ? override.hero.slides : [],
+      slides: (Array.isArray(override.hero?.slides) && override.hero.slides.length > 0)
+        ? override.hero.slides
+        : (base.hero?.slides || []),
     },
     programs: {
       ...base.programs,
       ...(override.programs || {}),
-      items: Array.isArray(override.programs?.items) ? override.programs.items : [],
+      items: (Array.isArray(override.programs?.items) && override.programs.items.length > 0)
+        ? override.programs.items
+        : (base.programs?.items || []),
     },
     gallery: {
       ...base.gallery,
       ...(override.gallery || {}),
-      items: Array.isArray(override.gallery?.items) ? override.gallery.items : [],
+      items: (Array.isArray(override.gallery?.items) && override.gallery.items.length > 0)
+        ? override.gallery.items
+        : (base.gallery?.items || []),
     },
   };
 }

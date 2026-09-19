@@ -4,6 +4,7 @@ import React from 'react';
 import { GraduationCap, HeartPulse, Sparkles, Utensils, PartyPopper, ArrowUpRight, Heart } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { defaultContent } from '@/data/initialContent';
+import { SafeImage } from '@/components/SafeImage';
 
 const iconMap: Record<string, React.FC<{ className?: string }>> = {
   GraduationCap,
@@ -63,9 +64,10 @@ export const Programs: React.FC = () => {
               >
                 <div>
                   <div className="overflow-hidden h-48 sm:h-56 relative">
-                    <img
+                    <SafeImage
                       src={item.image}
                       alt={item.title}
+                      fallbackSrc="/uploads/prog_prog-1789648391668.jpg"
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-cover group-hover:scale-105 transition duration-500"

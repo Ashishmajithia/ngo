@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, Calendar, User, Heart, Share2, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { useContent } from '@/context/ContentContext';
+import { SafeImage } from '@/components/SafeImage';
 
 interface BlogModalProps {
   blog: BlogPost | null;
@@ -52,8 +53,12 @@ export const BlogModal: React.FC<BlogModalProps> = ({ blog, onClose }) => {
         <div className="overflow-y-auto flex-1">
           {/* Cover Image */}
           <div className="relative h-64 sm:h-80 w-full overflow-hidden shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={blog.coverImage} alt={blog.title} className="h-full w-full object-cover" />
+            <SafeImage
+              src={blog.coverImage}
+              alt={blog.title}
+              fallbackSrc="/uploads/act_official_logo.jpg"
+              className="h-full w-full object-cover"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-[#fffdf8] via-transparent to-black/40" />
             <span className="absolute top-4 left-4 rounded-full bg-[#123f38] px-4 py-1.5 text-xs font-bold text-[#f2ad3b] shadow-md">
               {blog.category}
@@ -106,10 +111,10 @@ export const BlogModal: React.FC<BlogModalProps> = ({ blog, onClose }) => {
                       onClick={() => setActiveLightboxImg(img)}
                       className="cursor-pointer relative rounded-2xl overflow-hidden border border-[#dce7dc] h-32 group shadow-sm hover:shadow-md transition"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <SafeImage
                         src={img}
                         alt={`Gallery ${idx + 1}`}
+                        fallbackSrc="/uploads/act_official_logo.jpg"
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[10px] font-bold">
@@ -167,8 +172,12 @@ export const BlogModal: React.FC<BlogModalProps> = ({ blog, onClose }) => {
           >
             <X className="w-6 h-6" />
           </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={activeLightboxImg} alt="Gallery Enlarged" className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl" />
+          <SafeImage
+            src={activeLightboxImg}
+            alt="Gallery Enlarged"
+            fallbackSrc="/uploads/act_official_logo.jpg"
+            className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl"
+          />
         </div>
       )}
     </div>

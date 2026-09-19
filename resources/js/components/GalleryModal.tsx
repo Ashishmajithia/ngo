@@ -3,6 +3,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { SafeImage } from '@/components/SafeImage';
 
 export const GalleryModal: React.FC = () => {
   const { selectedGalleryImage, setSelectedGalleryImage } = useContent();
@@ -26,8 +27,7 @@ export const GalleryModal: React.FC = () => {
         </button>
 
         <div className="flex items-center justify-center h-full p-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <SafeImage
             src={selectedGalleryImage}
             alt="Enlarged view"
             className="max-h-[82vh] w-auto object-contain rounded-2xl mx-auto"

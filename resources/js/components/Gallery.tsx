@@ -4,6 +4,7 @@ import React from 'react';
 import { Maximize2 } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { defaultContent } from '@/data/initialContent';
+import { SafeImage } from '@/components/SafeImage';
 
 export const Gallery: React.FC = () => {
   const { content, setSelectedGalleryImage } = useContent();
@@ -52,9 +53,10 @@ export const Gallery: React.FC = () => {
               }`}
             >
               <div className="overflow-hidden h-64 sm:h-80 relative">
-                <img
+                <SafeImage
                   src={item.image}
                   alt={item.title}
+                  fallbackSrc="/uploads/gal_gal-1789648482492.jpg"
                   loading="lazy"
                   decoding="async"
                   className="h-full w-full object-cover group-hover:scale-110 transition duration-700"

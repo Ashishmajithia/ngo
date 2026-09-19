@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { SafeImage } from '@/components/SafeImage';
 
 export const Footer: React.FC = () => {
   const { content, setIsDonateOpen, showToast } = useContent();
@@ -40,17 +41,19 @@ export const Footer: React.FC = () => {
             <div className="flex items-center gap-3">
               {brand.logo ? (
                 brand.logoStyle === 'full' ? (
-                  <img
+                  <SafeImage
                     src={brand.logo}
                     alt={brand.name}
+                    fallbackSrc="/uploads/act_official_logo.jpg"
                     className="h-12 sm:h-16 w-auto max-w-[220px] sm:max-w-[300px] object-contain"
                   />
                 ) : (
                   <>
                     <span className="relative flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center overflow-hidden rounded-xl border border-[#d9e1d7] bg-white shadow-sm shrink-0">
-                      <img
+                      <SafeImage
                         src={brand.logo}
                         alt={brand.name}
+                        fallbackSrc="/uploads/act_official_logo.jpg"
                         className="h-full w-full object-contain p-1"
                       />
                     </span>
@@ -138,9 +141,10 @@ export const Footer: React.FC = () => {
                 <div className="flex items-center gap-3">
                   {/* QR Image Box - Fixed 80x80px with strict max constraints */}
                   <div className="w-20 h-20 shrink-0 rounded-xl bg-white p-1 border border-[#123f38]/25 shadow-inner flex items-center justify-center overflow-hidden">
-                    <img
+                    <SafeImage
                       src={qrImage}
                       alt="UPI Payment QR Code"
+                      fallbackSrc="/uploads/payment_qr_code.jpg"
                       className="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300"
                     />
                   </div>

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowDownRight, Sparkles } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { defaultContent } from '@/data/initialContent';
+import { SafeImage } from '@/components/SafeImage';
 
 export const Hero: React.FC = () => {
   const { content, setIsDonateOpen } = useContent();
@@ -68,10 +69,10 @@ export const Hero: React.FC = () => {
               idx === activeSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <SafeImage
               src={slide.image}
               alt={slide.title || 'Hero Banner'}
+              fallbackSrc="/uploads/banner_slide-1789645680125.jpg"
               fetchPriority={idx === 0 ? 'high' : 'auto'}
               loading={idx === 0 ? 'eager' : 'lazy'}
               className="h-full w-full object-cover object-center scale-100 transition-transform duration-[10000ms] ease-out"

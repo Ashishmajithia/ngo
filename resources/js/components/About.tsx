@@ -3,6 +3,7 @@
 import React from 'react';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { SafeImage } from '@/components/SafeImage';
 
 export const About: React.FC = () => {
   const { content } = useContent();
@@ -51,9 +52,10 @@ export const About: React.FC = () => {
         {/* Right Photo Frame & Badge */}
         {about.image && (
           <div className="photo-frame relative w-full">
-            <img
+            <SafeImage
               src={about.image}
               alt={about.title || 'About ACT'}
+              fallbackSrc="/uploads/about_image.jpg"
               className="h-[280px] xs:h-[360px] sm:h-[480px] w-full rounded-3xl object-cover shadow-2xl transition duration-500 hover:scale-[1.01]"
             />
             {about.badgeTitle && (

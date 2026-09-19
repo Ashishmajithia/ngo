@@ -2419,7 +2419,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <div className="mt-3 flex items-center justify-center bg-[#f8f4e9] rounded-2xl p-3 max-h-[75vh] overflow-auto">
-              <img
+              <SafeImage
                 src={previewScreenshot}
                 alt="Payment proof screenshot"
                 className="max-h-[68vh] w-auto object-contain rounded-xl shadow-md"

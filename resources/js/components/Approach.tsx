@@ -3,6 +3,7 @@
 import React from 'react';
 import { Ear, HandHeart, Sprout } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { SafeImage } from '@/components/SafeImage';
 
 const iconMap: Record<string, React.FC<{ className?: string }>> = {
   Ear,
@@ -23,9 +24,10 @@ export const Approach: React.FC = () => {
         {/* Photo Frame Left */}
         {approach?.image && (
           <div className="photo-frame relative order-2 lg:order-1">
-            <img
+            <SafeImage
               src={approach.image}
               alt={approach.title || 'Our Approach'}
+              fallbackSrc="/uploads/approach_image.jpg"
               className="h-[260px] xs:h-[340px] sm:h-[480px] w-full rounded-3xl object-cover shadow-2xl"
             />
           </div>

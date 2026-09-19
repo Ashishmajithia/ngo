@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { BlogPost } from '../types/blog';
 import { defaultBlogs } from '../data/initialBlogs';
+import { SafeImage } from '../components/SafeImage';
 
 interface BlogDetailPageProps {
   slugOrId: string;
@@ -394,9 +395,10 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                 className="group relative mb-14 overflow-hidden rounded-3xl border border-[#e2e8f0] shadow-2xl cursor-pointer"
                 title="Click to view full screen"
               >
-                <img
+                <SafeImage
                   src={blog.coverImage}
                   alt={blog.title}
+                  fallbackSrc="/uploads/act_official_logo.jpg"
                   className="h-[300px] xs:h-[400px] sm:h-[540px] md:h-[620px] lg:h-[680px] w-full object-cover transition duration-500 group-hover:scale-[1.01]"
                 />
                 
@@ -450,9 +452,10 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                             onClick={() => setPreviewIndex(targetIndex)}
                             className="group relative h-64 sm:h-72 overflow-hidden rounded-2xl border border-[#e2e8f0] shadow-md hover:shadow-2xl transition duration-300 cursor-pointer bg-[#f1f5f9]"
                           >
-                            <img
+                            <SafeImage
                               src={img}
                               alt={`Moment ${i + 1}`}
+                              fallbackSrc="/uploads/act_official_logo.jpg"
                               loading="lazy"
                               className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                             />
@@ -507,11 +510,10 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                 {/* Official Trust Identity Card */}
                 <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 sm:p-7 shadow-lg">
                   <div className="flex items-center gap-3 border-b border-[#f1f5f9] pb-4">
-                    <img
+                    <SafeImage
                       src="/uploads/act_official_logo.jpg"
                       alt="ACT Trust"
                       className="h-12 w-12 rounded-full object-contain border border-[#e2e8f0] p-0.5"
-                      onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
                     />
                     <div>
                       <h4 className="font-bold text-[#003b73] text-base leading-tight">ACT Charitable Trust</h4>
@@ -567,9 +569,10 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                           }}
                           className="group flex items-start gap-3.5 rounded-2xl p-2.5 hover:bg-[#f0f7ff] transition"
                         >
-                          <img
+                          <SafeImage
                             src={rel.thumbnail || rel.coverImage}
                             alt={rel.title}
+                            fallbackSrc="/uploads/act_official_logo.jpg"
                             loading="lazy"
                             decoding="async"
                             className="h-20 w-20 rounded-xl object-cover shrink-0 border border-[#e2e8f0] shadow-sm group-hover:scale-105 transition"
@@ -643,10 +646,11 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
 
             {/* Central High-Res Photo */}
             <div className="relative max-w-[92vw] max-h-[72vh] flex items-center justify-center">
-              <img
+              <SafeImage
                 key={allImages[previewIndex]}
                 src={allImages[previewIndex]}
                 alt={`Preview photo ${previewIndex + 1}`}
+                fallbackSrc="/uploads/act_official_logo.jpg"
                 className="max-h-[72vh] max-w-[92vw] object-contain rounded-2xl shadow-2xl transition duration-300"
               />
             </div>
@@ -679,9 +683,10 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                       : 'border-white/30 opacity-60 hover:opacity-100'
                   }`}
                 >
-                  <img
+                  <SafeImage
                     src={img}
                     alt={`Thumbnail ${idx + 1}`}
+                    fallbackSrc="/uploads/act_official_logo.jpg"
                     className="h-full w-full object-cover"
                   />
                 </button>
