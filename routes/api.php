@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\GalleryController;
 use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\LeaderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,14 @@ Route::get('/admin/gallery', [GalleryController::class, 'adminIndex']);
 Route::post('/gallery', [GalleryController::class, 'store']);
 Route::put('/gallery/{id}', [GalleryController::class, 'update']);
 Route::delete('/gallery/{id}', [GalleryController::class, 'destroy']);
+
+// Leaders (Leadership & Trustees - Clean Relational Architecture)
+Route::get('/leaders', [LeaderController::class, 'index']);
+Route::get('/admin/leaders', [LeaderController::class, 'adminIndex']);
+Route::post('/leaders', [LeaderController::class, 'store']);
+Route::put('/leaders/{id}', [LeaderController::class, 'update']);
+Route::delete('/leaders/{id}', [LeaderController::class, 'destroy']);
+Route::post('/leaders/reorder', [LeaderController::class, 'reorder']);
 
 // Settings (Brand, Payment, Support, Approach)
 Route::get('/settings', [SettingController::class, 'index']);

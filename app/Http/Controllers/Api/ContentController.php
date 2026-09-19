@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Banner;
 use App\Models\Program;
 use App\Models\GalleryItem;
+use App\Models\Leader;
 use App\Models\Setting;
 use App\Models\SiteContent;
 
@@ -220,6 +221,31 @@ class ContentController extends Controller
             }
         }
 
+        $leaders = Leader::active()->ordered()->get()->map(function ($l) {
+            return [
+                'id' => $l->id,
+                'name' => $l->name,
+                'role' => $l->role,
+                'badge' => $l->badge ?? '',
+                'tenure' => $l->tenure ?? '',
+                'photo' => $l->photo ?? '',
+                'message' => $l->message ?? '',
+                'phone' => $l->phone ?? '',
+                'email' => $l->email ?? '',
+                'order' => $l->order,
+                'createdBy' => $l->created_by,
+            ];
+        })->values();
+
+        $leadershipSettings = $settings['leadership'] ?? [];
+        $leadershipData = [
+            'isEnabled' => isset($leadershipSettings['isEnabled']) ? (bool)$leadershipSettings['isEnabled'] : false,
+            'eyebrow' => $leadershipSettings['eyebrow'] ?? '',
+            'title' => $leadershipSettings['title'] ?? '',
+            'subtitle' => $leadershipSettings['subtitle'] ?? '',
+            'leaders' => $leaders,
+        ];
+
         $content = [
             'brand' => $settings['brand'] ?? $defaultBrand,
             'hero' => [
@@ -239,34 +265,7 @@ class ContentController extends Controller
                 'items' => $gallery,
             ],
             'about' => $about,
-            'leadership' => $settings['leadership'] ?? [
-                'isEnabled' => true,
-                'eyebrow' => 'Our Vision & Governance',
-                'title' => 'Guiding Light & Trust Leadership',
-                'subtitle' => 'Dedicated stewards committed to transparent governance, grassroots child welfare, and uplifting vulnerable communities.',
-                'leaders' => [
-                    [
-                        'id' => 'leader-1',
-                        'name' => 'Sohan Lal',
-                        'role' => 'Chairman & Managing Trustee',
-                        'badge' => 'Current Leadership',
-                        'tenure' => 'Active Leadership',
-                        'photo' => '/uploads/act_official_logo.jpg',
-                        'message' => 'Our mission is simple yet unyielding: ensure every child receives quality learning, nutritious sustenance, and a dignified future.',
-                        'phone' => '+919779308480',
-                        'email' => 'sohan@gmail.com',
-                    ],
-                    [
-                        'id' => 'leader-2',
-                        'name' => 'Founder & Patron',
-                        'role' => 'Founder & Ex-Chairman',
-                        'badge' => 'Founding Patron',
-                        'tenure' => 'Founding Legacy',
-                        'photo' => '/uploads/act_official_logo.jpg',
-                        'message' => 'ACT Charitable Trust was established with the vision of selfless grassroots service. Seeing hope in a child’s eyes is our greatest reward.',
-                    ],
-                ],
-            ],
+            'leadership' => $leadershipData,
             'approach' => $settings['approach'] ?? $defaultApproach,
             'support' => $support,
             'payment' => $settings['payment'] ?? $defaultPayment,
@@ -424,8 +423,51 @@ class ContentController extends Controller
             ], $updatedBy);
         }
 
-        // 4. Sync Settings (brand, about, leadership, approach, support, payment, impactStats)
-        $settingKeys = ['brand', 'about', 'leadership', 'approach', 'support', 'payment', 'impactStats', 'fieldCenters'];
+        // 3.5. Sync Leaders (Leadership & Trustees Relational Table)
+        if (isset($body['leadership']['leaders']) && is_array($body['leadership']['leaders'])) {
+            $leaderIds = [];
+            foreach ($body['leadership']['leaders'] as $index => $item) {
+                $hasContent = !empty($item['name']) || !empty($item['role']) || !empty($item['photo']);
+                if ($hasContent) {
+                    $id = !empty($item['id']) ? $item['id'] : 'leader-' . time() . '-' . $index;
+                    $leaderIds[] = $id;
+                    $photo = $item['photo'] ?? '';
+                    Leader::updateOrCreate(
+                        ['id' => $id],
+                        [
+                            'name' => !empty($item['name']) ? $item['name'] : 'Leader ' . ($index + 1),
+                            'role' => $item['role'] ?? '',
+                            'badge' => $item['badge'] ?? null,
+                            'tenure' => $item['tenure'] ?? null,
+                            'photo' => $photo,
+                            'message' => $item['message'] ?? null,
+                            'phone' => $item['phone'] ?? null,
+                            'email' => $item['email'] ?? null,
+                            'order' => $index,
+                            'is_active' => true,
+                            'created_by' => $updatedBy,
+                        ]
+                    );
+                }
+            }
+            if (!empty($leaderIds)) {
+                Leader::whereNotIn('id', $leaderIds)->delete();
+            } else {
+                Leader::query()->delete();
+            }
+        }
+
+        if (isset($body['leadership'])) {
+            Setting::set('leadership', [
+                'isEnabled' => (bool)($body['leadership']['isEnabled'] ?? false),
+                'eyebrow' => $body['leadership']['eyebrow'] ?? '',
+                'title' => $body['leadership']['title'] ?? '',
+                'subtitle' => $body['leadership']['subtitle'] ?? '',
+            ], $updatedBy);
+        }
+
+        // 4. Sync Settings (brand, about, approach, support, payment, impactStats, fieldCenters)
+        $settingKeys = ['brand', 'about', 'approach', 'support', 'payment', 'impactStats', 'fieldCenters'];
         foreach ($settingKeys as $k) {
             if (isset($body[$k])) {
                 Setting::set($k, $body[$k], $updatedBy);

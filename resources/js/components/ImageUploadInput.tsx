@@ -24,8 +24,8 @@ const compressImageFile = (file: File): Promise<string> => {
       const rawDataUrl = e.target?.result as string;
       if (!rawDataUrl) return resolve('');
 
-      // Keep 100% original Full HD / 4K resolution directly for normal files (<6MB)
-      if (file.size < 6 * 1024 * 1024) {
+      // Keep 100% original Full HD / 4K resolution directly for normal files (<15MB)
+      if (file.size < 15 * 1024 * 1024) {
         return resolve(normalizeImageUrl(rawDataUrl));
       }
 

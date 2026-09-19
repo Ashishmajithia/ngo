@@ -1123,11 +1123,13 @@ export default function AdminDashboardPage() {
                       const newLeader: LeaderItem = {
                         id: 'leader-' + Date.now(),
                         name: '',
-                        role: 'Trustee / Board Member',
-                        badge: 'Board of Trustees',
-                        tenure: 'Active',
-                        photo: '/uploads/act_official_logo.jpg',
+                        role: '',
+                        badge: '',
+                        tenure: '',
+                        photo: '',
                         message: '',
+                        phone: '',
+                        email: '',
                       };
                       setContent((prev) => ({
                         ...prev,
@@ -1258,6 +1260,44 @@ export default function AdminDashboardPage() {
 
                 {/* Leader Cards List */}
                 <div className="space-y-6">
+                  {(content.leadership?.leaders || []).length === 0 && (
+                    <div className="text-center py-12 px-6 rounded-2xl bg-[#faf8f4] border-2 border-dashed border-[#dcd6c8] space-y-4">
+                      <Award className="w-12 h-12 text-[#28745e]/50 mx-auto" />
+                      <h3 className="text-lg font-bold text-[#183a35]">No Leader Cards Added in Database Yet</h3>
+                      <p className="text-sm text-[#58706a] max-w-md mx-auto">
+                        Database table bilkul clean hai (zero dummy data). Aap Current Chairman aur Ex-Chairman / Founder Patron ke cards add karne ke liye button par click karein.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newLeader: LeaderItem = {
+                            id: 'leader-' + Date.now(),
+                            name: '',
+                            role: '',
+                            badge: '',
+                            tenure: '',
+                            photo: '',
+                            message: '',
+                            phone: '',
+                            email: '',
+                          };
+                          setContent((prev) => ({
+                            ...prev,
+                            leadership: {
+                              ...(prev.leadership || defaultContent.leadership!),
+                              leaders: [newLeader],
+                            },
+                          }));
+                          showToastMsg('Leader card added! Fill details and click Save.');
+                        }}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#123f38] text-white text-xs font-bold hover:bg-[#28745e] transition cursor-pointer shadow-md"
+                      >
+                        <Plus className="w-4 h-4 text-[#f2ad3b]" />
+                        <span>+ Add First Leader Card (Current Chairman / Founder)</span>
+                      </button>
+                    </div>
+                  )}
+
                   {(content.leadership?.leaders || []).map((leader, index) => {
                     const updateLeader = (patch: Partial<LeaderItem>) => {
                       setContent((prev) => {

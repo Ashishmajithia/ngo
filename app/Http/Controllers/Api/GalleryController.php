@@ -39,7 +39,7 @@ class GalleryController extends Controller
         $order = $request->has('order') ? (int)$request->order : (GalleryItem::max('order') + 1);
         $createdBy = $request->created_by ?: (auth()->user()?->email ?? env('ADMIN_EMAIL', 'admin@actcharitabletrust.org'));
 
-        $image = UploadController::optimizeImage($request->image, 1000, 750, 75);
+        $image = !empty($request->image) ? $request->image : '';
 
         $item = GalleryItem::create([
             'id' => $id,
@@ -72,9 +72,7 @@ class GalleryController extends Controller
             'is_active',
         ]);
 
-        if (!empty($data['image'])) {
-            $data['image'] = UploadController::optimizeImage($data['image'], 1000, 750, 75);
-        }
+
 
         $item->update($data);
 
