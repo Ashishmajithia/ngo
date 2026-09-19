@@ -16,55 +16,13 @@ interface ImageUploadInputProps {
 export { normalizeImageUrl, SafeImage } from './SafeImage';
 import { normalizeImageUrl, SafeImage } from './SafeImage';
 
-// Convert image file to heavily compressed, lightweight web image (<80KB)
-const compressImageFile = (file: File): Promise<string> => {
+// Read raw image file directly with 100% original Full HD / 4K fidelity (zero lossy compression or resizing)
+const readRawImageFile = (file: File): Promise<string> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const rawDataUrl = e.target?.result as string;
-      if (!rawDataUrl) return resolve('');
-
-      // Keep 100% original Full HD / 4K resolution directly for normal files (<15MB)
-      if (file.size < 15 * 1024 * 1024) {
-        return resolve(normalizeImageUrl(rawDataUrl));
-      }
-
-      // Only for ultra-huge files (>6MB), maintain crisp 2560px resolution at 0.94 quality
-      const maxDim = 2560;
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const isPng = file.type === 'image/png';
-            const compressed = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', isPng ? undefined : 0.94);
-            resolve(normalizeImageUrl(compressed));
-          } else {
-            resolve(normalizeImageUrl(rawDataUrl));
-          }
-        } catch {
-          resolve(normalizeImageUrl(rawDataUrl));
-        }
-      };
-      img.onerror = () => resolve(normalizeImageUrl(rawDataUrl));
-      img.src = rawDataUrl;
+      resolve(normalizeImageUrl(rawDataUrl || ''));
     };
     reader.onerror = () => resolve('');
     reader.readAsDataURL(file);
@@ -100,11 +58,11 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
     try {
       const fileArray = Array.from(files);
 
-      // 1. Client-side compression first so image is always lightweight (< 80KB)
-      const compressedDataUrls = await Promise.all(
-        fileArray.map((file) => compressImageFile(file, 1280))
+      // 1. Read 100% original Full HD raw file directly
+      const rawDataUrls = await Promise.all(
+        fileArray.map((file) => readRawImageFile(file))
       );
-      const validDataUrls = compressedDataUrls.filter(Boolean);
+      const validDataUrls = rawDataUrls.filter(Boolean);
 
       if (validDataUrls.length === 0) {
         setErrorMsg('Please select a valid image file (JPG, PNG, WEBP).');

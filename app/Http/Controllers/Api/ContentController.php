@@ -13,14 +13,6 @@ use App\Models\SiteContent;
 
 class ContentController extends Controller
 {
-    /**
-     * Build unified site content from dedicated relational tables.
-     */
-    private static function optimizeBase64Image($dataUrl, $maxWidth = null, $maxHeight = null, $quality = null)
-    {
-        // Preserve 100% original full HD resolution without compression or downsampling
-        return $dataUrl;
-    }
 
     public static function getContentArray()
     {
@@ -199,27 +191,9 @@ class ContentController extends Controller
             'ctaText' => '',
         ];
 
-        foreach ($banners as &$b) {
-            if (!empty($b['image'])) $b['image'] = self::optimizeBase64Image($b['image']);
-        }
-        foreach ($programs as &$p) {
-            if (!empty($p['image'])) $p['image'] = self::optimizeBase64Image($p['image']);
-        }
-        foreach ($gallery as &$g) {
-            if (!empty($g['image'])) $g['image'] = self::optimizeBase64Image($g['image']);
-        }
         $about = $settings['about'] ?? $defaultAbout;
-        if (!empty($about['image'])) $about['image'] = self::optimizeBase64Image($about['image']);
-
         $support = $settings['support'] ?? $defaultSupport;
-        if (!empty($support['image'])) $support['image'] = self::optimizeBase64Image($support['image']);
-
         $fieldCenters = $settings['fieldCenters'] ?? $defaultFieldCenters;
-        if (is_array($fieldCenters)) {
-            foreach ($fieldCenters as &$fc) {
-                if (!empty($fc['image'])) $fc['image'] = self::optimizeBase64Image($fc['image']);
-            }
-        }
 
         $leaders = Leader::active()->ordered()->get()->map(function ($l) {
             return [
@@ -308,9 +282,6 @@ class ContentController extends Controller
                     $id = !empty($slide['id']) ? $slide['id'] : 'slide-' . time() . '-' . $index;
                     $slideIds[] = $id;
                     $img = $slide['image'] ?? '';
-                    if (!empty($img)) {
-                        $img = self::optimizeBase64Image($img, 1280, 720, 75);
-                    }
                     Banner::updateOrCreate(
                         ['id' => $id],
                         [
@@ -347,9 +318,6 @@ class ContentController extends Controller
                     $id = !empty($item['id']) ? $item['id'] : 'prog-' . time() . '-' . $index;
                     $progIds[] = $id;
                     $progImg = $item['image'] ?? '';
-                    if (!empty($progImg)) {
-                        $progImg = self::optimizeBase64Image($progImg, 800, 600, 75);
-                    }
                     Program::updateOrCreate(
                         ['id' => $id],
                         [
@@ -391,9 +359,6 @@ class ContentController extends Controller
                     $id = !empty($item['id']) ? $item['id'] : 'gal-' . time() . '-' . $index;
                     $galIds[] = $id;
                     $galImg = $item['image'] ?? '';
-                    if (!empty($galImg)) {
-                        $galImg = self::optimizeBase64Image($galImg, 1000, 750, 75);
-                    }
                     GalleryItem::updateOrCreate(
                         ['id' => $id],
                         [

@@ -106,7 +106,7 @@ class UploadController extends Controller
         }
 
         if (!empty($uploadedUrls)) {
-            $thumbnail = self::optimizeImage($uploadedUrls[0], 420, 280, 60);
+            $thumbnail = $uploadedUrls[0];
             return response()->json([
                 'success' => true,
                 'url' => $uploadedUrls[0],
