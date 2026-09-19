@@ -43,7 +43,7 @@ export const Footer: React.FC = () => {
                   <img
                     src={brand.logo}
                     alt={brand.name}
-                    className="h-11 xs:h-12 sm:h-16 w-auto max-w-[190px] xs:max-w-[240px] sm:max-w-[320px] object-contain"
+                    className="h-12 sm:h-16 w-auto max-w-[220px] sm:max-w-[300px] object-contain"
                   />
                 ) : (
                   <>
@@ -136,12 +136,12 @@ export const Footer: React.FC = () => {
                 className="group cursor-pointer rounded-2xl bg-white p-3.5 border border-[#dce7dc] shadow-sm hover:shadow-md hover:border-[#28745e] transition space-y-2.5"
               >
                 <div className="flex items-center gap-3">
-                  {/* QR Image Box */}
-                  <div className="h-18 w-18 xs:h-20 xs:w-20 shrink-0 rounded-xl bg-white p-1 border border-[#123f38]/30 shadow-inner flex items-center justify-center overflow-hidden">
+                  {/* QR Image Box - Fixed 80x80px with strict max constraints */}
+                  <div className="w-20 h-20 shrink-0 rounded-xl bg-white p-1 border border-[#123f38]/25 shadow-inner flex items-center justify-center overflow-hidden">
                     <img
                       src={qrImage}
                       alt="UPI Payment QR Code"
-                      className="h-full w-full object-contain group-hover:scale-105 transition duration-300"
+                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300"
                     />
                   </div>
 
@@ -162,7 +162,7 @@ export const Footer: React.FC = () => {
                 {/* UPI ID One-Click Copy */}
                 {upiId && (
                   <div className="flex items-center justify-between gap-1 bg-[#f8f4e9] px-2.5 py-1.5 rounded-lg border border-[#dce7dc] text-[11px]">
-                    <span className="font-mono text-[#183a35] font-bold truncate text-[10px] xs:text-[11px]">{upiId}</span>
+                    <span className="font-mono text-[#183a35] font-bold truncate text-[11px]">{upiId}</span>
                     <button
                       type="button"
                       onClick={handleCopyUpi}
