@@ -10,8 +10,23 @@ interface BlogSectionProps {
   onOpenCreateBlog?: () => void;
 }
 
+function getInitialBlogs(): BlogPost[] {
+  try {
+    if (typeof document !== 'undefined') {
+      const el = document.getElementById('server-initial-blogs');
+      if (el && el.textContent) {
+        const parsed = JSON.parse(el.textContent);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    }
+  } catch {}
+  return defaultBlogs;
+}
+
 export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCreateBlog }) => {
-  const [blogs, setBlogs] = useState<BlogPost[]>(defaultBlogs);
+  const [blogs, setBlogs] = useState<BlogPost[]>(getInitialBlogs);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [loading, setLoading] = useState(false);
 
