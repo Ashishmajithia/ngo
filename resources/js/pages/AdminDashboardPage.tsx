@@ -32,10 +32,12 @@ import {
   X,
   MapPin,
   MessageCircle,
+  Award,
+  Quote,
 } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { defaultContent } from '@/data/initialContent';
-import { SiteContent, HeroSlide, ProgramItem, PrincipleItem, GalleryItem } from '@/types/content';
+import { SiteContent, HeroSlide, ProgramItem, PrincipleItem, GalleryItem, LeaderItem } from '@/types/content';
 import { ImageUploadInput, SafeImage } from '@/components/ImageUploadInput';
 
 interface DonationItem {
@@ -64,7 +66,7 @@ export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
-    'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'approach' | 'gallery' | 'support' | 'payment' | 'content' | 'donations'
+    'blogs' | 'banners' | 'metrics' | 'about' | 'leadership' | 'programs' | 'approach' | 'gallery' | 'support' | 'payment' | 'content' | 'donations'
   >('blogs');
 
   // Database Connection State
@@ -363,6 +365,8 @@ export default function AdminDashboardPage() {
       payloadToSave = { gallery: content.gallery };
     } else if (secLabel === 'About Us') {
       payloadToSave = { about: content.about };
+    } else if (secLabel === 'Leadership & Chairman') {
+      payloadToSave = { leadership: content.leadership };
     } else if (secLabel === 'Approach & Principles') {
       payloadToSave = { approach: content.approach };
     } else if (secLabel === 'Support CTA Banner') {
@@ -496,6 +500,7 @@ export default function AdminDashboardPage() {
             { id: 'banners' as const, label: 'Hero Banners', icon: ImageIcon, count: content.hero?.slides?.length ?? 0 },
             { id: 'metrics' as const, label: 'Impact Numbers & Metrics', icon: BarChart3, count: content.impactStats?.length ?? 0 },
             { id: 'about' as const, label: 'About Us Section', icon: Info },
+            { id: 'leadership' as const, label: 'Leadership & Chairman', icon: Award, count: content.leadership?.leaders?.length ?? 2 },
             { id: 'programs' as const, label: 'Strategic Initiatives', icon: Target, count: content.programs?.items?.length ?? 0 },
             { id: 'approach' as const, label: 'Approach & Principles', icon: Compass, count: content.approach?.principles?.length ?? 0 },
             { id: 'gallery' as const, label: 'Moments of Hope (Gallery)', icon: Images, count: content.gallery?.items?.length ?? 0 },
@@ -1099,6 +1104,315 @@ export default function AdminDashboardPage() {
                   onChangeSingle={(url) => setContent((prev) => ({ ...prev, about: { ...prev.about, image: url } }))}
                   helperText="Upload or change the primary featured photo for the About Us section on the homepage."
                 />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3.5: LEADERSHIP & CHAIRMAN SECTION */}
+          {activeTab === 'leadership' && (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d9e1d7]">
+                <div>
+                  <h2 className="display-font text-2xl font-bold text-[#183a35]">Leadership & Chairman Editor</h2>
+                  <p className="text-xs text-[#58706a]">Manage Current Chairman, Ex-Chairman / Founder cards, vision messages, and high-res photos</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newLeader: LeaderItem = {
+                        id: 'leader-' + Date.now(),
+                        name: '',
+                        role: 'Trustee / Board Member',
+                        badge: 'Board of Trustees',
+                        tenure: 'Active',
+                        photo: '/uploads/act_official_logo.jpg',
+                        message: '',
+                      };
+                      setContent((prev) => ({
+                        ...prev,
+                        leadership: {
+                          ...(prev.leadership || defaultContent.leadership!),
+                          leaders: [...(prev.leadership?.leaders || []), newLeader],
+                        },
+                      }));
+                      showToastMsg('New Leader / Trustee card added!');
+                    }}
+                    className="flex items-center gap-1.5 rounded-full border border-[#28745e] px-4 py-2 text-xs font-bold text-[#28745e] hover:bg-[#28745e] hover:text-white transition shadow-sm cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add Leader Card</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleSaveContent('Leadership & Chairman')}
+                    disabled={savingSection === 'Leadership & Chairman'}
+                    className="flex items-center gap-2 rounded-full bg-[#123f38] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#28745e] transition disabled:opacity-70 cursor-pointer"
+                  >
+                    {savingSection === 'Leadership & Chairman' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#f2ad3b]" />
+                        <span>Saving Leadership Section...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 text-[#f2ad3b]" />
+                        <span>Save Leadership Section</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-6">
+                {/* Section Visibility Toggle */}
+                <div className="flex items-center justify-between p-5 rounded-2xl bg-[#fffdf8] border border-[#dce7dc] shadow-sm">
+                  <div className="flex items-center gap-3.5">
+                    <div className={`p-2.5 rounded-xl ${content.leadership?.isEnabled !== false ? 'bg-[#28745e]/15 text-[#28745e]' : 'bg-gray-100 text-gray-400'}`}>
+                      <Award className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-[#183a35]">Leadership Section Live Visibility</h4>
+                      <p className="text-xs text-[#58706a]">Turn this section ON or OFF on the public homepage</p>
+                    </div>
+                  </div>
+
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={content.leadership?.isEnabled !== false}
+                      onChange={(e) => setContent((prev) => ({
+                        ...prev,
+                        leadership: {
+                          ...(prev.leadership || defaultContent.leadership!),
+                          isEnabled: e.target.checked,
+                        },
+                      }))}
+                      className="sr-only peer"
+                    />
+                    <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#28745e]"></div>
+                    <span className="ml-3 text-xs font-bold text-[#183a35]">
+                      {content.leadership?.isEnabled !== false ? 'Active (Visible Live)' : 'Disabled (Hidden)'}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Section Header Settings */}
+                <div className="p-5 rounded-2xl bg-white border border-[#dce7dc] shadow-sm space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#123f38] border-b pb-2">
+                    Section Header Titles
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold mb-1 text-[#183a35]">Eyebrow Title</label>
+                      <input
+                        type="text"
+                        value={content.leadership?.eyebrow ?? 'Our Vision & Governance'}
+                        onChange={(e) => setContent((prev) => ({
+                          ...prev,
+                          leadership: {
+                            ...(prev.leadership || defaultContent.leadership!),
+                            eyebrow: e.target.value,
+                          },
+                        }))}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                        placeholder="e.g. Our Vision & Governance"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold mb-1 text-[#183a35]">Main Section Heading</label>
+                      <input
+                        type="text"
+                        value={content.leadership?.title ?? 'Guiding Light & Trust Leadership'}
+                        onChange={(e) => setContent((prev) => ({
+                          ...prev,
+                          leadership: {
+                            ...(prev.leadership || defaultContent.leadership!),
+                            title: e.target.value,
+                          },
+                        }))}
+                        className="w-full rounded-xl border p-2.5 text-xs bg-white font-bold"
+                        placeholder="e.g. Guiding Light & Trust Leadership"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold mb-1 text-[#183a35]">Subtitle / Vision Description</label>
+                    <textarea
+                      rows={2}
+                      value={content.leadership?.subtitle ?? ''}
+                      onChange={(e) => setContent((prev) => ({
+                        ...prev,
+                        leadership: {
+                          ...(prev.leadership || defaultContent.leadership!),
+                          subtitle: e.target.value,
+                        },
+                      }))}
+                      className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                      placeholder="Brief introductory statement about the trust's leadership and commitment to children..."
+                    />
+                  </div>
+                </div>
+
+                {/* Leader Cards List */}
+                <div className="space-y-6">
+                  {(content.leadership?.leaders || []).map((leader, index) => {
+                    const updateLeader = (patch: Partial<LeaderItem>) => {
+                      setContent((prev) => {
+                        const currentLeaders = prev.leadership?.leaders || defaultContent.leadership!.leaders;
+                        const updated = currentLeaders.map((item, i) => (i === index ? { ...item, ...patch } : item));
+                        return {
+                          ...prev,
+                          leadership: {
+                            ...(prev.leadership || defaultContent.leadership!),
+                            leaders: updated,
+                          },
+                        };
+                      });
+                    };
+
+                    const isChairman = index === 0;
+
+                    return (
+                      <div
+                        key={leader.id || `lead-${index}`}
+                        className="p-5 sm:p-6 rounded-2xl bg-white border border-[#dce7dc] shadow-sm space-y-4 hover:border-[#28745e]/50 transition"
+                      >
+                        <div className="flex items-center justify-between pb-3 border-b border-[#e8efe8]">
+                          <div className="flex items-center gap-2">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#123f38] text-white text-xs font-bold">
+                              {index + 1}
+                            </span>
+                            <span className="text-sm font-bold text-[#183a35]">
+                              {leader.name ? leader.name : isChairman ? 'Current Chairman Card' : 'Ex-Chairman / Founder Card'}
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f2ad3b]/20 text-[#b36b00]">
+                              {leader.badge || (isChairman ? 'Current Leadership' : 'Founder Patron')}
+                            </span>
+                          </div>
+
+                          {(content.leadership?.leaders || []).length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm(`Remove this leader card (${leader.name || 'Card #' + (index + 1)})?`)) {
+                                  setContent((prev) => {
+                                    const currentLeaders = prev.leadership?.leaders || defaultContent.leadership!.leaders;
+                                    return {
+                                      ...prev,
+                                      leadership: {
+                                        ...(prev.leadership || defaultContent.leadership!),
+                                        leaders: currentLeaders.filter((_, i) => i !== index),
+                                      },
+                                    };
+                                  });
+                                }
+                              }}
+                              className="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Remove</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold mb-1 text-[#183a35]">Full Name *</label>
+                            <input
+                              type="text"
+                              value={leader.name}
+                              onChange={(e) => updateLeader({ name: e.target.value })}
+                              placeholder="e.g. Sohan Lal"
+                              className="w-full rounded-xl border p-2.5 text-xs bg-[#f8f4e9]/30 font-bold"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold mb-1 text-[#183a35]">Role / Designation *</label>
+                            <input
+                              type="text"
+                              value={leader.role}
+                              onChange={(e) => updateLeader({ role: e.target.value })}
+                              placeholder="e.g. Chairman & Managing Trustee"
+                              className="w-full rounded-xl border p-2.5 text-xs bg-white font-semibold"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold mb-1 text-[#183a35]">Badge Tag</label>
+                            <input
+                              type="text"
+                              value={leader.badge ?? ''}
+                              onChange={(e) => updateLeader({ badge: e.target.value })}
+                              placeholder="e.g. Current Leadership or Founder Patron"
+                              className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold mb-1 text-[#183a35]">Tenure / Status</label>
+                            <input
+                              type="text"
+                              value={leader.tenure ?? ''}
+                              onChange={(e) => updateLeader({ tenure: e.target.value })}
+                              placeholder="e.g. Active Leadership or Founding Legacy"
+                              className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Inspiring Message / Quote */}
+                        <div>
+                          <label className="block text-xs font-bold mb-1 text-[#183a35]">
+                            Inspiring Vision / Message from Leader
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={leader.message ?? ''}
+                            onChange={(e) => updateLeader({ message: e.target.value })}
+                            placeholder="A personal quote or inspiring commitment statement..."
+                            className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                          />
+                        </div>
+
+                        {/* Photo Upload with Zero Compression */}
+                        <ImageUploadInput
+                          label={`${leader.name || 'Leader'} Official Portrait Photo`}
+                          value={leader.photo}
+                          onChangeSingle={(url) => updateLeader({ photo: url })}
+                          helperText="Upload a crisp portrait photo. 100% original full HD quality is preserved without blurring."
+                        />
+
+                        {/* Contact details (optional) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                          <div>
+                            <label className="block text-xs font-bold mb-1 text-[#183a35]">Direct Phone (Optional)</label>
+                            <input
+                              type="text"
+                              value={leader.phone ?? ''}
+                              onChange={(e) => updateLeader({ phone: e.target.value })}
+                              placeholder="e.g. +919779308480"
+                              className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold mb-1 text-[#183a35]">Direct Email (Optional)</label>
+                            <input
+                              type="email"
+                              value={leader.email ?? ''}
+                              onChange={(e) => updateLeader({ email: e.target.value })}
+                              placeholder="e.g. sohan@gmail.com"
+                              className="w-full rounded-xl border p-2.5 text-xs bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}

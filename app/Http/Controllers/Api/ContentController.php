@@ -15,44 +15,9 @@ class ContentController extends Controller
     /**
      * Build unified site content from dedicated relational tables.
      */
-    private static function optimizeBase64Image($dataUrl, $maxWidth = 900, $maxHeight = 600, $quality = 70)
+    private static function optimizeBase64Image($dataUrl, $maxWidth = null, $maxHeight = null, $quality = null)
     {
-        if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
-            return $dataUrl;
-        }
-        if (strlen($dataUrl) < 30000) {
-            return $dataUrl;
-        }
-        try {
-            $commaPos = strpos($dataUrl, ',');
-            if ($commaPos === false) return $dataUrl;
-            $binary = base64_decode(substr($dataUrl, $commaPos + 1));
-            if (!$binary) return $dataUrl;
-
-            if (function_exists('imagecreatefromstring')) {
-                $img = @imagecreatefromstring($binary);
-                if ($img !== false) {
-                    $origW = imagesx($img);
-                    $origH = imagesy($img);
-                    $scale = min(1.0, $maxWidth / max($origW, 1), $maxHeight / max($origH, 1));
-                    $newW = max(1, (int)($origW * $scale));
-                    $newH = max(1, (int)($origH * $scale));
-
-                    $resized = imagecreatetruecolor($newW, $newH);
-                    imagecopyresampled($resized, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
-
-                    ob_start();
-                    imagejpeg($resized, null, $quality);
-                    $compressedBinary = ob_get_clean();
-                    imagedestroy($img);
-                    imagedestroy($resized);
-
-                    if ($compressedBinary && strlen($compressedBinary) < strlen($binary)) {
-                        return 'data:image/jpeg;base64,' . base64_encode($compressedBinary);
-                    }
-                }
-            }
-        } catch (\Throwable $e) {}
+        // Preserve 100% original full HD resolution without compression or downsampling
         return $dataUrl;
     }
 
@@ -274,6 +239,34 @@ class ContentController extends Controller
                 'items' => $gallery,
             ],
             'about' => $about,
+            'leadership' => $settings['leadership'] ?? [
+                'isEnabled' => true,
+                'eyebrow' => 'Our Vision & Governance',
+                'title' => 'Guiding Light & Trust Leadership',
+                'subtitle' => 'Dedicated stewards committed to transparent governance, grassroots child welfare, and uplifting vulnerable communities.',
+                'leaders' => [
+                    [
+                        'id' => 'leader-1',
+                        'name' => 'Sohan Lal',
+                        'role' => 'Chairman & Managing Trustee',
+                        'badge' => 'Current Leadership',
+                        'tenure' => 'Active Leadership',
+                        'photo' => '/uploads/act_official_logo.jpg',
+                        'message' => 'Our mission is simple yet unyielding: ensure every child receives quality learning, nutritious sustenance, and a dignified future.',
+                        'phone' => '+919779308480',
+                        'email' => 'sohan@gmail.com',
+                    ],
+                    [
+                        'id' => 'leader-2',
+                        'name' => 'Founder & Patron',
+                        'role' => 'Founder & Ex-Chairman',
+                        'badge' => 'Founding Patron',
+                        'tenure' => 'Founding Legacy',
+                        'photo' => '/uploads/act_official_logo.jpg',
+                        'message' => 'ACT Charitable Trust was established with the vision of selfless grassroots service. Seeing hope in a child’s eyes is our greatest reward.',
+                    ],
+                ],
+            ],
             'approach' => $settings['approach'] ?? $defaultApproach,
             'support' => $support,
             'payment' => $settings['payment'] ?? $defaultPayment,
@@ -431,8 +424,8 @@ class ContentController extends Controller
             ], $updatedBy);
         }
 
-        // 4. Sync Settings (brand, about, approach, support, payment, impactStats)
-        $settingKeys = ['brand', 'about', 'approach', 'support', 'payment', 'impactStats', 'fieldCenters'];
+        // 4. Sync Settings (brand, about, leadership, approach, support, payment, impactStats)
+        $settingKeys = ['brand', 'about', 'leadership', 'approach', 'support', 'payment', 'impactStats', 'fieldCenters'];
         foreach ($settingKeys as $k) {
             if (isset($body[$k])) {
                 Setting::set($k, $body[$k], $updatedBy);

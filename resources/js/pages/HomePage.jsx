@@ -3,6 +3,7 @@ import { Header } from '../components/Header';
 import { Hero } from '../components/Hero';
 import { ImpactStats } from '../components/ImpactStats';
 import { About } from '../components/About';
+import { LeadershipSection } from '../components/LeadershipSection';
 import { Programs } from '../components/Programs';
 import { Approach } from '../components/Approach';
 import { Gallery } from '../components/Gallery';
@@ -21,6 +22,7 @@ export default function HomePage() {
       <Hero />
       <ImpactStats />
       <About />
+      <LeadershipSection />
       <Programs />
       <Approach />
       <Gallery />

@@ -111,6 +111,26 @@ export interface PaymentConfig {
   enableQrDonation?: boolean;
 }
 
+export interface LeaderItem {
+  id: string;
+  name: string;
+  role: string; // e.g. "Chairman & Managing Trustee" or "Founder & Ex-Chairman"
+  badge?: string; // e.g. "Current Leadership" or "Founder Patron"
+  tenure?: string; // e.g. "Active Leadership" or "Founding Legacy"
+  photo: string;
+  message?: string; // inspiring quote or vision statement
+  email?: string;
+  phone?: string;
+}
+
+export interface LeadershipSectionData {
+  isEnabled: boolean;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  leaders: LeaderItem[];
+}
+
 export interface SiteContent {
   brand: BrandConfig;
   hero: {
@@ -119,6 +139,7 @@ export interface SiteContent {
   };
   impactStats: ImpactStat[];
   about: AboutSectionData;
+  leadership?: LeadershipSectionData;
   programs: {
     eyebrow: string;
     title: string;

@@ -570,7 +570,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
                           className="group flex items-start gap-3.5 rounded-2xl p-2.5 hover:bg-[#f0f7ff] transition"
                         >
                           <SafeImage
-                            src={rel.thumbnail || rel.coverImage}
+                            src={rel.coverImage || rel.thumbnail}
                             alt={rel.title}
                             fallbackSrc="/uploads/act_official_logo.jpg"
                             loading="lazy"

@@ -19,82 +19,15 @@ class BlogController extends Controller
         }
     }
 
-    public static function generateThumbnail($dataUrl, $maxWidth = 420, $maxHeight = 280, $quality = 60)
+    public static function generateThumbnail($dataUrl, $maxWidth = null, $maxHeight = null, $quality = null)
     {
-        if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
-            return $dataUrl;
-        }
-        try {
-            $commaPos = strpos($dataUrl, ',');
-            if ($commaPos === false) return $dataUrl;
-            $binary = base64_decode(substr($dataUrl, $commaPos + 1));
-            if (!$binary) return $dataUrl;
-
-            if (function_exists('imagecreatefromstring')) {
-                $img = @imagecreatefromstring($binary);
-                if ($img !== false) {
-                    $origW = imagesx($img);
-                    $origH = imagesy($img);
-                    $scale = min(1.0, $maxWidth / max($origW, 1), $maxHeight / max($origH, 1));
-                    $newW = max(1, (int)($origW * $scale));
-                    $newH = max(1, (int)($origH * $scale));
-
-                    $thumb = imagecreatetruecolor($newW, $newH);
-                    imagecopyresampled($thumb, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
-
-                    ob_start();
-                    imagejpeg($thumb, null, $quality);
-                    $thumbBinary = ob_get_clean();
-                    imagedestroy($img);
-                    imagedestroy($thumb);
-
-                    if ($thumbBinary) {
-                        return 'data:image/jpeg;base64,' . base64_encode($thumbBinary);
-                    }
-                }
-            }
-        } catch (\Throwable $e) {}
+        // Return 100% full resolution image without creating blurred low-res thumbnails
         return $dataUrl;
     }
 
-    public static function optimizeBase64Image($dataUrl, $maxWidth = 850, $maxHeight = 550, $quality = 70)
+    public static function optimizeBase64Image($dataUrl, $maxWidth = null, $maxHeight = null, $quality = null)
     {
-        if (!is_string($dataUrl) || !str_starts_with($dataUrl, 'data:image/')) {
-            return $dataUrl;
-        }
-        if (strlen($dataUrl) < 30000) {
-            return $dataUrl;
-        }
-        try {
-            $commaPos = strpos($dataUrl, ',');
-            if ($commaPos === false) return $dataUrl;
-            $binary = base64_decode(substr($dataUrl, $commaPos + 1));
-            if (!$binary) return $dataUrl;
-
-            if (function_exists('imagecreatefromstring')) {
-                $img = @imagecreatefromstring($binary);
-                if ($img !== false) {
-                    $origW = imagesx($img);
-                    $origH = imagesy($img);
-                    $scale = min(1.0, $maxWidth / max($origW, 1), $maxHeight / max($origH, 1));
-                    $newW = max(1, (int)($origW * $scale));
-                    $newH = max(1, (int)($origH * $scale));
-
-                    $resized = imagecreatetruecolor($newW, $newH);
-                    imagecopyresampled($resized, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
-
-                    ob_start();
-                    imagejpeg($resized, null, $quality);
-                    $compressedBinary = ob_get_clean();
-                    imagedestroy($img);
-                    imagedestroy($resized);
-
-                    if ($compressedBinary && strlen($compressedBinary) < strlen($binary)) {
-                        return 'data:image/jpeg;base64,' . base64_encode($compressedBinary);
-                    }
-                }
-            }
-        } catch (\Throwable $e) {}
+        // Return 100% original full HD resolution without compression or downsampling
         return $dataUrl;
     }
 

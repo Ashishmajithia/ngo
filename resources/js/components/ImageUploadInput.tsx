@@ -17,13 +17,20 @@ export { normalizeImageUrl, SafeImage } from './SafeImage';
 import { normalizeImageUrl, SafeImage } from './SafeImage';
 
 // Convert image file to heavily compressed, lightweight web image (<80KB)
-const compressImageFile = (file: File, maxDim = 1280): Promise<string> => {
+const compressImageFile = (file: File): Promise<string> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const rawDataUrl = e.target?.result as string;
       if (!rawDataUrl) return resolve('');
 
+      // Keep 100% original Full HD / 4K resolution directly for normal files (<6MB)
+      if (file.size < 6 * 1024 * 1024) {
+        return resolve(normalizeImageUrl(rawDataUrl));
+      }
+
+      // Only for ultra-huge files (>6MB), maintain crisp 2560px resolution at 0.94 quality
+      const maxDim = 2560;
       const img = new Image();
       img.onload = () => {
         try {
@@ -47,7 +54,7 @@ const compressImageFile = (file: File, maxDim = 1280): Promise<string> => {
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
             const isPng = file.type === 'image/png';
-            const compressed = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', isPng ? undefined : 0.82);
+            const compressed = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', isPng ? undefined : 0.94);
             resolve(normalizeImageUrl(compressed));
           } else {
             resolve(normalizeImageUrl(rawDataUrl));

@@ -7,48 +7,14 @@ use Illuminate\Http\Request;
 
 class UploadController extends Controller
 {
-    public static function optimizeImage($dataUrlOrBinary, $maxWidth = 900, $maxHeight = 600, $quality = 70)
+    public static function optimizeImage($dataUrlOrBinary, $maxWidth = null, $maxHeight = null, $quality = null)
     {
-        try {
-            $binary = null;
-            if (is_string($dataUrlOrBinary) && str_starts_with($dataUrlOrBinary, 'data:image/')) {
-                $commaPos = strpos($dataUrlOrBinary, ',');
-                if ($commaPos === false) return $dataUrlOrBinary;
-                $binary = base64_decode(substr($dataUrlOrBinary, $commaPos + 1));
-            } else {
-                $binary = $dataUrlOrBinary;
-            }
-
-            if (!$binary) return '';
-
-            if (function_exists('imagecreatefromstring')) {
-                $img = @imagecreatefromstring($binary);
-                if ($img !== false) {
-                    $origW = imagesx($img);
-                    $origH = imagesy($img);
-                    $scale = min(1.0, $maxWidth / max($origW, 1), $maxHeight / max($origH, 1));
-                    $newW = max(1, (int)($origW * $scale));
-                    $newH = max(1, (int)($origH * $scale));
-
-                    $resized = imagecreatetruecolor($newW, $newH);
-                    imagecopyresampled($resized, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
-
-                    ob_start();
-                    imagejpeg($resized, null, $quality);
-                    $compressedBinary = ob_get_clean();
-                    imagedestroy($img);
-                    imagedestroy($resized);
-
-                    if ($compressedBinary && strlen($compressedBinary) < strlen($binary)) {
-                        return 'data:image/jpeg;base64,' . base64_encode($compressedBinary);
-                    }
-                }
-            }
-        } catch (\Throwable $e) {}
-
         if (is_string($dataUrlOrBinary) && str_starts_with($dataUrlOrBinary, 'data:image/')) {
             return $dataUrlOrBinary;
         }
+
+        $binary = $dataUrlOrBinary;
+        if (!$binary) return '';
 
         $mime = 'image/jpeg';
         if (str_starts_with($binary, "\x89PNG\r\n\x1a\n")) {

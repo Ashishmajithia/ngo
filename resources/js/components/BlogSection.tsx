@@ -169,7 +169,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectBlog, onOpenCr
                 <div>
                   <div className="overflow-hidden h-48 sm:h-60 relative">
                     <SafeImage
-                      src={blog.thumbnail || blog.coverImage}
+                      src={blog.coverImage || blog.thumbnail}
                       alt={blog.title}
                       fallbackSrc="/uploads/act_official_logo.jpg"
                       loading="lazy"

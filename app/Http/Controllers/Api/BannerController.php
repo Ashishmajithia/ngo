@@ -39,7 +39,7 @@ class BannerController extends Controller
         $order = $request->has('order') ? (int)$request->order : (Banner::max('order') + 1);
         $createdBy = $request->created_by ?: (auth()->user()?->email ?? env('ADMIN_EMAIL', 'admin@actcharitabletrust.org'));
 
-        $image = UploadController::optimizeImage($request->image, 1280, 850, 75);
+        $image = $request->image;
 
         $banner = Banner::create([
             'id' => $id,
@@ -75,10 +75,6 @@ class BannerController extends Controller
             'order',
             'is_active',
         ]);
-
-        if (!empty($data['image'])) {
-            $data['image'] = UploadController::optimizeImage($data['image'], 1280, 850, 75);
-        }
 
         $banner->update($data);
 
