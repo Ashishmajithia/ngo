@@ -3,11 +3,17 @@
 import React from 'react';
 import { Maximize2 } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { defaultContent } from '@/data/initialContent';
 
 export const Gallery: React.FC = () => {
   const { content, setSelectedGalleryImage } = useContent();
-  const gallery = content?.gallery;
-  const items = Array.isArray(gallery?.items) ? gallery.items : [];
+  const gallery = (content && content.gallery && typeof content.gallery === 'object')
+    ? content.gallery
+    : defaultContent.gallery;
+
+  const items = (Array.isArray(gallery?.items) && gallery.items.length > 0)
+    ? gallery.items
+    : (defaultContent.gallery?.items || []);
 
   if (items.length === 0) return null;
 

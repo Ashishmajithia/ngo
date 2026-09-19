@@ -23,6 +23,7 @@ import {
   Maximize2
 } from 'lucide-react';
 import { BlogPost } from '../types/blog';
+import { defaultBlogs } from '../data/initialBlogs';
 
 interface BlogDetailPageProps {
   slugOrId: string;
@@ -54,6 +55,13 @@ function getCachedStory(slugOrId: string): { blog: BlogPost | null; related: any
           }
         }
       }
+    }
+
+    // 3. Check defaultBlogs
+    const foundDefault = defaultBlogs.find(b => b.slug === slugOrId || b.id === slugOrId);
+    if (foundDefault) {
+      const rel = defaultBlogs.filter(b => b.id !== foundDefault.id).slice(0, 3);
+      return { blog: foundDefault, related: rel };
     }
   } catch {}
   return { blog: null, related: [] };

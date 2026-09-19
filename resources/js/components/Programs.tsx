@@ -3,6 +3,7 @@
 import React from 'react';
 import { GraduationCap, HeartPulse, Sparkles, Utensils, PartyPopper, ArrowUpRight, Heart } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
+import { defaultContent } from '@/data/initialContent';
 
 const iconMap: Record<string, React.FC<{ className?: string }>> = {
   GraduationCap,
@@ -15,7 +16,13 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
 
 export const Programs: React.FC = () => {
   const { content, setIsDonateOpen } = useContent();
-  const items = Array.isArray(content?.programs?.items) ? content.programs.items : [];
+  const programs = (content && content.programs && typeof content.programs === 'object')
+    ? content.programs
+    : defaultContent.programs;
+
+  const items = (Array.isArray(programs?.items) && programs.items.length > 0)
+    ? programs.items
+    : (defaultContent.programs?.items || []);
 
   if (items.length === 0) return null;
 
