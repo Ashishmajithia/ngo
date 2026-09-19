@@ -13,20 +13,8 @@ interface ImageUploadInputProps {
   helperText?: string;
 }
 
-// Ensure URL is clean, valid, and has leading slash if relative
-export const normalizeImageUrl = (raw?: string): string => {
-  if (!raw) return '';
-  const trimmed = raw.trim();
-  if (
-    trimmed.startsWith('data:') ||
-    trimmed.startsWith('blob:') ||
-    trimmed.startsWith('http://') ||
-    trimmed.startsWith('https://')
-  ) {
-    return trimmed;
-  }
-  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-};
+export { normalizeImageUrl, SafeImage } from './SafeImage';
+import { normalizeImageUrl, SafeImage } from './SafeImage';
 
 // Convert image file to heavily compressed, lightweight web image (<80KB)
 const compressImageFile = (file: File, maxDim = 1280): Promise<string> => {
@@ -58,17 +46,17 @@ const compressImageFile = (file: File, maxDim = 1280): Promise<string> => {
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
-            const isPng = file.type === 'image/png' && width < 400;
-            const compressed = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.76);
-            resolve(compressed);
+            const isPng = file.type === 'image/png';
+            const compressed = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', isPng ? undefined : 0.82);
+            resolve(normalizeImageUrl(compressed));
           } else {
-            resolve(rawDataUrl.length < 200000 ? rawDataUrl : '');
+            resolve(normalizeImageUrl(rawDataUrl));
           }
         } catch {
-          resolve(rawDataUrl.length < 200000 ? rawDataUrl : '');
+          resolve(normalizeImageUrl(rawDataUrl));
         }
       };
-      img.onerror = () => resolve(rawDataUrl.length < 200000 ? rawDataUrl : '');
+      img.onerror = () => resolve(normalizeImageUrl(rawDataUrl));
       img.src = rawDataUrl;
     };
     reader.onerror = () => resolve('');
@@ -76,88 +64,7 @@ const compressImageFile = (file: File, maxDim = 1280): Promise<string> => {
   });
 };
 
-// Resilient image renderer with automatic cache-buster retry on 404/error
-export const SafeImage: React.FC<{
-  src: string;
-  alt: string;
-  className?: string;
-  onStatusChange?: (status: 'loading' | 'loaded' | 'error') => void;
-}> = ({ src, alt, className = '', onStatusChange }) => {
-  const cleanSrc = useMemo(() => normalizeImageUrl(src), [src]);
-  const [activeSrc, setActiveSrc] = useState(cleanSrc);
-  const [hasRetried, setHasRetried] = useState(false);
-  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
 
-  useEffect(() => {
-    const nextSrc = normalizeImageUrl(src);
-    setActiveSrc(nextSrc);
-    setHasRetried(false);
-    setStatus('loading');
-    onStatusChange?.('loading');
-  }, [src]);
-
-  const handleError = () => {
-    // If not already retried and not a data URI, auto-retry with cache buster to break stale 404 cache
-    if (!hasRetried && activeSrc && !activeSrc.startsWith('data:') && !activeSrc.startsWith('blob:')) {
-      setHasRetried(true);
-      const sep = activeSrc.includes('?') ? '&' : '?';
-      setActiveSrc(`${activeSrc}${sep}cb=${Date.now()}`);
-    } else {
-      setStatus('error');
-      onStatusChange?.('error');
-    }
-  };
-
-  const handleLoad = () => {
-    setStatus('loaded');
-    onStatusChange?.('loaded');
-  };
-
-  if (!cleanSrc) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-[#eef3ee] text-[#58706a] text-[10px]">
-        No Image
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative w-full h-full flex items-center justify-center bg-[#eef3ee]">
-      {status === 'loading' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/5 z-10">
-          <Loader2 className="w-4 h-4 animate-spin text-[#28745e]" />
-        </div>
-      )}
-      {status === 'error' ? (
-        <div className="flex flex-col items-center justify-center p-2 text-center text-red-500 w-full h-full">
-          <AlertCircle className="w-5 h-5 mb-0.5 text-red-500" />
-          <span className="text-[9px] font-bold text-red-700 leading-tight">Image Error</span>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setStatus('loading');
-              const sep = cleanSrc.includes('?') ? '&' : '?';
-              setActiveSrc(`${cleanSrc}${sep}retry=${Date.now()}`);
-            }}
-            className="mt-1 text-[8px] px-1.5 py-0.5 bg-red-100 hover:bg-red-200 text-red-800 rounded font-bold transition flex items-center gap-0.5"
-          >
-            <RefreshCw className="w-2.5 h-2.5" /> Retry
-          </button>
-        </div>
-      ) : (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
-          src={activeSrc}
-          alt={alt}
-          onLoad={handleLoad}
-          onError={handleError}
-          className={`${className} ${status === 'loading' ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
-        />
-      )}
-    </div>
-  );
-};
 
 export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
   label,
@@ -197,31 +104,33 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
         return;
       }
 
-      // 2. Try uploading the compressed image to /api/upload
+      // 2. Try uploading to /api/upload
       let finalUrls: string[] = [];
       try {
         const formData = new FormData();
-        for (let i = 0; i < validDataUrls.length; i++) {
-          const dataUrl = validDataUrls[i];
-          const blob = await (await fetch(dataUrl)).blob();
-          formData.append('files[]', blob, `img_${Date.now()}_${i}.jpg`);
+        for (let i = 0; i < fileArray.length; i++) {
+          formData.append('files[]', fileArray[i]);
         }
         const res = await fetch('/api/upload', { method: 'POST', body: formData });
         if (res.ok) {
           const json = await res.json();
-          if (json.urls && Array.isArray(json.urls) && json.urls.length > 0) {
-            finalUrls = json.urls;
-          } else if (json.url) {
-            finalUrls = [json.url];
+          const serverUrls = (json.urls && Array.isArray(json.urls) && json.urls.length > 0)
+            ? json.urls
+            : (json.url ? [json.url] : []);
+          
+          // Only use server URLs if they actually saved to static /uploads disk
+          const diskUrls = serverUrls.filter((u: string) => typeof u === 'string' && u.startsWith('/uploads/'));
+          if (diskUrls.length === fileArray.length) {
+            finalUrls = diskUrls;
           }
         }
       } catch (uploadErr) {
         console.warn('Server upload warning:', uploadErr);
       }
 
-      // If server could not save to disk (e.g. Vercel read-only filesystem), use the tiny compressed data URLs!
+      // If server could not save to disk (e.g. Vercel read-only filesystem), use the client compressed data URLs!
       if (finalUrls.length === 0) {
-        finalUrls = validDataUrls;
+        finalUrls = validDataUrls.map(normalizeImageUrl);
       }
 
       if (multiple && onChangeMultiple) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Lock, Mail, ArrowRight, HeartHandshake, Database, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, ArrowRight, HeartHandshake, AlertCircle } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -8,11 +8,28 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if already authenticated
-    fetch('/api/admin/verify')
-      .then((res) => {
+    // Only check if an active token already exists in localStorage
+    const token = localStorage.getItem('act_admin_token');
+    if (!token || !token.startsWith('act_laravel_')) {
+      return;
+    }
+
+    fetch('/api/admin/verify', {
+      headers: {
+        'X-Admin-Token': token,
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+    })
+      .then(async (res) => {
         if (res.ok) {
-          window.location.href = '/admin';
+          const data = await res.json();
+          if (data && data.authenticated) {
+            window.location.replace('/admin');
+          }
+        } else {
+          localStorage.removeItem('act_admin_token');
+          localStorage.removeItem('act_admin_user');
         }
       })
       .catch(() => {});
@@ -31,6 +48,7 @@ export default function AdminLoginPage() {
           'Accept': 'application/json',
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -40,7 +58,7 @@ export default function AdminLoginPage() {
         if (json.token) {
           localStorage.setItem('act_admin_token', json.token);
         }
-        window.location.href = '/admin';
+        window.location.replace('/admin');
       } else {
         setError(json.error || 'Invalid administrator credentials');
       }
@@ -49,11 +67,6 @@ export default function AdminLoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillQuickCredentials = () => {
-    setEmail('admin@actcharitabletrust.org');
-    setPassword('ActTrust@2026!');
   };
 
   return (
@@ -72,13 +85,8 @@ export default function AdminLoginPage() {
             ACT Trust Admin Portal
           </h2>
           <p className="mt-1 text-xs text-[#28745e] font-bold uppercase tracking-widest">
-            Laravel Enterprise Management Console
+            Secure Management Console
           </p>
-
-          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Laravel Database & Eloquent Connected</span>
-          </div>
         </div>
 
         {error && (
@@ -126,31 +134,16 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 flex items-center justify-center gap-2 rounded-2xl bg-[#123f38] py-4 text-sm font-bold text-[#fffdf8] shadow-xl hover:bg-[#28745e] hover:shadow-2xl transition duration-300 disabled:opacity-50 hover:-translate-y-0.5"
+            className="w-full mt-2 flex items-center justify-center gap-2 rounded-2xl bg-[#123f38] py-4 text-sm font-bold text-[#fffdf8] shadow-xl hover:bg-[#28745e] hover:shadow-2xl transition duration-300 disabled:opacity-50 hover:-translate-y-0.5 cursor-pointer"
           >
             <span>{loading ? 'Authenticating...' : 'Sign In To Admin Console'}</span>
             <ArrowRight className="w-4 h-4 text-[#f2ad3b]" />
           </button>
         </form>
 
-        {/* Quick Credentials Helper */}
-        <div className="mt-5 p-3 rounded-xl bg-[#f8f4e9] border border-[#e5dec9] text-xs text-[#58706a] flex items-center justify-between">
-          <div className="space-y-0.5">
-            <span className="font-semibold text-[#183a35] block">Default Admin Login:</span>
-            <span className="text-[11px] text-[#58706a]">admin@actcharitabletrust.org</span>
-          </div>
-          <button
-            type="button"
-            onClick={fillQuickCredentials}
-            className="px-2.5 py-1 text-xs font-bold text-[#123f38] bg-white rounded-lg border border-[#dce7dc] hover:bg-[#f2ad3b]/10 transition"
-          >
-            Auto-Fill
-          </button>
-        </div>
-
-        <div className="mt-6 pt-4 border-t border-[#dce7dc] flex items-center justify-center gap-2 text-xs text-[#58706a]">
+        <div className="mt-8 pt-4 border-t border-[#dce7dc] flex items-center justify-center gap-2 text-xs text-[#58706a]">
           <ShieldCheck className="w-4 h-4 text-[#28745e]" />
-          <span>Laravel Auth & 256-Bit Encrypted Sessions</span>
+          <span>256-Bit SSL Encrypted Secure Portal</span>
         </div>
       </div>
     </div>

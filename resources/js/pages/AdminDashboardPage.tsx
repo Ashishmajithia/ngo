@@ -60,6 +60,8 @@ const router = {
 
 export default function AdminDashboardPage() {
   const [mounted, setMounted] = useState(false);
+  const [isVerifyingAuth, setIsVerifyingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
     'blogs' | 'banners' | 'metrics' | 'about' | 'programs' | 'approach' | 'gallery' | 'support' | 'payment' | 'content' | 'donations'
@@ -86,7 +88,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     setMounted(true);
 
-    // Clear any residual localStorage cache
+    // Clear any residual content cache
     try {
       Object.keys(localStorage).forEach((key) => {
         if (key.startsWith('act_charitable_trust_')) {
@@ -95,23 +97,51 @@ export default function AdminDashboardPage() {
       });
     } catch {}
 
-    // Verify admin authentication
-    fetch('/api/admin/verify')
+    const token = localStorage.getItem('act_admin_token');
+    const user = localStorage.getItem('act_admin_user');
+
+    if (!token && !user) {
+      setIsVerifyingAuth(false);
+      setIsAuthenticated(false);
+      window.location.replace('/admin/login');
+      return;
+    }
+
+    // Verify admin authentication with backend
+    fetch('/api/admin/verify', {
+      headers: {
+        'X-Admin-Token': token || '',
+        'Authorization': `Bearer ${token || ''}`,
+      },
+      credentials: 'include',
+    })
       .then(async (res) => {
-        if (res.status === 401) {
-          router.push('/admin/login');
-          return null;
+        if (!res.ok) {
+          throw new Error('Unauthorized');
         }
-        return res.json();
-      })
-      .then((data) => {
-        if (data && data.dbStatus) {
+        const data = await res.json();
+        if (!data || !data.authenticated) {
+          throw new Error('Session invalid');
+        }
+        if (data.dbStatus) {
           setDbStatus(data.dbStatus);
         }
+        setIsAuthenticated(true);
+        setIsVerifyingAuth(false);
+        fetchData();
       })
-      .catch(() => {});
-
-    fetchData();
+      .catch(() => {
+        try {
+          localStorage.removeItem('act_admin_user');
+          localStorage.removeItem('act_admin_token');
+          sessionStorage.clear();
+          document.cookie = 'act_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'act_admin_session=deleted; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        } catch {}
+        setIsAuthenticated(false);
+        setIsVerifyingAuth(false);
+        window.location.replace('/admin/login');
+      });
   }, []);
 
   const fetchData = async () => {
@@ -164,12 +194,25 @@ export default function AdminDashboardPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/admin/logout', { method: 'POST' });
+      const token = localStorage.getItem('act_admin_token') || '';
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        headers: {
+          'X-Admin-Token': token,
+          'Authorization': `Bearer ${token}`,
+        },
+        credentials: 'include',
+      });
     } catch {}
     try {
       localStorage.removeItem('act_admin_user');
+      localStorage.removeItem('act_admin_token');
+      sessionStorage.clear();
+      document.cookie = 'act_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'act_admin_session=deleted; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     } catch {}
-    router.push('/admin/login');
+    setIsAuthenticated(false);
+    window.location.replace('/admin/login');
   };
 
   const handleUpdateDonationStatus = async (id: string, newStatus: string) => {
@@ -365,11 +408,24 @@ export default function AdminDashboardPage() {
     }
   };
 
-  if (!mounted || loading) {
+  if (!mounted || isVerifyingAuth || !isAuthenticated || loading) {
     return (
-      <div className="min-h-screen bg-[#123f38] flex flex-col items-center justify-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin text-[#f2ad3b] mb-4" />
-        <p className="font-bold text-sm">Loading Control Dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-[#0b2823] via-[#123f38] to-[#1a574e] flex flex-col items-center justify-center text-white p-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 mb-4 animate-pulse">
+          <ShieldCheck className="w-8 h-8 text-[#f2ad3b]" />
+        </div>
+        <h2 className="display-font text-xl font-bold tracking-tight">
+          {isVerifyingAuth ? 'Verifying Administrator Access...' : 'Loading Control Dashboard...'}
+        </h2>
+        <p className="mt-2 text-xs text-white/70 max-w-sm">
+          {isVerifyingAuth
+            ? 'Please wait while your session credentials are securely validated.'
+            : 'Synchronizing site content and impact stories...'}
+        </p>
+        <div className="mt-6 flex items-center gap-2 text-xs text-[#f2ad3b]">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span>Please wait...</span>
+        </div>
       </div>
     );
   }

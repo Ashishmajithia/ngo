@@ -46,9 +46,20 @@ class UploadController extends Controller
             }
         } catch (\Throwable $e) {}
 
-        return is_string($dataUrlOrBinary) && str_starts_with($dataUrlOrBinary, 'data:image/')
-            ? $dataUrlOrBinary
-            : 'data:image/jpeg;base64,' . base64_encode($binary);
+        if (is_string($dataUrlOrBinary) && str_starts_with($dataUrlOrBinary, 'data:image/')) {
+            return $dataUrlOrBinary;
+        }
+
+        $mime = 'image/jpeg';
+        if (str_starts_with($binary, "\x89PNG\r\n\x1a\n")) {
+            $mime = 'image/png';
+        } elseif (str_starts_with($binary, "RIFF") && substr($binary, 8, 4) === 'WEBP') {
+            $mime = 'image/webp';
+        } elseif (str_starts_with($binary, "GIF8")) {
+            $mime = 'image/gif';
+        }
+
+        return 'data:' . $mime . ';base64,' . base64_encode($binary);
     }
 
     public function upload(Request $request)

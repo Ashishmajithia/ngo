@@ -195,7 +195,7 @@ export const Footer: React.FC = () => {
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#58706a] gap-2 text-center sm:text-left">
           <p>© {new Date().getFullYear()} {brand.name}. All rights reserved.</p>
           <p className="flex items-center justify-center gap-1">
-            Built with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline" /> for maximum performance on Vercel.
+            Crafted with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline" /> by <span className="font-bold text-[#183a35]">Ashish</span>
           </p>
         </div>
       </div>

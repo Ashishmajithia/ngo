@@ -78,6 +78,21 @@ function AppRouter() {
   }
 
   if (currentPath.startsWith('/admin')) {
+    const hasAdminSession =
+      typeof window !== 'undefined' &&
+      Boolean(
+        localStorage.getItem('act_admin_token') &&
+        localStorage.getItem('act_admin_token')?.startsWith('act_laravel_')
+      );
+
+    if (!hasAdminSession) {
+      return (
+        <Suspense fallback={<div className="min-h-screen bg-[#123f38]" />}>
+          <AdminLoginPage />
+        </Suspense>
+      );
+    }
+
     return (
       <Suspense fallback={<div className="min-h-screen bg-[#123f38]" />}>
         <AdminDashboardPage />

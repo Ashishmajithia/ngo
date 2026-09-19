@@ -76,10 +76,13 @@ class AuthController extends Controller
     {
         $session = $request->cookie('act_admin_session') ?? $request->bearerToken() ?? $request->header('X-Admin-Token');
 
-        if (!$session) {
+        $session = is_string($session) ? trim($session) : '';
+
+        // Reject empty, "deleted", "null", "undefined", or invalid token formats
+        if (empty($session) || $session === 'deleted' || $session === 'null' || $session === 'undefined' || !str_starts_with($session, 'act_laravel_')) {
             return response()->json([
                 'authenticated' => false,
-                'message' => 'No active session found.',
+                'message' => 'No active administrator session found.',
             ], 401);
         }
 
@@ -101,11 +104,13 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $forgetCookie = cookie()->forget('act_admin_session');
+        // Explicitly expire cookies for all variants (secure and non-secure)
+        $cookie1 = cookie('act_admin_session', '', -2628000, '/', null, false, true);
+        $cookie2 = cookie('act_admin_session', '', -2628000, '/', null, true, true);
 
         return response()->json([
             'success' => true,
             'message' => 'Administrator logged out successfully.',
-        ])->withCookie($forgetCookie);
+        ])->withCookie($cookie1)->withCookie($cookie2);
     }
 }

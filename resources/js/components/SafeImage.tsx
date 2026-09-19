@@ -2,14 +2,27 @@
 
 import React, { useState, useEffect, useMemo, forwardRef } from 'react';
 
-// Normalize any image URL: trims whitespace, ensures leading slash on relative paths, protects data/http URIs
+// Normalize any image URL: trims whitespace, fixes corrupted data URI MIME types, ensures leading slash on relative paths, protects data/http URIs
 export const normalizeImageUrl = (raw?: string | null): string => {
   if (!raw || typeof raw !== 'string') return '';
-  const trimmed = raw.trim();
+  let trimmed = raw.trim();
   if (!trimmed) return '';
 
+  if (trimmed.startsWith('data:')) {
+    // Auto-detect and fix mismatched base64 magic bytes
+    if (trimmed.includes('base64,iVBORw0KGgo')) {
+      trimmed = 'data:image/png;base64,' + trimmed.substring(trimmed.indexOf('base64,') + 7);
+    } else if (trimmed.includes('base64,/9j/')) {
+      trimmed = 'data:image/jpeg;base64,' + trimmed.substring(trimmed.indexOf('base64,') + 7);
+    } else if (trimmed.includes('base64,UklGR')) {
+      trimmed = 'data:image/webp;base64,' + trimmed.substring(trimmed.indexOf('base64,') + 7);
+    } else if (trimmed.includes('base64,R0lGOD')) {
+      trimmed = 'data:image/gif;base64,' + trimmed.substring(trimmed.indexOf('base64,') + 7);
+    }
+    return trimmed;
+  }
+
   if (
-    trimmed.startsWith('data:') ||
     trimmed.startsWith('blob:') ||
     trimmed.startsWith('http://') ||
     trimmed.startsWith('https://')
