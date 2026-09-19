@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState } from 'react';
 import Link from './Link';
 import {
@@ -8,7 +6,6 @@ import {
   Mail,
   MapPin,
   Heart,
-  Lock,
   QrCode,
   Copy,
   Check,
@@ -21,8 +18,8 @@ export const Footer: React.FC = () => {
   const { brand, payment } = content;
   const [copiedUpi, setCopiedUpi] = useState(false);
 
-  const qrImage = payment?.qrCodeImage || 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=actcharitabletrust@upi&pn=ACT%20Charitable%20Trust&cu=INR';
-  const upiId = payment?.upiId || 'actcharitabletrust@upi';
+  const qrImage = payment?.qrCodeImage || 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=ashishmajithia8-4@okicici&pn=ACT%20Charitable%20Trust&cu=INR';
+  const upiId = payment?.upiId || 'ashishmajithia8-4@okicici';
   const isQrEnabled = payment?.enableQrDonation !== false;
 
   const handleCopyUpi = (e: React.MouseEvent) => {
@@ -72,15 +69,6 @@ export const Footer: React.FC = () => {
             <p className="text-xs text-[#58706a] leading-relaxed">
               Empowering grassroots communities through quality education, rural healthcare drives, and sustainable livelihoods.
             </p>
-            <div className="pt-1">
-              <Link
-                href="/admin/login"
-                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#58706a] hover:text-[#123f38] transition py-1"
-              >
-                <Lock className="w-3 h-3 text-[#28745e]" />
-                <span>Admin Login Portal</span>
-              </Link>
-            </div>
           </div>
 
           {/* Quick Links */}
