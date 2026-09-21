@@ -8,15 +8,11 @@ import {
   QrCode,
   Copy,
   Building,
-  ChevronDown,
-  ChevronUp,
   Sparkles,
   Upload,
   Image as ImageIcon,
   Trash2,
   Loader2,
-  Zap,
-  Smartphone,
 } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { SafeImage } from '@/components/SafeImage';
@@ -51,7 +47,8 @@ export const DonateModal: React.FC = () => {
   const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const [showBankDetails, setShowBankDetails] = useState(false);
+  const [copiedAcc, setCopiedAcc] = useState(false);
+  const [copiedIfsc, setCopiedIfsc] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -62,30 +59,11 @@ export const DonateModal: React.FC = () => {
   const qrImage = payment?.qrCodeImage || '/uploads/payment_qr_code.jpg';
   const upiId = String(payment?.upiId || 'edigibiz.1005870@myesaf').trim();
   const rawAccountName = payment?.accountName || content?.brand?.name || 'ACT Charitable Trust';
-  // Strip special characters (*, _, #, brackets, etc.) strictly following NPCI UPI Payee Name rules
   const cleanAccountName = String(rawAccountName).replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim() || 'ACT Charitable Trust';
   const accountName = cleanAccountName;
-  const cleanBrandName = String(content?.brand?.name || 'ACT Trust').replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim();
 
   const presetAmounts = ['500', '1000', '2500', '5000'];
   const finalSelectedAmount = amount === 'custom' ? (customAmount || '1000') : amount;
-  // The official registered payee name in ESAF Bank switch is edigibiz.1005870@myesaf
-  // Matching it guarantees the NPCI switch authorizes the payment without payee mismatch or receiver restrictions
-  const officialPn = upiId === 'edigibiz.1005870@myesaf' ? 'edigibiz.1005870@myesaf' : cleanAccountName;
-
-  // 1. Universal Standard UPI Intent with Pre-filled Amount (NPCI Standard - NO tr, NO tn)
-  const upiIntentWithAmount = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(officialPn)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR`;
-
-  // 2. Direct Bank QR payload (Exact 100% replica of scanned physical ESAF QR code)
-  const upiDirectQrPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(officialPn)}`;
-
-  const handleCopyUpiQuiet = () => {
-    if (upiId) {
-      navigator.clipboard.writeText(upiId).catch(() => {});
-      setCopiedUpi(true);
-      setTimeout(() => setCopiedUpi(false), 2500);
-    }
-  };
 
   const handleCopyUpi = () => {
     if (!upiId) return;
@@ -93,6 +71,22 @@ export const DonateModal: React.FC = () => {
     setCopiedUpi(true);
     showToast('✓ UPI ID copied to clipboard!');
     setTimeout(() => setCopiedUpi(false), 3000);
+  };
+
+  const handleCopyAcc = (accNo: string) => {
+    if (!accNo) return;
+    navigator.clipboard.writeText(accNo);
+    setCopiedAcc(true);
+    showToast('✓ Account Number copied!');
+    setTimeout(() => setCopiedAcc(false), 3000);
+  };
+
+  const handleCopyIfsc = (ifsc: string) => {
+    if (!ifsc) return;
+    navigator.clipboard.writeText(ifsc);
+    setCopiedIfsc(true);
+    showToast('✓ IFSC Code copied!');
+    setTimeout(() => setCopiedIfsc(false), 3000);
   };
 
 
@@ -275,147 +269,123 @@ export const DonateModal: React.FC = () => {
               </div>
             </div>
 
-            {/* QR CODE & MOBILE 1-TAP UPI PAYMENT SECTION */}
+            {/* QR CODE & OFFICIAL BANK DETAILS SECTION */}
             {isQrEnabled && (
-              <div className="rounded-2xl bg-[#f8f4e9] p-4 border border-[#dce7dc] space-y-3">
+              <div className="rounded-2xl bg-[#f8f4e9] p-4 border border-[#dce7dc] space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <QrCode className="w-4 h-4 text-[#28745e]" />
                     <span className="text-xs font-bold uppercase tracking-wider text-[#123f38]">
-                      2. Pay Via UPI App or QR Barcode
+                      2. Scan QR Barcode or Direct Bank Transfer
                     </span>
                   </div>
                   <span className="text-[10px] bg-[#28745e]/15 text-[#123f38] px-2 py-0.5 rounded-full font-bold">
-                    Instant Zero-Fee
+                    Direct Bank Verified
                   </span>
                 </div>
 
-                {/* Mobile One-Tap Direct UPI App Payment */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-3.5 rounded-2xl border border-emerald-200/80 space-y-2.5 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#123f38]">
-                      <Smartphone className="w-4 h-4 text-emerald-600" />
-                      <span>Direct UPI Payment</span>
-                    </div>
-                    <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-extrabold flex items-center gap-1 shadow-sm">
-                      <Zap className="w-3 h-3 text-[#f2ad3b]" /> Pre-Fills ₹{finalSelectedAmount}
-                    </span>
-                  </div>
-
-                  {/* Primary Launch Any UPI App Button */}
-                  <a
-                    href={upiIntentWithAmount}
-                    onClick={handleCopyUpiQuiet}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#123f38] to-[#28745e] hover:from-[#1b554c] hover:to-[#349277] py-2.5 text-xs sm:text-sm font-bold text-white shadow-md transition active:scale-98 cursor-pointer text-center"
-                  >
-                    <Zap className="w-4 h-4 text-[#f2ad3b]" />
-                    <span>Pay ₹{finalSelectedAmount} via Google Pay / Any UPI App</span>
-                  </a>
-
-                  {/* Quick Shortcut Buttons for GPay, PhonePe, Paytm */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <a
-                      href={upiIntentWithAmount}
-                      onClick={handleCopyUpiQuiet}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 py-2 px-1 text-[11px] font-bold text-[#183a35] shadow-sm transition active:scale-95 text-center cursor-pointer"
-                    >
-                      <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0"></span>
-                      <span>Google Pay</span>
-                    </a>
-                    <a
-                      href={upiIntentWithAmount}
-                      onClick={handleCopyUpiQuiet}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-purple-300 bg-white hover:bg-purple-50 py-2 px-1 text-[11px] font-bold text-[#492275] shadow-sm transition active:scale-95 text-center cursor-pointer"
-                    >
-                      <span className="h-2 w-2 rounded-full bg-purple-600 shrink-0"></span>
-                      <span>PhonePe</span>
-                    </a>
-                    <a
-                      href={upiIntentWithAmount}
-                      onClick={handleCopyUpiQuiet}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-sky-300 bg-white hover:bg-sky-50 py-2 px-1 text-[11px] font-bold text-[#002e6e] shadow-sm transition active:scale-95 text-center cursor-pointer"
-                    >
-                      <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0"></span>
-                      <span>Paytm</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Divider for QR code */}
-                <div className="relative flex items-center justify-center py-0.5">
-                  <div className="border-t border-[#dce7dc] w-full"></div>
-                  <span className="bg-[#f8f4e9] px-2 text-[10px] font-bold uppercase tracking-wider text-[#58706a] shrink-0">
-                    Or Scan Barcode / Copy UPI
-                  </span>
-                  <div className="border-t border-[#dce7dc] w-full"></div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-2xl border border-[#dce7dc]">
+                {/* QR Image & UPI ID Box */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3.5 rounded-2xl border border-[#dce7dc] shadow-sm">
                   {/* QR Image Box */}
-                  <a
-                    href={upiDirectQrPayload}
-                    onClick={handleCopyUpiQuiet}
-                    title="Tap to pay via official bank QR"
-                    className="w-32 h-32 sm:w-36 sm:h-36 shrink-0 bg-white p-2 rounded-xl border-2 border-[#123f38] shadow-md flex items-center justify-center cursor-pointer hover:opacity-95 transition"
-                  >
+                  <div className="w-36 h-36 sm:w-40 sm:h-40 shrink-0 bg-white p-2 rounded-2xl border-2 border-[#123f38] shadow-md flex items-center justify-center">
                     <SafeImage
                       src={qrImage}
                       alt="UPI Payment Barcode QR"
                       fallbackSrc="/uploads/payment_qr_code.jpg"
                       className="w-full h-full object-contain"
                     />
-                  </a>
+                  </div>
 
                   {/* QR Info & Actions */}
-                  <div className="flex-1 text-center sm:text-left space-y-2">
-                    <div className="text-xs text-[#58706a]">
-                      Beneficiary: <strong className="text-[#183a35]">{accountName}</strong>
+                  <div className="flex-1 text-center sm:text-left space-y-2.5 w-full">
+                    <div>
+                      <div className="text-[11px] text-[#58706a]">Official Beneficiary:</div>
+                      <div className="text-sm font-bold text-[#183a35]">{accountName}</div>
                     </div>
 
                     {/* Copy UPI Button */}
-                    <div className="flex items-center gap-2 bg-[#f8f4e9] p-2 rounded-xl border border-[#dce7dc]">
-                      <div className="flex-1 font-mono text-xs font-bold text-[#123f38] truncate text-left pl-1">
-                        {upiId}
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-semibold text-[#58706a] uppercase tracking-wider text-left">
+                        UPI ID (GPay / PhonePe / Paytm / BHIM):
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleCopyUpi}
-                        className="inline-flex items-center gap-1 bg-[#123f38] text-white hover:bg-[#28745e] px-2.5 py-1 rounded-lg text-xs font-bold transition shrink-0 shadow-sm"
-                      >
-                        {copiedUpi ? <Check className="w-3.5 h-3.5 text-[#f2ad3b]" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedUpi ? 'Copied' : 'Copy'}</span>
-                      </button>
+                      <div className="flex items-center gap-2 bg-[#f8f4e9] p-2 rounded-xl border border-[#dce7dc]">
+                        <div className="flex-1 font-mono text-xs sm:text-sm font-bold text-[#123f38] truncate text-left pl-1">
+                          {upiId}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCopyUpi}
+                          className="inline-flex items-center gap-1.5 bg-[#123f38] text-white hover:bg-[#28745e] px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 shadow-sm cursor-pointer active:scale-95"
+                        >
+                          {copiedUpi ? <Check className="w-3.5 h-3.5 text-[#f2ad3b]" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedUpi ? 'Copied!' : 'Copy UPI'}</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="text-[11px] text-[#58706a] leading-tight">
-                      Supported Apps: Google Pay, PhonePe, Paytm, BHIM, Amazon Pay, Cred & all UPI apps.
+                      Scan this QR code from any UPI app, or copy the UPI ID directly into Google Pay or PhonePe search.
                     </div>
                   </div>
                 </div>
 
-                {/* Optional Bank Transfer Expandable Accordion */}
+                {/* Direct Bank Transfer Details */}
                 {(payment.bankName || payment.accountNumber) && (
-                  <div className="pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setShowBankDetails(!showBankDetails)}
-                      className="w-full flex items-center justify-between text-xs font-bold text-[#28745e] hover:text-[#123f38] py-1"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <Building className="w-3.5 h-3.5" />
-                        <span>Need Direct Bank Transfer (IMPS/NEFT)?</span>
-                      </span>
-                      {showBankDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
+                  <div className="bg-white p-3.5 rounded-2xl border border-[#dce7dc] shadow-sm space-y-2.5">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#123f38] pb-1 border-b border-[#eef3ee]">
+                      <Building className="w-4 h-4 text-[#28745e]" />
+                      <span>Direct Bank Transfer (IMPS / NEFT / RTGS)</span>
+                    </div>
 
-                    {showBankDetails && (
-                      <div className="mt-2 p-3 bg-white rounded-xl border border-[#dce7dc] text-xs space-y-1 animate-in fade-in">
-                        {payment.bankName && <div className="text-[#58706a]">Bank: <strong className="text-[#183a35]">{payment.bankName}</strong></div>}
-                        {payment.accountNumber && <div className="text-[#58706a]">A/C Number: <strong className="text-[#183a35] font-mono">{payment.accountNumber}</strong></div>}
-                        {payment.ifscCode && <div className="text-[#58706a]">IFSC Code: <strong className="text-[#183a35] font-mono">{payment.ifscCode}</strong></div>}
-                        {payment.accountName && <div className="text-[#58706a]">A/C Holder: <strong className="text-[#183a35]">{payment.accountName}</strong></div>}
-                      </div>
-                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      {payment.bankName && (
+                        <div className="bg-[#fbfcfb] p-2.5 rounded-xl border border-[#e8f0e8]">
+                          <span className="text-[10px] text-[#58706a] block">Bank Name:</span>
+                          <strong className="text-[#183a35] font-semibold">{payment.bankName}</strong>
+                        </div>
+                      )}
+
+                      {payment.accountName && (
+                        <div className="bg-[#fbfcfb] p-2.5 rounded-xl border border-[#e8f0e8]">
+                          <span className="text-[10px] text-[#58706a] block">Account Holder:</span>
+                          <strong className="text-[#183a35] font-semibold">{payment.accountName}</strong>
+                        </div>
+                      )}
+
+                      {payment.accountNumber && (
+                        <div className="bg-[#fbfcfb] p-2.5 rounded-xl border border-[#e8f0e8] flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-[#58706a] block">Account Number:</span>
+                            <strong className="text-[#183a35] font-mono text-xs sm:text-sm">{payment.accountNumber}</strong>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyAcc(payment.accountNumber)}
+                            className="inline-flex items-center gap-1 bg-[#123f38] text-white hover:bg-[#28745e] px-2.5 py-1 rounded-md text-[11px] font-bold transition shrink-0 cursor-pointer active:scale-95 shadow-sm"
+                          >
+                            {copiedAcc ? <Check className="w-3 h-3 text-[#f2ad3b]" /> : <Copy className="w-3 h-3" />}
+                            <span>{copiedAcc ? 'Copied' : 'Copy'}</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {payment.ifscCode && (
+                        <div className="bg-[#fbfcfb] p-2.5 rounded-xl border border-[#e8f0e8] flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-[#58706a] block">IFSC Code:</span>
+                            <strong className="text-[#183a35] font-mono text-xs sm:text-sm">{payment.ifscCode}</strong>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyIfsc(payment.ifscCode)}
+                            className="inline-flex items-center gap-1 bg-[#123f38] text-white hover:bg-[#28745e] px-2.5 py-1 rounded-md text-[11px] font-bold transition shrink-0 cursor-pointer active:scale-95 shadow-sm"
+                          >
+                            {copiedIfsc ? <Check className="w-3 h-3 text-[#f2ad3b]" /> : <Copy className="w-3 h-3" />}
+                            <span>{copiedIfsc ? 'Copied' : 'Copy'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
