@@ -19,8 +19,8 @@ export const Footer: React.FC = () => {
   const { brand, payment } = content;
   const [copiedUpi, setCopiedUpi] = useState(false);
 
-  const qrImage = payment?.qrCodeImage || 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=ashishmajithia8-4@okicici&pn=ACT%20Charitable%20Trust&cu=INR';
-  const upiId = payment?.upiId || 'ashishmajithia8-4@okicici';
+  const qrImage = payment?.qrCodeImage || '/uploads/payment_qr_code.jpg';
+  const upiId = payment?.upiId || 'edigibiz.1005870@myesaf';
   const isQrEnabled = payment?.enableQrDonation !== false;
 
   const handleCopyUpi = (e: React.MouseEvent) => {

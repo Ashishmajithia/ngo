@@ -17,6 +17,7 @@ import {
   Loader2,
   Zap,
   Smartphone,
+  Info,
 } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { SafeImage } from '@/components/SafeImage';
@@ -59,23 +60,67 @@ export const DonateModal: React.FC = () => {
 
   const payment = content.payment || {};
   const isQrEnabled = payment.enableQrDonation !== false;
-  const qrImage = payment.qrCodeImage || 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=actcharitabletrust@upi&pn=ACT%20Charitable%20Trust&cu=INR';
-  const upiId = payment.upiId || 'ashishmajithia8-4@okicici';
-  const accountName = payment.accountName || content.brand?.name || '*Act Charitable Trust* *(Rising Hope For Children)*';
+  const qrImage = payment.qrCodeImage || '/uploads/payment_qr_code.jpg';
+  const upiId = (payment.upiId || 'edigibiz.1005870@myesaf').trim();
+  const rawAccountName = payment.accountName || content.brand?.name || 'ACT Charitable Trust';
+  // Strip special characters (*, _, #, brackets, etc.) strictly following NPCI UPI Payee Name rules
+  const cleanAccountName = rawAccountName.replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim() || 'ACT Charitable Trust';
+  const cleanBrandName = (content?.brand?.name || 'ACT Trust').replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim();
 
   const presetAmounts = ['500', '1000', '2500', '5000'];
   const finalSelectedAmount = amount === 'custom' ? (customAmount || '1000') : amount;
-  const upiIntentUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(accountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent('Donation to ' + (content?.brand?.name || 'ACT Trust'))}`;
-  const gpayUrl = `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(accountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent('Donation to ' + (content?.brand?.name || 'ACT Trust'))}`;
-  const phonePeUrl = `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(accountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent('Donation to ' + (content?.brand?.name || 'ACT Trust'))}`;
-  const paytmUrl = `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(accountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent('Donation to ' + (content?.brand?.name || 'ACT Trust'))}`;
+  const txnRef = `ACT${Date.now()}`;
+  const cleanNote = `Donation to ${cleanBrandName}`.replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+  // Universal Standard UPI Intent (Works across all UPI apps on Android and iOS)
+  const upiIntentUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}`;
+
+  // Android Chrome Package Intents
+  const gpayAndroidIntent = `intent://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user;end;`;
+  const phonePeAndroidIntent = `intent://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}#Intent;scheme=upi;package=com.phonepe.app;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.phonepe.app;end;`;
+  const paytmAndroidIntent = `intent://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}#Intent;scheme=upi;package=net.one97.paytm;S.browser_fallback_url=https://play.google.com/store/apps/details?id=net.one97.paytm;end;`;
 
   const handleCopyUpi = () => {
     if (!upiId) return;
     navigator.clipboard.writeText(upiId);
     setCopiedUpi(true);
-    showToast('✓ UPI ID copied to clipboard!');
+    showToast('✓ UPI ID copied! You can paste it directly in Google Pay search.');
     setTimeout(() => setCopiedUpi(false), 3000);
+  };
+
+  const handleLaunchUpiApp = (app: 'all' | 'gpay' | 'phonepe' | 'paytm') => {
+    // Always copy UPI ID to clipboard first as a guaranteed safety fallback
+    if (upiId) {
+      navigator.clipboard.writeText(upiId).catch(() => {});
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 4000);
+      const appTitle = app === 'gpay' ? 'Google Pay' : app === 'phonepe' ? 'PhonePe' : app === 'paytm' ? 'Paytm' : 'UPI';
+      showToast(`✓ UPI ID copied! Opening ${appTitle}...`);
+    }
+
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+    let targetUrl = upiIntentUrl;
+
+    if (isAndroid) {
+      if (app === 'gpay') targetUrl = gpayAndroidIntent;
+      else if (app === 'phonepe') targetUrl = phonePeAndroidIntent;
+      else if (app === 'paytm') targetUrl = paytmAndroidIntent;
+      else targetUrl = upiIntentUrl;
+    } else {
+      // iOS / Desktop / Other OS
+      if (app === 'gpay') {
+        targetUrl = `tez://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}`;
+      } else if (app === 'phonepe') {
+        targetUrl = `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}`;
+      } else if (app === 'paytm') {
+        targetUrl = `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}`;
+      } else {
+        targetUrl = upiIntentUrl;
+      }
+    }
+
+    // Launch app
+    window.location.href = targetUrl;
   };
 
   const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -285,41 +330,55 @@ export const DonateModal: React.FC = () => {
                   </div>
 
                   {/* Primary Launch Any UPI App Button */}
-                  <a
-                    href={upiIntentUrl}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#123f38] to-[#28745e] hover:from-[#1b554c] hover:to-[#349277] py-2.5 text-xs sm:text-sm font-bold text-white shadow-md transition active:scale-98"
+                  <button
+                    type="button"
+                    onClick={() => handleLaunchUpiApp('all')}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#123f38] to-[#28745e] hover:from-[#1b554c] hover:to-[#349277] py-2.5 text-xs sm:text-sm font-bold text-white shadow-md transition active:scale-98 cursor-pointer"
                   >
                     <Zap className="w-4 h-4 text-[#f2ad3b]" />
                     <span>Open in Any Installed UPI App (₹{finalSelectedAmount})</span>
-                  </a>
+                  </button>
 
                   {/* Quick Shortcut Buttons for GPay, PhonePe, Paytm */}
                   <div className="grid grid-cols-3 gap-2">
-                    <a
-                      href={gpayUrl}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 py-2 px-1 text-[11px] font-bold text-[#183a35] shadow-sm transition active:scale-95 text-center"
+                    <button
+                      type="button"
+                      onClick={() => handleLaunchUpiApp('gpay')}
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 py-2 px-1 text-[11px] font-bold text-[#183a35] shadow-sm transition active:scale-95 text-center cursor-pointer"
                     >
                       <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0"></span>
                       <span>Google Pay</span>
-                    </a>
-                    <a
-                      href={phonePeUrl}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-purple-300 bg-white hover:bg-purple-50 py-2 px-1 text-[11px] font-bold text-[#492275] shadow-sm transition active:scale-95 text-center"
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleLaunchUpiApp('phonepe')}
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-purple-300 bg-white hover:bg-purple-50 py-2 px-1 text-[11px] font-bold text-[#492275] shadow-sm transition active:scale-95 text-center cursor-pointer"
                     >
                       <span className="h-2 w-2 rounded-full bg-purple-600 shrink-0"></span>
                       <span>PhonePe</span>
-                    </a>
-                    <a
-                      href={paytmUrl}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-sky-300 bg-white hover:bg-sky-50 py-2 px-1 text-[11px] font-bold text-[#002e6e] shadow-sm transition active:scale-95 text-center"
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleLaunchUpiApp('paytm')}
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-sky-300 bg-white hover:bg-sky-50 py-2 px-1 text-[11px] font-bold text-[#002e6e] shadow-sm transition active:scale-95 text-center cursor-pointer"
                     >
                       <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0"></span>
                       <span>Paytm</span>
-                    </a>
+                    </button>
                   </div>
-                  <p className="text-[10px] text-[#58706a] text-center">
-                    Tapping opens the app on your phone with amount already filled.
-                  </p>
+
+                  {/* Helpful Tip for Bank Security / Web-Intent Limitations */}
+                  <div className="rounded-xl bg-amber-50/90 p-2.5 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-2">
+                    <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="leading-snug space-y-0.5">
+                      <p className="font-semibold">
+                        GPay me "Receiver cannot accept payment" aaye to:
+                      </p>
+                      <p className="text-amber-800 text-[10.5px]">
+                        Bank web-link restrict karti hai. Button click karte hi UPI ID copy ho gaya hai — GPay ke <strong>Search bar me paste</strong> karke direct send karein (100% working).
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Divider for QR code */}
