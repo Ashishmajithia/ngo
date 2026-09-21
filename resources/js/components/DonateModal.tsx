@@ -17,7 +17,6 @@ import {
   Loader2,
   Zap,
   Smartphone,
-  Info,
 } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { SafeImage } from '@/components/SafeImage';
@@ -70,59 +69,32 @@ export const DonateModal: React.FC = () => {
 
   const presetAmounts = ['500', '1000', '2500', '5000'];
   const finalSelectedAmount = amount === 'custom' ? (customAmount || '1000') : amount;
-  const txnRef = `ACT${Date.now()}`;
-  const cleanNote = `Donation to ${cleanBrandName}`.replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  // The official registered payee name in ESAF Bank switch is edigibiz.1005870@myesaf
+  // Matching it guarantees the NPCI switch authorizes the payment without payee mismatch or receiver restrictions
+  const officialPn = upiId === 'edigibiz.1005870@myesaf' ? 'edigibiz.1005870@myesaf' : cleanAccountName;
 
-  // Universal Standard UPI Intent (Works across all UPI apps on Android and iOS)
-  const upiIntentUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}`;
+  // 1. Universal Standard UPI Intent with Pre-filled Amount (NPCI Standard - NO tr, NO tn)
+  const upiIntentWithAmount = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(officialPn)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR`;
 
-  // Android Chrome Package Intents
-  const gpayAndroidIntent = `intent://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user;end;`;
-  const phonePeAndroidIntent = `intent://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}#Intent;scheme=upi;package=com.phonepe.app;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.phonepe.app;end;`;
-  const paytmAndroidIntent = `intent://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}#Intent;scheme=upi;package=net.one97.paytm;S.browser_fallback_url=https://play.google.com/store/apps/details?id=net.one97.paytm;end;`;
+  // 2. Direct Bank QR payload (Exact 100% replica of scanned physical ESAF QR code)
+  const upiDirectQrPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(officialPn)}`;
+
+  const handleCopyUpiQuiet = () => {
+    if (upiId) {
+      navigator.clipboard.writeText(upiId).catch(() => {});
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 2500);
+    }
+  };
 
   const handleCopyUpi = () => {
     if (!upiId) return;
     navigator.clipboard.writeText(upiId);
     setCopiedUpi(true);
-    showToast('✓ UPI ID copied! You can paste it directly in Google Pay search.');
+    showToast('✓ UPI ID copied to clipboard!');
     setTimeout(() => setCopiedUpi(false), 3000);
   };
 
-  const handleLaunchUpiApp = (app: 'all' | 'gpay' | 'phonepe' | 'paytm') => {
-    // Always copy UPI ID to clipboard first as a guaranteed safety fallback
-    if (upiId) {
-      navigator.clipboard.writeText(upiId).catch(() => {});
-      setCopiedUpi(true);
-      setTimeout(() => setCopiedUpi(false), 4000);
-      const appTitle = app === 'gpay' ? 'Google Pay' : app === 'phonepe' ? 'PhonePe' : app === 'paytm' ? 'Paytm' : 'UPI';
-      showToast(`✓ UPI ID copied! Opening ${appTitle}...`);
-    }
-
-    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-    let targetUrl = upiIntentUrl;
-
-    if (isAndroid) {
-      if (app === 'gpay') targetUrl = gpayAndroidIntent;
-      else if (app === 'phonepe') targetUrl = phonePeAndroidIntent;
-      else if (app === 'paytm') targetUrl = paytmAndroidIntent;
-      else targetUrl = upiIntentUrl;
-    } else {
-      // iOS / Desktop / Other OS
-      if (app === 'gpay') {
-        targetUrl = `tez://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}`;
-      } else if (app === 'phonepe') {
-        targetUrl = `phonepe://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}`;
-      } else if (app === 'paytm') {
-        targetUrl = `paytmmp://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(cleanAccountName)}&am=${encodeURIComponent(finalSelectedAmount)}&cu=INR&tn=${encodeURIComponent(cleanNote)}&tr=${encodeURIComponent(txnRef)}`;
-      } else {
-        targetUrl = upiIntentUrl;
-      }
-    }
-
-    // Launch app
-    window.location.href = targetUrl;
-  };
 
   const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -323,7 +295,7 @@ export const DonateModal: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#123f38]">
                       <Smartphone className="w-4 h-4 text-emerald-600" />
-                      <span>Mobile 1-Tap Payment</span>
+                      <span>Direct UPI Payment</span>
                     </div>
                     <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-extrabold flex items-center gap-1 shadow-sm">
                       <Zap className="w-3 h-3 text-[#f2ad3b]" /> Pre-Fills ₹{finalSelectedAmount}
@@ -331,54 +303,41 @@ export const DonateModal: React.FC = () => {
                   </div>
 
                   {/* Primary Launch Any UPI App Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleLaunchUpiApp('all')}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#123f38] to-[#28745e] hover:from-[#1b554c] hover:to-[#349277] py-2.5 text-xs sm:text-sm font-bold text-white shadow-md transition active:scale-98 cursor-pointer"
+                  <a
+                    href={upiIntentWithAmount}
+                    onClick={handleCopyUpiQuiet}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#123f38] to-[#28745e] hover:from-[#1b554c] hover:to-[#349277] py-2.5 text-xs sm:text-sm font-bold text-white shadow-md transition active:scale-98 cursor-pointer text-center"
                   >
                     <Zap className="w-4 h-4 text-[#f2ad3b]" />
-                    <span>Open in Any Installed UPI App (₹{finalSelectedAmount})</span>
-                  </button>
+                    <span>Pay ₹{finalSelectedAmount} via Google Pay / Any UPI App</span>
+                  </a>
 
                   {/* Quick Shortcut Buttons for GPay, PhonePe, Paytm */}
                   <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleLaunchUpiApp('gpay')}
+                    <a
+                      href={upiIntentWithAmount}
+                      onClick={handleCopyUpiQuiet}
                       className="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 py-2 px-1 text-[11px] font-bold text-[#183a35] shadow-sm transition active:scale-95 text-center cursor-pointer"
                     >
                       <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0"></span>
                       <span>Google Pay</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleLaunchUpiApp('phonepe')}
+                    </a>
+                    <a
+                      href={upiIntentWithAmount}
+                      onClick={handleCopyUpiQuiet}
                       className="flex items-center justify-center gap-1.5 rounded-xl border border-purple-300 bg-white hover:bg-purple-50 py-2 px-1 text-[11px] font-bold text-[#492275] shadow-sm transition active:scale-95 text-center cursor-pointer"
                     >
                       <span className="h-2 w-2 rounded-full bg-purple-600 shrink-0"></span>
                       <span>PhonePe</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleLaunchUpiApp('paytm')}
+                    </a>
+                    <a
+                      href={upiIntentWithAmount}
+                      onClick={handleCopyUpiQuiet}
                       className="flex items-center justify-center gap-1.5 rounded-xl border border-sky-300 bg-white hover:bg-sky-50 py-2 px-1 text-[11px] font-bold text-[#002e6e] shadow-sm transition active:scale-95 text-center cursor-pointer"
                     >
                       <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0"></span>
                       <span>Paytm</span>
-                    </button>
-                  </div>
-
-                  {/* Helpful Tip for Bank Security / Web-Intent Limitations */}
-                  <div className="rounded-xl bg-amber-50/90 p-2.5 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-2">
-                    <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <div className="leading-snug space-y-0.5">
-                      <p className="font-semibold">
-                        GPay me "Receiver cannot accept payment" aaye to:
-                      </p>
-                      <p className="text-amber-800 text-[10.5px]">
-                        Bank web-link restrict karti hai. Button click karte hi UPI ID copy ho gaya hai — GPay ke <strong>Search bar me paste</strong> karke direct send karein (100% working).
-                      </p>
-                    </div>
+                    </a>
                   </div>
                 </div>
 
@@ -393,14 +352,19 @@ export const DonateModal: React.FC = () => {
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-2xl border border-[#dce7dc]">
                   {/* QR Image Box */}
-                  <div className="w-32 h-32 sm:w-36 sm:h-36 shrink-0 bg-white p-2 rounded-xl border-2 border-[#123f38] shadow-md flex items-center justify-center">
+                  <a
+                    href={upiDirectQrPayload}
+                    onClick={handleCopyUpiQuiet}
+                    title="Tap to pay via official bank QR"
+                    className="w-32 h-32 sm:w-36 sm:h-36 shrink-0 bg-white p-2 rounded-xl border-2 border-[#123f38] shadow-md flex items-center justify-center cursor-pointer hover:opacity-95 transition"
+                  >
                     <SafeImage
                       src={qrImage}
                       alt="UPI Payment Barcode QR"
                       fallbackSrc="/uploads/payment_qr_code.jpg"
                       className="w-full h-full object-contain"
                     />
-                  </div>
+                  </a>
 
                   {/* QR Info & Actions */}
                   <div className="flex-1 text-center sm:text-left space-y-2">
