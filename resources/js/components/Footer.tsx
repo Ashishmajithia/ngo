@@ -16,11 +16,12 @@ import { SafeImage } from '@/components/SafeImage';
 
 export const Footer: React.FC = () => {
   const { content, setIsDonateOpen, showToast } = useContent();
-  const { brand, payment } = content;
+  const brand = content?.brand || {};
+  const payment = content?.payment || {};
   const [copiedUpi, setCopiedUpi] = useState(false);
 
   const qrImage = payment?.qrCodeImage || '/uploads/payment_qr_code.jpg';
-  const upiId = payment?.upiId || 'edigibiz.1005870@myesaf';
+  const upiId = String(payment?.upiId || 'edigibiz.1005870@myesaf').trim();
   const isQrEnabled = payment?.enableQrDonation !== false;
 
   const handleCopyUpi = (e: React.MouseEvent) => {

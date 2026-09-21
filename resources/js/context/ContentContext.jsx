@@ -4,36 +4,37 @@ import { emptyContent } from '../data/initialContent';
 const ContentContext = createContext(undefined);
 
 export function safeMerge(base, override) {
-  if (!override || typeof override !== 'object') return base;
+  if (!override || typeof override !== 'object') return base || emptyContent;
+  const safeBase = (base && typeof base === 'object') ? base : emptyContent;
   return {
-    ...base,
+    ...safeBase,
     ...override,
-    brand: (override.brand && typeof override.brand === 'object') ? { ...base.brand, ...override.brand } : base.brand,
-    about: (override.about && typeof override.about === 'object') ? { ...base.about, ...override.about } : base.about,
-    approach: (override.approach && typeof override.approach === 'object') ? { ...base.approach, ...override.approach } : base.approach,
-    support: (override.support && typeof override.support === 'object') ? { ...base.support, ...override.support } : base.support,
-    payment: (override.payment && typeof override.payment === 'object') ? { ...base.payment, ...override.payment } : base.payment,
-    impactStats: (Array.isArray(override.impactStats) && override.impactStats.length > 0) ? override.impactStats : (base.impactStats || []),
+    brand: (override.brand && typeof override.brand === 'object') ? { ...(safeBase.brand || {}), ...override.brand } : (safeBase.brand || emptyContent.brand),
+    about: (override.about && typeof override.about === 'object') ? { ...(safeBase.about || {}), ...override.about } : (safeBase.about || emptyContent.about),
+    approach: (override.approach && typeof override.approach === 'object') ? { ...(safeBase.approach || {}), ...override.approach } : (safeBase.approach || emptyContent.approach),
+    support: (override.support && typeof override.support === 'object') ? { ...(safeBase.support || {}), ...override.support } : (safeBase.support || emptyContent.support),
+    payment: (override.payment && typeof override.payment === 'object') ? { ...(safeBase.payment || {}), ...override.payment } : (safeBase.payment || emptyContent.payment),
+    impactStats: (Array.isArray(override.impactStats) && override.impactStats.length > 0) ? override.impactStats : (safeBase.impactStats || emptyContent.impactStats || []),
     hero: {
-      ...base.hero,
+      ...(safeBase.hero || emptyContent.hero || {}),
       ...(override.hero || {}),
       slides: (Array.isArray(override.hero?.slides) && override.hero.slides.length > 0)
         ? override.hero.slides
-        : (base.hero?.slides || []),
+        : (safeBase.hero?.slides || emptyContent.hero?.slides || []),
     },
     programs: {
-      ...base.programs,
+      ...(safeBase.programs || emptyContent.programs || {}),
       ...(override.programs || {}),
       items: (Array.isArray(override.programs?.items) && override.programs.items.length > 0)
         ? override.programs.items
-        : (base.programs?.items || []),
+        : (safeBase.programs?.items || emptyContent.programs?.items || []),
     },
     gallery: {
-      ...base.gallery,
+      ...(safeBase.gallery || emptyContent.gallery || {}),
       ...(override.gallery || {}),
       items: (Array.isArray(override.gallery?.items) && override.gallery.items.length > 0)
         ? override.gallery.items
-        : (base.gallery?.items || []),
+        : (safeBase.gallery?.items || emptyContent.gallery?.items || []),
     },
   };
 }

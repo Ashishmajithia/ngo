@@ -39,6 +39,11 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             <p className="mt-3 text-sm text-[#58706a]">
               We noticed a display sync update. Please click below to reset the view.
             </p>
+            {this.state.error && (
+              <div className="mt-3 p-2.5 rounded-lg bg-red-50 text-red-700 text-xs font-mono text-left overflow-auto max-h-32 border border-red-200">
+                <p className="font-semibold">{this.state.error.name}: {this.state.error.message}</p>
+              </div>
+            )}
             <button
               onClick={() => {
                 localStorage.clear();

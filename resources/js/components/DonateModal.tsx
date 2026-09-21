@@ -30,11 +30,11 @@ export const DonateModal: React.FC = () => {
       fetch(`/api/content?t=${Date.now()}`, { cache: 'no-store' })
         .then((res) => res.json())
         .then((json) => {
-          if (json.success && json.data?.payment && setContent) {
+          if (json.success && json.data && setContent) {
             setContent((prev: any) => ({
-              ...prev,
-              payment: json.data.payment,
-              brand: json.data.brand || prev.brand,
+              ...(prev || {}),
+              payment: json.data.payment || prev?.payment || {},
+              brand: json.data.brand || prev?.brand || {},
             }));
           }
         })
@@ -58,14 +58,14 @@ export const DonateModal: React.FC = () => {
 
   if (!isDonateOpen) return null;
 
-  const payment = content.payment || {};
-  const isQrEnabled = payment.enableQrDonation !== false;
-  const qrImage = payment.qrCodeImage || '/uploads/payment_qr_code.jpg';
-  const upiId = (payment.upiId || 'edigibiz.1005870@myesaf').trim();
-  const rawAccountName = payment.accountName || content.brand?.name || 'ACT Charitable Trust';
+  const payment = content?.payment || {};
+  const isQrEnabled = payment?.enableQrDonation !== false;
+  const qrImage = payment?.qrCodeImage || '/uploads/payment_qr_code.jpg';
+  const upiId = String(payment?.upiId || 'edigibiz.1005870@myesaf').trim();
+  const rawAccountName = payment?.accountName || content?.brand?.name || 'ACT Charitable Trust';
   // Strip special characters (*, _, #, brackets, etc.) strictly following NPCI UPI Payee Name rules
-  const cleanAccountName = rawAccountName.replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim() || 'ACT Charitable Trust';
-  const cleanBrandName = (content?.brand?.name || 'ACT Trust').replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+  const cleanAccountName = String(rawAccountName).replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim() || 'ACT Charitable Trust';
+  const cleanBrandName = String(content?.brand?.name || 'ACT Trust').replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim();
 
   const presetAmounts = ['500', '1000', '2500', '5000'];
   const finalSelectedAmount = amount === 'custom' ? (customAmount || '1000') : amount;
@@ -214,7 +214,7 @@ export const DonateModal: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="display-font text-lg sm:text-xl font-bold text-[#183a35]">
-                Support {content.brand.name}
+                Support {content?.brand?.name || 'ACT Charitable Trust'}
               </h3>
               <span className="inline-flex items-center gap-1 rounded-full bg-[#e8f0e8] px-2 py-0.5 text-[10px] font-bold text-[#28745e]">
                 <Sparkles className="w-3 h-3 text-[#f2ad3b]" /> 80G Tax Exempt
