@@ -65,6 +65,7 @@ export const DonateModal: React.FC = () => {
   const rawAccountName = payment?.accountName || content?.brand?.name || 'ACT Charitable Trust';
   // Strip special characters (*, _, #, brackets, etc.) strictly following NPCI UPI Payee Name rules
   const cleanAccountName = String(rawAccountName).replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim() || 'ACT Charitable Trust';
+  const accountName = cleanAccountName;
   const cleanBrandName = String(content?.brand?.name || 'ACT Trust').replace(/[*_#()[\]]/g, ' ').replace(/\s+/g, ' ').trim();
 
   const presetAmounts = ['500', '1000', '2500', '5000'];
