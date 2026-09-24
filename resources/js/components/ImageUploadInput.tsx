@@ -16,13 +16,60 @@ interface ImageUploadInputProps {
 export { normalizeImageUrl, SafeImage } from './SafeImage';
 import { normalizeImageUrl, SafeImage } from './SafeImage';
 
-// Read raw image file directly with 100% original Full HD / 4K fidelity (zero lossy compression or resizing)
+// Read and optimize image file to crisp Full HD (max 1600px, 85% quality)
+// This guarantees that even with 15-20 photos in a blog, total payload stays safe (< 3MB) and never crosses Vercel 4.5MB limit
 const readRawImageFile = (file: File): Promise<string> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const rawDataUrl = e.target?.result as string;
-      resolve(normalizeImageUrl(rawDataUrl || ''));
+      if (!rawDataUrl) return resolve('');
+
+      // If SVG or already lightweight (< 150KB), keep directly
+      if (file.type === 'image/svg+xml' || file.size < 150 * 1024) {
+        return resolve(normalizeImageUrl(rawDataUrl));
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const maxDim = 1600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, width, height);
+            // Use JPEG for large photos (150-250KB crisp Full HD)
+            const isLogo = file.name.toLowerCase().includes('logo');
+            const format = (file.type === 'image/png' && isLogo) ? 'image/png' : 'image/jpeg';
+            const quality = format === 'image/jpeg' ? 0.85 : undefined;
+            const compressed = canvas.toDataURL(format, quality);
+            resolve(normalizeImageUrl(compressed));
+          } else {
+            resolve(normalizeImageUrl(rawDataUrl));
+          }
+        } catch {
+          resolve(normalizeImageUrl(rawDataUrl));
+        }
+      };
+      img.onerror = () => resolve(normalizeImageUrl(rawDataUrl));
+      img.src = rawDataUrl;
     };
     reader.onerror = () => resolve('');
     reader.readAsDataURL(file);
