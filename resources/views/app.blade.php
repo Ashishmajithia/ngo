@@ -45,12 +45,7 @@
     @endforeach
 
 
-    @if(isset($serverContent) && $serverContent)
-    <script id="server-initial-content" type="application/json">{!! json_encode($serverContent) !!}</script>
-    @endif
-    @if(isset($serverBlogs) && $serverBlogs)
-    <script id="server-initial-blogs" type="application/json">{!! json_encode($serverBlogs) !!}</script>
-    @endif
+
 
     <script type="module" src="{{ $jsFile }}"></script>
 </head>
