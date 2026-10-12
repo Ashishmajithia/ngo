@@ -4,31 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>ACT Charitable Trust | Rising Hope for Children (REG.NO.220)</title>
+    <title>{{ $seoTitle ?? 'ACT Charitable Trust | Rising Hope for Children (Reg. No. 220) - Official NGO' }}</title>
     
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="{{ $seoTitle ?? 'ACT Charitable Trust | Rising Hope for Children (Reg. No. 220) - Official NGO' }}">
+    <meta name="description" content="{{ $seoDesc ?? 'ACT Charitable Trust (REG.NO.220) is an official non-profit organization dedicated to child education, daily nutrition, clothing drives, and vocational training in India. Donate to support underprivileged children.' }}">
+    <meta name="keywords" content="{{ $seoKeywords ?? 'ACT Charitable Trust, NGO, charity trust, child education NGO, donate for children, non profit organization Punjab, NGO Kharar Mohali, child healthcare charity, NGO 220, donation for kids, school kit donation, child nutrition NGO' }}">
+    <meta name="author" content="ACT Charitable Trust">
+    <meta name="publisher" content="ACT Charitable Trust">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <link rel="canonical" href="{{ $canonicalUrl ?? 'https://act-charitable-trust.vercel.app/' }}">
+
     <!-- Google Site Verification -->
     <meta name="google-site-verification" content="google56250d811f255f09">
     <meta name="google-site-verification" content="google56250d811f255f09.html">
 
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="ACT Charitable Trust (REG.NO.220) - Dedicated to empowering children, rural education, healthcare, and uplifting communities across Tamil Nadu.">
-    <meta name="keywords" content="ACT Charitable Trust, NGO, child welfare, rural education, NGO Tamil Nadu, charity donation, support children">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://act-charitable-trust.vercel.app/">
-
-    <!-- Open Graph / Social Sharing -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://act-charitable-trust.vercel.app/">
-    <meta property="og:title" content="ACT Charitable Trust | Rising Hope for Children (REG.NO.220)">
-    <meta property="og:description" content="ACT Charitable Trust is committed to child development, rural education, and social welfare. Support a noble cause.">
-    <meta property="og:image" content="https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg">
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}">
+    <meta property="og:site_name" content="ACT Charitable Trust">
+    <meta property="og:url" content="{{ $canonicalUrl ?? 'https://act-charitable-trust.vercel.app/' }}">
+    <meta property="og:title" content="{{ $seoTitle ?? 'ACT Charitable Trust | Rising Hope for Children (Reg. No. 220)' }}">
+    <meta property="og:description" content="{{ $seoDesc ?? 'Dedicated to child welfare, free education, daily meals, and clothing relief. 100% direct aid to children in need.' }}">
+    <meta property="og:image" content="{{ $seoImage ?? 'https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg' }}">
+    <meta property="og:image:secure_url" content="{{ $seoImage ?? 'https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg' }}">
+    <meta property="og:image:alt" content="ACT Charitable Trust - Rising Hope for Children">
+    <meta property="og:image:width" content="800">
+    <meta property="og:image:height" content="800">
+    <meta property="og:locale" content="en_US">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://act-charitable-trust.vercel.app/">
-    <meta name="twitter:title" content="ACT Charitable Trust | Rising Hope for Children (REG.NO.220)">
-    <meta name="twitter:description" content="ACT Charitable Trust is committed to child development, rural education, and social welfare.">
-    <meta name="twitter:image" content="https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg">
+    <meta name="twitter:url" content="{{ $canonicalUrl ?? 'https://act-charitable-trust.vercel.app/' }}">
+    <meta name="twitter:title" content="{{ $seoTitle ?? 'ACT Charitable Trust | Rising Hope for Children' }}">
+    <meta name="twitter:description" content="{{ $seoDesc ?? 'Dedicated to child welfare, free education, daily meals, and clothing relief.' }}">
+    <meta name="twitter:image" content="{{ $seoImage ?? 'https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg' }}">
+
+    <!-- Geo Local SEO (Kharar, Mohali, Punjab) -->
+    <meta name="geo.region" content="IN-PB">
+    <meta name="geo.placename" content="Kharar, Mohali, Punjab">
+    <meta name="geo.position" content="30.7415;76.6413">
+    <meta name="ICBM" content="30.7415, 76.6413">
+
+    <!-- Mobile Theme -->
+    <meta name="theme-color" content="#123f38">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <!-- Schema.org JSON-LD Structured Data for Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["NGO", "NonprofitOrganization"],
+          "@id": "https://act-charitable-trust.vercel.app/#organization",
+          "name": "ACT Charitable Trust",
+          "legalName": "ACT Charitable Trust (REG.NO.220)",
+          "alternateName": "Rising Hope for Children",
+          "url": "https://act-charitable-trust.vercel.app/",
+          "logo": "https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg",
+          "image": "https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg",
+          "description": "ACT Charitable Trust (REG.NO.220) is an official registered charitable trust dedicated to child welfare, foundational education, daily warm meals, footwear, clothing relief, and vocational skill training in India.",
+          "telephone": "+91 97793 08480",
+          "email": "info@actcharitabletrust.org",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "First Floor New Mata Gujri SCO- 4 near petrol pump Mundi kharar",
+            "addressLocality": "Kharar, Mohali",
+            "addressRegion": "Punjab",
+            "postalCode": "140301",
+            "addressCountry": "IN"
+          },
+          "areaServed": {
+            "@type": "Country",
+            "name": "India"
+          },
+          "knowsAbout": [
+            "Child Welfare",
+            "School Education",
+            "Daily Nutrition",
+            "Clothes Distribution",
+            "Vocational Training for Girls"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://act-charitable-trust.vercel.app/#website",
+          "url": "https://act-charitable-trust.vercel.app/",
+          "name": "ACT Charitable Trust",
+          "description": "Rising Hope for Children - Official Website",
+          "publisher": {
+            "@id": "https://act-charitable-trust.vercel.app/#organization"
+          },
+          "inLanguage": "en-US"
+        }
+      ]
+    }
+    </script>
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">

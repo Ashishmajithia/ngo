@@ -1,5 +1,19 @@
 User-agent: *
+Allow: /
+Allow: /build/
+Allow: /images/
+Allow: /uploads/
 Disallow: /admin
 Disallow: /api/
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /uploads/
+Allow: /images/
+
+User-agent: Bingbot
+Allow: /
 
 Sitemap: https://act-charitable-trust.vercel.app/sitemap.xml

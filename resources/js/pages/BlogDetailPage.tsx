@@ -153,6 +153,17 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({ slugOrId }) => {
     loadStory();
   }, [slugOrId]);
 
+  // Update dynamic document title and meta description for SEO
+  useEffect(() => {
+    if (blog?.title) {
+      document.title = `${blog.title} | ACT Charitable Trust (REG.NO.220)`;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc && blog.excerpt) {
+        metaDesc.setAttribute('content', blog.excerpt);
+      }
+    }
+  }, [blog]);
+
   const handleCopyLink = () => {
     if (navigator?.clipboard) {
       navigator.clipboard.writeText(window.location.href);

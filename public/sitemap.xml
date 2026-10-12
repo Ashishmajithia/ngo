@@ -1,15 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Main Home Page -->
   <url>
     <loc>https://act-charitable-trust.vercel.app/</loc>
     <lastmod>2026-10-12</lastmod>
-    <changefreq>weekly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg</image:loc>
+      <image:title>ACT Charitable Trust Official Logo</image:title>
+      <image:caption>ACT Charitable Trust (REG.NO.220) - Rising Hope for Children</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/about_image.jpg</image:loc>
+      <image:title>Transforming Lives Through Care and Education</image:title>
+    </image:image>
   </url>
+
+  <!-- Blogs & Stories Section -->
   <url>
     <loc>https://act-charitable-trust.vercel.app/blogs</loc>
     <lastmod>2026-10-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Story: Clothing Distribution -->
+  <url>
+    <loc>https://act-charitable-trust.vercel.app/blog/spreading-warmth-clothing-distribution-and-festive-care-drives</loc>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/blog_blog-1789747802536.jpg</image:loc>
+      <image:title>Spreading Warmth: Clothing Distribution and Festive Care Drives</image:title>
+    </image:image>
+  </url>
+
+  <!-- Story: Outdoor Sports & Team Activities -->
+  <url>
+    <loc>https://act-charitable-trust.vercel.app/blog/active-bodies-united-spirits-outdoor-sports-and-team-activities</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/blog_blog-1789747540992.jpg</image:loc>
+      <image:title>Active Bodies, United Spirits: Outdoor Sports and Team Activities</image:title>
+    </image:image>
+  </url>
+
+  <!-- Story: Creative Arts -->
+  <url>
+    <loc>https://act-charitable-trust.vercel.app/blog/colors-of-hope-fostering-imagination-through-drawing-and-creative-arts</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/blog_blog-1789747415487.jpg</image:loc>
+      <image:title>Colors of Hope: Fostering Imagination Through Drawing and Creative Arts</image:title>
+    </image:image>
+  </url>
+
+  <!-- Story: Vocational Training & Tailoring -->
+  <url>
+    <loc>https://act-charitable-trust.vercel.app/blog/stitches-of-independence-empowering-young-girls-through-tailoring-skills</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/blog_blog-1789747243636.jpg</image:loc>
+      <image:title>Stitches of Independence: Empowering Young Girls Through Tailoring Skills</image:title>
+    </image:image>
+  </url>
+
+  <!-- Story: Wholesome Daily Meals -->
+  <url>
+    <loc>https://act-charitable-trust.vercel.app/blog/nourishing-futures-serving-wholesome-daily-meals-to-70-children</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/blog_blog-1789661661290.jpg</image:loc>
+      <image:title>Nourishing Futures: Serving Wholesome Daily Meals</image:title>
+    </image:image>
+  </url>
+
+  <!-- Story: School Backpacks & Education -->
+  <url>
+    <loc>https://act-charitable-trust.vercel.app/blog/dignity-footwear-distribution-category-community-event</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/blog_blog-1789660167657.jpg</image:loc>
+      <image:title>Bags of Ambition: Empowering Students with School Backpacks</image:title>
+    </image:image>
+  </url>
+
+  <!-- Story: Footwear & Health -->
+  <url>
+    <loc>https://act-charitable-trust.vercel.app/blog/ssas</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://act-charitable-trust.vercel.app/uploads/blog_blog-1789645639322.jpg</image:loc>
+      <image:title>Stepping Forward: Footwear Distribution for Health and Dignity</image:title>
+    </image:image>
   </url>
 </urlset>
