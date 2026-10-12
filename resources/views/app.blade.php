@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ACT Charitable Trust | Rising Hope for Children (REG.NO.220)</title>
+    
+    <!-- Google Site Verification -->
+    <meta name="google-site-verification" content="google56250d811f255f09">
+    <meta name="google-site-verification" content="google56250d811f255f09.html">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="ACT Charitable Trust (REG.NO.220) - Dedicated to empowering children, rural education, healthcare, and uplifting communities across Tamil Nadu.">
+    <meta name="keywords" content="ACT Charitable Trust, NGO, child welfare, rural education, NGO Tamil Nadu, charity donation, support children">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://act-charitable-trust.vercel.app/">
+
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://act-charitable-trust.vercel.app/">
+    <meta property="og:title" content="ACT Charitable Trust | Rising Hope for Children (REG.NO.220)">
+    <meta property="og:description" content="ACT Charitable Trust is committed to child development, rural education, and social welfare. Support a noble cause.">
+    <meta property="og:image" content="https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://act-charitable-trust.vercel.app/">
+    <meta name="twitter:title" content="ACT Charitable Trust | Rising Hope for Children (REG.NO.220)">
+    <meta name="twitter:description" content="ACT Charitable Trust is committed to child development, rural education, and social welfare.">
+    <meta name="twitter:image" content="https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg">
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
