@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $seoTitle ?? 'ACT Charitable Trust | Rising Hope for Children (Reg. No. 220) - Official NGO' }}</title>
+    <title>{{ $seoTitle ?? 'ACT Charitable Trust Mohali, Kharar, Chandigarh | NGO Punjab India (REG.NO.220)' }}</title>
     
     <!-- Primary Meta Tags -->
-    <meta name="title" content="{{ $seoTitle ?? 'ACT Charitable Trust | Rising Hope for Children (Reg. No. 220) - Official NGO' }}">
-    <meta name="description" content="{{ $seoDesc ?? 'ACT Charitable Trust (REG.NO.220) is an official non-profit organization dedicated to child education, daily nutrition, clothing drives, and vocational training in India. Donate to support underprivileged children.' }}">
-    <meta name="keywords" content="{{ $seoKeywords ?? 'ACT Charitable Trust, NGO, charity trust, child education NGO, donate for children, non profit organization Punjab, NGO Kharar Mohali, child healthcare charity, NGO 220, donation for kids, school kit donation, child nutrition NGO' }}">
+    <meta name="title" content="{{ $seoTitle ?? 'ACT Charitable Trust Mohali, Kharar, Chandigarh | NGO Punjab India (REG.NO.220)' }}">
+    <meta name="description" content="{{ $seoDesc ?? 'ACT Charitable Trust (REG.NO.220) is an official registered NGO in Kharar, Mohali near Chandigarh (Punjab, India). Serving underprivileged children with education, food, and clothes. Top-rated NGO near you.' }}">
+    <meta name="keywords" content="{{ $seoKeywords ?? 'Act charitable trust mohali, Act charitable trust kharar, Act charitable trust chandigarh, Act charitable trust punjab, Act charitable trust india, Act charitable trust near me, act charitable trust, NGO in Mohali, NGO in Kharar, NGO in Chandigarh, charitable trust Punjab, child charity NGO near me, NGO registration 220, donation for children Mohali, trust in Mundi Kharar' }}">
     <meta name="author" content="ACT Charitable Trust">
     <meta name="publisher" content="ACT Charitable Trust">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
