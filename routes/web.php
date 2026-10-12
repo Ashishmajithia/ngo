@@ -23,9 +23,9 @@ Route::get('/sitemap.xml', function () {
 
 Route::get('/{any?}', function ($any = null) {
     $baseUrl = 'https://act-charitable-trust.vercel.app';
-    $seoTitle = 'ACT Charitable Trust | Rising Hope for Children (Reg. No. 220) - Official NGO';
-    $seoDesc = 'ACT Charitable Trust (REG.NO.220) is an official non-profit organization dedicated to child education, daily nutrition, clothing drives, and vocational training in India. Donate to support underprivileged children.';
-    $seoKeywords = 'ACT Charitable Trust, NGO, charity trust, child education NGO, donate for children, non profit organization Punjab, NGO Kharar Mohali, child healthcare charity, NGO 220, donation for kids, school kit donation, child nutrition NGO';
+    $seoTitle = 'ACT Charitable Trust Mohali, Kharar, Chandigarh | NGO Punjab India (REG.NO.220)';
+    $seoDesc = 'ACT Charitable Trust (REG.NO.220) is an official registered NGO in Kharar, Mohali (near Chandigarh, Punjab, India). Dedicated to child education, daily meals, footwear, and clothes distribution. Find the best NGO near you.';
+    $seoKeywords = 'Act charitable trust mohali, Act charitable trust kharar, Act charitable trust chandigarh, Act charitable trust punjab, Act charitable trust india, Act charitable trust near me, act charitable trust, NGO in Mohali, NGO in Kharar, NGO in Chandigarh, charitable trust Punjab, child charity NGO near me, NGO registration 220, donation for children Mohali, trust in Mundi Kharar';
     $seoImage = $baseUrl . '/uploads/act_official_logo.jpg';
     $canonicalUrl = $baseUrl . ($any ? '/' . ltrim($any, '/') : '/');
     $ogType = 'website';

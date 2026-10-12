@@ -51,21 +51,29 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/site.webmanifest">
 
-    <!-- Schema.org JSON-LD Structured Data for Google -->
+    <!-- Schema.org JSON-LD Structured Data for Google (LocalBusiness + NGO + FAQPage) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
         {
-          "@type": ["NGO", "NonprofitOrganization"],
+          "@type": ["NGO", "NonprofitOrganization", "LocalBusiness"],
           "@id": "https://act-charitable-trust.vercel.app/#organization",
           "name": "ACT Charitable Trust",
           "legalName": "ACT Charitable Trust (REG.NO.220)",
-          "alternateName": "Rising Hope for Children",
+          "alternateName": [
+            "ACT Charitable Trust Mohali",
+            "ACT Charitable Trust Kharar",
+            "ACT Charitable Trust Chandigarh",
+            "ACT Charitable Trust Punjab",
+            "ACT Charitable Trust India",
+            "ACT Charitable Trust Near Me",
+            "Rising Hope for Children"
+          ],
           "url": "https://act-charitable-trust.vercel.app/",
           "logo": "https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg",
           "image": "https://act-charitable-trust.vercel.app/uploads/act_official_logo.jpg",
-          "description": "ACT Charitable Trust (REG.NO.220) is an official registered charitable trust dedicated to child welfare, foundational education, daily warm meals, footwear, clothing relief, and vocational skill training in India.",
+          "description": "ACT Charitable Trust (REG.NO.220) is an official registered charitable trust located in Kharar, Mohali near Chandigarh (Punjab, India). Serving underprivileged children with quality education, daily warm meals, footwear, clothes, and vocational skill training.",
           "telephone": "+91 97793 08480",
           "email": "info@actcharitabletrust.org",
           "address": {
@@ -76,28 +84,78 @@
             "postalCode": "140301",
             "addressCountry": "IN"
           },
-          "areaServed": {
-            "@type": "Country",
-            "name": "India"
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "30.7499",
+            "longitude": "76.6413"
           },
+          "areaServed": [
+            { "@type": "City", "name": "Mohali" },
+            { "@type": "City", "name": "Kharar" },
+            { "@type": "City", "name": "Chandigarh" },
+            { "@type": "AdministrativeArea", "name": "Punjab" },
+            { "@type": "Country", "name": "India" }
+          ],
           "knowsAbout": [
-            "Child Welfare",
-            "School Education",
-            "Daily Nutrition",
-            "Clothes Distribution",
-            "Vocational Training for Girls"
-          ]
+            "Child Welfare NGO in Mohali",
+            "Charitable Trust in Kharar",
+            "Free School Education NGO",
+            "Daily Nutrition for Children",
+            "Clothes & Footwear Distribution Drives",
+            "Vocational Tailoring Training for Girls in Punjab"
+          ],
+          "priceRange": "Free / Charitable NGO",
+          "openingHours": "Mo-Sa 09:00-18:00"
         },
         {
           "@type": "WebSite",
           "@id": "https://act-charitable-trust.vercel.app/#website",
           "url": "https://act-charitable-trust.vercel.app/",
           "name": "ACT Charitable Trust",
-          "description": "Rising Hope for Children - Official Website",
+          "alternateName": "ACT Charitable Trust Mohali Kharar Chandigarh",
+          "description": "Rising Hope for Children - Official Charitable Trust in Mohali, Kharar, Punjab, India",
           "publisher": {
             "@id": "https://act-charitable-trust.vercel.app/#organization"
           },
           "inLanguage": "en-US"
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://act-charitable-trust.vercel.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Where is ACT Charitable Trust located in Mohali and Kharar?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ACT Charitable Trust is located at First Floor New Mata Gujri SCO- 4 near petrol pump, Mundi Kharar, Mohali, Punjab 140301. We serve communities across Kharar, Mohali, Chandigarh Tricity, and throughout Punjab, India."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is ACT Charitable Trust an official registered NGO in Punjab, India?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, ACT Charitable Trust is officially registered under Govt. Reg. No. 220, dedicated to child welfare, education, healthcare, and community empowerment."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How can I contact ACT Charitable Trust near me?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "You can call or WhatsApp us at +91 97793 08480, email info@actcharitabletrust.org, or visit our center in Mundi Kharar, Mohali, Punjab."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What programs does ACT Charitable Trust run for underprivileged children?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Our core initiatives include school backpack and learning kit sponsorships, daily wholesome hot meals, shoes and winter uniform drives, and vocational tailoring skill training for young girls."
+              }
+            }
+          ]
         }
       ]
     }
@@ -188,7 +246,32 @@
                     }
                 }, true);
             </script>
-        </div>
     </div>
+
+    <!-- Crawlable Fallback for Search Engine Bots (Googlebot, Bingbot) -->
+    <noscript>
+        <div style="padding: 24px; max-width: 900px; margin: 0 auto; font-family: sans-serif; color: #183a35;">
+            <h1>ACT Charitable Trust - Official NGO in Mohali, Kharar, Chandigarh & Punjab, India</h1>
+            <p><strong>Govt. Reg. No. 220</strong> • Rising Hope for Children</p>
+            <p>ACT Charitable Trust is an officially registered non-profit organization located in Kharar, Mohali near Chandigarh (Punjab, India). We provide foundational education, daily warm nutrition, footwear, clothes distribution, and vocational training for underprivileged children.</p>
+            
+            <h2>Head Office & Center Address</h2>
+            <address>
+                First Floor New Mata Gujri SCO- 4 near petrol pump Mundi kharar, Kharar, Mohali, Punjab 140301, India.<br>
+                Phone: +91 97793 08480 | Email: info@actcharitabletrust.org
+            </address>
+
+            <h3>Key Service Areas</h3>
+            <p>Mundi Kharar, Mohali (SAS Nagar), Chandigarh, Zirakpur, Panchkula, and all across Punjab, India. Top-rated charitable trust near you.</p>
+
+            <h3>Core Initiatives</h3>
+            <ul>
+                <li>School Backpacks & Learning Kits for Underprivileged Kids</li>
+                <li>Daily Fresh Warm Meals & Nutrition for Children</li>
+                <li>Dignity Footwear, Seasonal Shoes & Clothes Distribution</li>
+                <li>Vocational Tailoring & Skill Training for Girls</li>
+            </ul>
+        </div>
+    </noscript>
 </body>
 </html>
