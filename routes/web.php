@@ -23,9 +23,9 @@ Route::get('/sitemap.xml', function () {
 
 Route::get('/{any?}', function ($any = null) {
     $baseUrl = 'https://act-charitable-trust.vercel.app';
-    $seoTitle = 'ACT Charitable Trust Mohali, Kharar, Chandigarh | NGO Punjab India (REG.NO.220)';
-    $seoDesc = 'ACT Charitable Trust (REG.NO.220) is an official registered NGO in Kharar, Mohali (near Chandigarh, Punjab, India). Dedicated to child education, daily meals, footwear, and clothes distribution. Find the best NGO near you.';
-    $seoKeywords = 'Act charitable trust mohali, Act charitable trust kharar, Act charitable trust chandigarh, Act charitable trust punjab, Act charitable trust india, Act charitable trust near me, act charitable trust, NGO in Mohali, NGO in Kharar, NGO in Chandigarh, charitable trust Punjab, child charity NGO near me, NGO registration 220, donation for children Mohali, trust in Mundi Kharar';
+    $seoTitle = 'ACT Charitable Trust - Rising Hope for Children | Mohali, Kharar, Punjab (REG.NO.220)';
+    $seoDesc = 'Rising Hope for Children - ACT Charitable Trust (REG.NO.220) is an official registered NGO in Kharar, Mohali near Chandigarh (Punjab, India). Dedicated to child education, nutrition, and clothing relief. Top NGO near you.';
+    $seoKeywords = 'Rising Hope for Children, Rising Hope for Children NGO, Rising Hope for Children Mohali, Rising Hope for Children Kharar, Rising Hope for Children Punjab, Act charitable trust rising hope for children, Act charitable trust mohali, Act charitable trust kharar, Act charitable trust chandigarh, Act charitable trust punjab, Act charitable trust india, Act charitable trust near me, act charitable trust, NGO in Mohali, NGO in Kharar, NGO in Chandigarh, charitable trust Punjab, child charity NGO near me, NGO registration 220, donation for children Mohali, trust in Mundi Kharar';
     $seoImage = $baseUrl . '/uploads/act_official_logo.jpg';
     $canonicalUrl = $baseUrl . ($any ? '/' . ltrim($any, '/') : '/');
     $ogType = 'website';
